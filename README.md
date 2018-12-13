@@ -1,0 +1,2 @@
+# ThiccBot
+Python discord bot
