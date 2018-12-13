@@ -1,0 +1,16 @@
+version: '3'
+services:
+  flask:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/src:/thiccflask:rw
+  bot:
+      build: ./bot
+      tty: true
+      image: thiccbot
+      # command: python bot/src/main.py
+      # command: bash -c "ls"
+      volumes:
+      - ./bot/src:/thiccbot:rw
