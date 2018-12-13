@@ -1,8 +1,9 @@
 import discord
 from yaml import load
+import os
+
 with open('config.yml', 'r') as stream:
     config = load(stream)
-
 
 class MyClient(discord.Client):
     async def on_ready(self):
@@ -12,4 +13,4 @@ class MyClient(discord.Client):
         print('Message from {0.author}: {0.content}'.format(message))
 
 client = MyClient()
-client.run(config['discord_id'])
+client.run(os.environ['DISCORD_ID'])

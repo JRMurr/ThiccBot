@@ -1,8 +1,12 @@
 # Thicc bot
-config.yml
 
+# Flask
 
+# Postgres
+postgres-data/*
 
+#sensitive info in .env
+.env
 # Vscode
 .vscode/*
 

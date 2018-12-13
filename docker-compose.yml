@@ -1,16 +1,35 @@
 version: '3'
 services:
+  postgres:
+    restart: always
+    image: postgres:10-alpine
+    environment:
+      - POSTGRES_USER=${USER}
+      - POSTGRES_PASSWORD=${PASSWORD}
+      - POSTGRES_DB=${DB}
+    volumes:
+      - ./postgres-data/postgres:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
   flask:
     build: ./backend
+    environment:
+      - DB_USER=${USER}
+      - DB_PASS=${PASSWORD}
+      - DB_NAME=${DB}
     ports:
       - "8000:8000"
     volumes:
-      - ./backend/src:/thiccflask:rw
+      - ./backend:/thiccflask:rw
+    depends_on:
+      - postgres
   bot:
       build: ./bot
       tty: true
       image: thiccbot
-      # command: python bot/src/main.py
-      # command: bash -c "ls"
+      environment:
+      - DISCORD_ID=${DISCORD_ID}
       volumes:
       - ./bot/src:/thiccbot:rw
+      depends_on:
+      - flask
