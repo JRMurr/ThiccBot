@@ -4,25 +4,26 @@ services:
     restart: always
     image: postgres:10-alpine
     environment:
-      - POSTGRES_USER=${USER}
-      - POSTGRES_PASSWORD=${PASSWORD}
-      - POSTGRES_DB=${DB}
-    volumes:
-      - ./postgres-data/postgres:/var/lib/postgresql/data
+      - POSTGRES_USER=${THICC_USER}
+      - POSTGRES_PASSWORD=${THICC_PASSWORD}
+      - POSTGRES_DB=${THICC_DB}
+    # volumes:
+    #   - ./postgres-data/postgres:/var/lib/postgresql/data
     ports:
       - "5432:5432"
   flask:
     build: ./backend
     environment:
-      - DB_USER=${USER}
-      - DB_PASS=${PASSWORD}
-      - DB_NAME=${DB}
+      - DB_USER=${THICC_USER}
+      - DB_PASS=${THICC_PASSWORD}
+      - DB_NAME=${THICC_DB}
     ports:
       - "8000:8000"
     volumes:
       - ./backend:/thiccflask:rw
     depends_on:
       - postgres
+    command: sh -c "dockerize -wait tcp://postgres:5432 && python src/main.py"
   bot:
       build: ./bot
       tty: true
@@ -33,3 +34,4 @@ services:
       - ./bot/src:/thiccbot:rw
       depends_on:
       - flask
+      command: python main.py
