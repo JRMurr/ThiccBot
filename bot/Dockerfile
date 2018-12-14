@@ -13,4 +13,4 @@ RUN pip install -U -r requirements.txt
 
 COPY . ./src
 
-CMD python main.py
+# CMD python main.py

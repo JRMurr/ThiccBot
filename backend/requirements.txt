@@ -4,7 +4,6 @@
 
 SQLAlchemy
 psycopg2
-graphene_sqlalchemy
 Flask
-Flask-GraphQL
+Flask-SQLAlchemy
 gunicorn
