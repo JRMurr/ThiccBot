@@ -6,5 +6,8 @@ setup(
     version='0.1.0',
     description='Flask Graphene server',
     author='John Murray',
-    license='',
+    include_package_data=True,
+    install_requires=[
+        'flask',
+    ],
 )

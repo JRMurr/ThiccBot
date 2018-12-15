@@ -17,13 +17,16 @@ services:
       - DB_USER=${THICC_USER}
       - DB_PASS=${THICC_PASSWORD}
       - DB_NAME=${THICC_DB}
+      - FLASK_APP=src
+      - FLASK_ENV=development
     ports:
-      - "8000:8000"
+      # - "8000:8000"
+      - "5000:5000"
     volumes:
       - ./backend:/thiccflask:rw
     depends_on:
       - postgres
-    command: sh -c "dockerize -wait tcp://postgres:5432 && python src/main.py"
+    command: sh -c "dockerize -wait tcp://postgres:5432 && flask run --host=0.0.0.0"
   bot:
       build: ./bot
       tty: true

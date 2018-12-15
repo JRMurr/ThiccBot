@@ -1,4 +1,4 @@
-from src.main import db
+from src import db
 
 class Alias(db.Model):
     __tablename__ = 'alias'
