@@ -1,15 +1,4 @@
 from src.main import db
-print(db)
-print('---------')
-print('---------')
-print('---------')
-print('---------')
-print('---------')
-print('---------')
-print('---------')
-print('---------')
-print('---------')
-print('---------')
 
 
 class DiscordServer(db.Model):
