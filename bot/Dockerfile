@@ -8,6 +8,7 @@ WORKDIR /thiccbot
 # Copy in requirements.txt first so changing the source
 # code doesn't require these steps to run again
 COPY requirements.txt .
+COPY setup.py .
 
 RUN pip install -U -r requirements.txt
 
