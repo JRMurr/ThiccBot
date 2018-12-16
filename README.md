@@ -11,9 +11,3 @@ This is a discord bot written in [discord.py](https://github.com/Rapptz/discord.
 2. Install docker and docker-compose https://docs.docker.com/compose/install/
 3. Run `docker-compose up`
 
-
-# Development stuff
-
-- Discord python api [Docs](http://discordpy.readthedocs.io/en/rewrite/)
-    - The rewrite branch is in active development and there will be breaking chanages
-    - Join the discord [server](https://discord.gg/r3sSKJJ) to get notified of any breaking chnages
