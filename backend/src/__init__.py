@@ -10,4 +10,4 @@ app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://{DB_USER}:{DB_PASS}@postg
 db = SQLAlchemy(app)
 from src.models import alias, discordServer
 db.create_all(app=app)
-import src.tmp
+from src.routes import alias

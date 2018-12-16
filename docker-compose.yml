@@ -33,8 +33,9 @@ services:
       image: thiccbot
       environment:
       - DISCORD_ID=${DISCORD_ID}
+      - BACKEND_URL=http://flask:5000
       volumes:
-      - ./bot/src:/thiccbot:rw
+      - ./bot:/thiccbot:rw
       depends_on:
       - flask
-      command: python main.py
+      command: python thiccBot/main.py
