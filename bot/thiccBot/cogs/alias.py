@@ -12,7 +12,6 @@ class Alias:
 
 
     # @commands.is_owner()
-
     @commands.command()
     async def alias(self, ctx, name : str, *, args: str):
         """Creates a alias command
