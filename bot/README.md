@@ -1,6 +1,6 @@
 
 # TODO
-- use uvloop? https://github.com/MagicStack/uvloop 
+- use uvloop? https://github.com/MagicStack/uvloop
 
 
 # Development stuff

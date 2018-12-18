@@ -11,3 +11,15 @@ This is a discord bot written in [discord.py](https://github.com/Rapptz/discord.
 2. Install docker and docker-compose https://docs.docker.com/compose/install/
 3. Run `docker-compose up`
 
+# Developing 
+
+While this uses docker to run the bot and flask backend, you can make a conda enviorment so your ide (vsCode) can have autocomplete for the packges.
+```bash
+conda create -n thiccBot python=3.7 pip
+source activate thiccBot
+cd bot
+pip install -r requirements.txt
+cd ..
+cd backend
+pip install -r requirements.txt
+```
