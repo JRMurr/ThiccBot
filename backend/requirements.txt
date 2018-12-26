@@ -1,9 +1,11 @@
 # local package
 -e .
 
-
-SQLAlchemy
 psycopg2
 Flask
 Flask-SQLAlchemy
+Flask-Migrate
 gunicorn
+
+#dev
+pylint-flask #handles pylint errors for models

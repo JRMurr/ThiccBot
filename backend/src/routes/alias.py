@@ -1,13 +1,13 @@
 from src import app
 from flask import request
 from pprint import pformat
-
+from src.models import Alias
+from src import db
 
 @app.route("/alias", methods=['POST', 'GET'])
-def hello():
+def aliasRoute():
     if request.method == 'POST':
-        app.logger.info(pformat(request.form))
-        app.logger.info('----')
+        form = request.form
         return 'small doinks'
     else:
         return 'big doinks'

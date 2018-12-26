@@ -2,6 +2,9 @@ import os
 import asyncio
 from thiccBot.bot import ThiccBot
 from yaml import load
+import logging
+from contextlib import contextmanager
+
 try:
     import uvloop
 except ImportError:
@@ -13,5 +16,28 @@ BOT_ID = os.environ['DISCORD_ID']
 with open(f'{os.path.dirname(os.path.abspath(__file__))}/config.yml', 'r') as stream:
     config = load(stream)
 
-bot = ThiccBot(config)
-bot.run(BOT_ID)
+@contextmanager
+def setup_logging():
+    try:
+        # __enter__
+        logging.getLogger('discord').setLevel(logging.INFO)
+        logging.getLogger('discord.http').setLevel(logging.WARNING)
+
+        log = logging.getLogger()
+        log.setLevel(logging.INFO)
+        handler = logging.FileHandler(filename='thiccBot.log', encoding='utf-8', mode='w')
+        dt_fmt = '%Y-%m-%d %H:%M:%S'
+        fmt = logging.Formatter('[{asctime}] [{levelname:<7}] {name}: {message}', dt_fmt, style='{')
+        handler.setFormatter(fmt)
+        log.addHandler(handler)
+        yield
+    finally:
+        # __exit__
+        handlers = log.handlers[:]
+        for hdlr in handlers:
+            hdlr.close()
+            log.removeHandler(hdlr)
+
+with setup_logging():
+    bot = ThiccBot(config)
+    bot.run(BOT_ID)

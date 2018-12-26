@@ -8,3 +8,14 @@ class Alias(db.Model):
     command = db.Column(db.String, doc="the command with args that the alias maps to")
 
     server = db.relationship('DiscordServer') # ,backref=db.backref('aliases', lazy=True)
+
+    @property
+    def serialize(self):
+       """Return object data in easily serializeable format"""
+       return {
+           'id': self.id,
+           'server_id': self.server_id,
+           'name': self.name,
+           'command': self.command,
+       }
+       

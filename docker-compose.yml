@@ -13,6 +13,7 @@ services:
       - "5432:5432"
   flask:
     build: ./backend
+    tty: true
     environment:
       - DB_USER=${THICC_USER}
       - DB_PASS=${THICC_PASSWORD}
@@ -26,7 +27,9 @@ services:
       - ./backend:/thiccflask:rw
     depends_on:
       - postgres
-    command: sh -c "dockerize -wait tcp://postgres:5432 && flask run --host=0.0.0.0"
+    # run this command when you change db models, this does not detect all changes https://flask-migrate.readthedocs.io/en/latest/ 
+    # command: sh -c "dockerize -wait tcp://postgres:5432 && flask db migrate"
+    command: sh -c "dockerize -wait tcp://postgres:5432 && flask db upgrade && flask run --host=0.0.0.0"
   bot:
       build: ./bot
       tty: true

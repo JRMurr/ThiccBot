@@ -15,12 +15,9 @@ RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSI
 # code doesn't require these steps to run again
 COPY requirements.txt .
 COPY setup.py .
-# COPY src/intitDb.py /app
 RUN pip install --no-cache-dir  -U -r requirements.txt
-# RUN python src/intitDb.py
 
 
 COPY . /app
-
 
 # CMD ["gunicorn", "--workers=2", "--bind=0.0.0.0:8000", "src.main:app"]
