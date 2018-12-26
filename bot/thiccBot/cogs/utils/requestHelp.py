@@ -17,12 +17,12 @@ class requestHelp:
     
     @staticmethod
     def post(url, data=None, json=None, **kwargs) -> requests.Response:
-            return requests.post(padURL(url), data, json, **kwargs)
+        return requests.post(padURL(url), data, json, **kwargs)
 
     @staticmethod
-    def put(url, data=None, json=None, **kwargs) -> requests.Response:
-            return requests.put(padURL(url), data, json, **kwargs)
+    def put(url, data=None, **kwargs) -> requests.Response:
+        return requests.put(padURL(url), data, **kwargs)
 
     @staticmethod
     def delete(url, **kwargs) -> requests.Response:
-            return requests.delete(padURL(url),**kwargs)
+        return requests.delete(padURL(url),**kwargs)
