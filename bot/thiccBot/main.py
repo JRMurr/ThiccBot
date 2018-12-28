@@ -3,8 +3,7 @@ import asyncio
 from thiccBot.bot import ThiccBot
 from yaml import load
 import logging
-from contextlib import contextmanager
-
+from contextlib import contextmanager, asynccontextmanager
 try:
     import uvloop
 except ImportError:
@@ -38,6 +37,15 @@ def setup_logging():
             hdlr.close()
             log.removeHandler(hdlr)
 
-with setup_logging():
-    bot = ThiccBot(config)
-    bot.run(BOT_ID)
+if __name__ == "__main__":
+    loop = asyncio.get_event_loop()
+
+    with setup_logging():
+        bot = ThiccBot(config)
+        try:
+            loop.run_until_complete(bot.start(BOT_ID))
+        except KeyboardInterrupt:
+            loop.run_until_complete(bot.logout())
+            loop.run_until_complete(bot.close_sessions())
+        finally:
+            loop.close()
