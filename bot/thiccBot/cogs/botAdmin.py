@@ -9,8 +9,8 @@ from contextlib import redirect_stdout
 
 
 # Most of this has been taken from robo danny
-class Admin:
-    """Admin only commands"""
+class BotAdmin:
+    """Bot admin only commands"""
 
     def __init__(self, bot):
         self.bot = bot
@@ -198,4 +198,4 @@ class Admin:
 
 
 def setup(bot):
-    bot.add_cog(Admin(bot))
+    bot.add_cog(BotAdmin(bot))
