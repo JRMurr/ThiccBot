@@ -3,4 +3,4 @@ bot_admin: 83736990750605312 #set this to your discord ID
 initial_extensions:
     - 'cogs.alias'
     - 'cogs.basics'
-    - 'cogs.admin'
+    - 'cogs.BotAdmin'
