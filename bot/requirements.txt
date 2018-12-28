@@ -3,5 +3,11 @@
 
 git+https://github.com/Rapptz/discord.py@rewrite
 pyyaml
-requests
+
+#request stuff
+aiohttp
+cchardet
+aiodns
+
+#faster async loop
 uvloop
