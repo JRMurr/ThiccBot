@@ -6,7 +6,6 @@ from pprint import pprint
 import logging
 import aiohttp
 import asyncio
-# from thiccBot.cogs.utils.requestHelp import requestHelp
 import os
 
 BACKEND_URL = os.environ['BACKEND_URL']
