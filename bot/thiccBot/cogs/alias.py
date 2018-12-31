@@ -1,5 +1,6 @@
 from discord.ext import commands
 import discord
+from thiccBot.cogs.utils import checks
 import logging
 from pprint import pprint
 from copy import copy
@@ -36,9 +37,9 @@ class Alias:
         alias_info = await self.get_alias_command(message)
 
 
-    # @commands.is_owner()
     @commands.command()
     @commands.guild_only()
+    @checks.is_bot_admin()
     async def alias(self, ctx, name : str, *, args: str):
         """Creates a alias command
 
