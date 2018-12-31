@@ -16,7 +16,7 @@ class Alias:
         for prefix in self.bot.get_command_prefixes(message):
             if message.content.startswith(prefix):
                 alias_name = message.content[len(prefix):]
-                if alias_name in self.bot.commands:
+                if alias_name in self.bot.commands: #TODO: this is not working
                     continue
                 server_id = message.guild.id
                 async with self.bot.backend_request('get', f'/alias/{server_id}/{alias_name}') as r:
