@@ -1,44 +1,60 @@
 version: '3'
+volumes:
+  node_modules:
+
 services:
-  postgres:
-    restart: always
-    image: postgres:10-alpine
-    environment:
-      - POSTGRES_USER=${THICC_USER}
-      - POSTGRES_PASSWORD=${THICC_PASSWORD}
-      - POSTGRES_DB=${THICC_DB}
-    # volumes:
-    #   - ./postgres-data/postgres:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-  flask:
-    build: ./backend
+  # postgres:
+  #   restart: always
+  #   image: postgres:10-alpine
+  #   environment:
+  #     - POSTGRES_USER=${THICC_USER}
+  #     - POSTGRES_PASSWORD=${THICC_PASSWORD}
+  #     - POSTGRES_DB=${THICC_DB}
+  #   # volumes:
+  #   #   - ./postgres-data/postgres:/var/lib/postgresql/data
+  #   ports:
+  #     - "5432:5432"
+  # flask:
+  #   build: ./backend
+  #   tty: true
+  #   environment:
+  #     - DB_USER=${THICC_USER}
+  #     - DB_PASS=${THICC_PASSWORD}
+  #     - DB_NAME=${THICC_DB}
+  #     - FLASK_APP=src
+  #     - FLASK_ENV=development
+  #   ports:
+  #     # - "8000:8000"
+  #     - "5000:5000"
+  #   volumes:
+  #     - ./backend:/thiccflask:rw
+  #   depends_on:
+  #     - postgres
+  #   # run this command when you change db models, this does not detect all changes https://flask-migrate.readthedocs.io/en/latest/ 
+  #   # command: sh -c "dockerize -wait tcp://postgres:5432 && flask db migrate"
+  #   command: sh -c "dockerize -wait tcp://postgres:5432 && flask db upgrade && flask run --host=0.0.0.0"
+  # bot:
+  #     build: ./bot
+  #     tty: true
+  #     image: thiccbot
+  #     environment:
+  #     - DISCORD_ID=${DISCORD_ID}
+  #     - BACKEND_URL=http://flask:5000
+  #     volumes:
+  #     - ./bot:/thiccbot:rw
+  #     depends_on:
+  #     - flask
+  #     command: python thiccBot/main.py
+  web: 
+    build: ./web
     tty: true
     environment:
-      - DB_USER=${THICC_USER}
-      - DB_PASS=${THICC_PASSWORD}
-      - DB_NAME=${THICC_DB}
-      - FLASK_APP=src
-      - FLASK_ENV=development
-    ports:
-      # - "8000:8000"
-      - "5000:5000"
+      - PORT=4000
+    ports: 
+      - "4000:4000"
     volumes:
-      - ./backend:/thiccflask:rw
-    depends_on:
-      - postgres
-    # run this command when you change db models, this does not detect all changes https://flask-migrate.readthedocs.io/en/latest/ 
-    # command: sh -c "dockerize -wait tcp://postgres:5432 && flask db migrate"
-    command: sh -c "dockerize -wait tcp://postgres:5432 && flask db upgrade && flask run --host=0.0.0.0"
-  bot:
-      build: ./bot
-      tty: true
-      image: thiccbot
-      environment:
-      - DISCORD_ID=${DISCORD_ID}
-      - BACKEND_URL=http://flask:5000
-      volumes:
-      - ./bot:/thiccbot:rw
-      depends_on:
-      - flask
-      command: python thiccBot/main.py
+      - ./web:/thiccweb:rw
+      - node_modules:/thiccweb/node_modules:rw
+    command: bash -c "cd /thiccweb; rm -f .bsb.lock; npm run dev"
+    # depends_on:
+    #   - flask
