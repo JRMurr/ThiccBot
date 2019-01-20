@@ -22,6 +22,12 @@ module.exports = {
     contentBase: outputDir,
     port: process.env.PORT || 8000,
     host: '0.0.0.0',
-    historyApiFallback: true
+    historyApiFallback: true,
+    proxy: {
+      '/api': {
+          target: 'http://localhost:5000',
+          secure: false
+      }
+  }
   }
 };

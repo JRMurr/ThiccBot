@@ -23,3 +23,22 @@ cd ..
 cd backend
 pip install -r requirements.txt
 ```
+
+## Run
+```sh
+docker-compose up
+```
+if you want to run the web interface locally you can do
+```sh
+docker-compose up
+
+# in a different tab
+./runWeb.sh
+```
+
+
+## DB migrate
+```sh
+docker-compose run flask flask db migrate
+docker-compose run flask flask db upgrade
+```
