@@ -1,5 +1,3 @@
-# app
-
 ## Run Project
 
 ```sh
