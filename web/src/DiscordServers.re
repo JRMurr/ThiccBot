@@ -75,7 +75,7 @@ let make = _children => {
         <ul>
           (
             Array.map(servers, (server =>
-              <li key=server.name> (server.name |> ReasonReact.string)) </li>
+              <li key=server.name> (server.name |> ReasonReact.string) </li>
             ))
             |> ReasonReact.array
           )
