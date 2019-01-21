@@ -68,7 +68,7 @@ function make(_children) {
                 return React.createElement("div", undefined, React.createElement("h1", undefined, "Servers"), React.createElement("ul", undefined, Belt_Array.map(match[0], (function (server) {
                                       return React.createElement("li", {
                                                   key: server[/* name */3]
-                                                }, server[/* name */3], String(server[/* id */2]));
+                                                }, server[/* name */3]);
                                     }))));
               }
             }),

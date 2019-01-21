@@ -2,7 +2,7 @@ from src import app
 from flask import Flask, redirect, url_for
 from flask_dance.contrib.discord import discord
 
-@app.route("/")
+@app.route("/login")
 def index():
     app.logger.info(f'poop')
     if not discord.authorized:
