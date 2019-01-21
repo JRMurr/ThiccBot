@@ -39,7 +39,7 @@ module API = {
     );
 };
 
-let component = ReasonReact.reducerComponent("FetchExample");
+let component = ReasonReact.reducerComponent("DiscordServers");
 
 let make = _children => {
   ...component,

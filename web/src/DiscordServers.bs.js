@@ -41,7 +41,7 @@ var API = /* module */[
   /* getServers */getServers
 ];
 
-var component = ReasonReact.reducerComponent("FetchExample");
+var component = ReasonReact.reducerComponent("DiscordServers");
 
 function make(_children) {
   return /* record */[
