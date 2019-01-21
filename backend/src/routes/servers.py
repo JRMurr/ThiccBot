@@ -4,6 +4,7 @@ from pprint import pformat
 from src import db
 from src.models import DiscordServer
 from flask import jsonify
+from flask_dance.contrib.discord import discord as dAuth
 
 
 @app.route("/api/servers", methods=['GET','POST'])
@@ -22,6 +23,10 @@ def serverRoute():
             app.logger.info(f'already had server: {server}')
         return jsonify(server.serialize)
     else:
+        if dAuth.authorized:
+            app.logger.info(f'BIG POOP')
+        else:
+            app.logger.info(f'small POOP')
         return jsonify([x.serialize for x in DiscordServer.query.all()])
 
 @app.route('/api/servers/<int:server_id>', methods=['PUT', 'GET'])
