@@ -36,10 +36,6 @@ module API = {
       Fetch.fetch("api/servers")
       |> then_(Fetch.Response.json)
       |> then_(json => decodeAllServers(json) |> resolve)
-      /* |> then_(json => {
-        Js.log(json);
-        resolve();
-      }) */
     );
 };
 
@@ -63,20 +59,6 @@ let make = _children => {
             |> Js.Promise.catch(_err => Js.Promise.resolve(self.send(ServersFailedToFetch)));
             ();
           }
-            /* Js.Promise.(
-              Fetch.fetch("https://dog.ceo/api/breeds/list")
-              |> then_(Fetch.Response.json)
-              |> then_(json =>
-                   json
-                   |> Decode.dogs
-                   |> (dogs => self.send(ServersFetches(dogs)))
-                   |> resolve
-                 )
-              |> catch(_err =>
-                   Js.Promise.resolve(self.send(ServersFailedToFetch))
-                 )
-              |> ignore
-            ) */
         ),
       )
     | ServersFetches(servers) => ReasonReact.Update(Loaded(servers))
@@ -92,9 +74,9 @@ let make = _children => {
         <h1> (ReasonReact.string("Servers")) </h1>
         <ul>
           (
-            Array.map(servers, server =>
-              <li key=server.name> (server.name |> ReasonReact.string) </li>
-            )
+            Array.map(servers, (server =>
+              <li key=server.name> (server.name |> ReasonReact.string)) </li>
+            ))
             |> ReasonReact.array
           )
         </ul>

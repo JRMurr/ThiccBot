@@ -4,9 +4,9 @@
 var ReactDOMRe = require("reason-react/src/ReactDOMRe.js");
 var ReasonReact = require("reason-react/src/ReasonReact.js");
 var Component2$ReactTemplate = require("./Component2.bs.js");
-var FetchExample$ReactTemplate = require("./FetchExample.bs.js");
+var DiscordServers$ReactTemplate = require("./DiscordServers.bs.js");
 
-ReactDOMRe.renderToElementWithId(ReasonReact.element(undefined, undefined, FetchExample$ReactTemplate.make(/* array */[])), "index1");
+ReactDOMRe.renderToElementWithId(ReasonReact.element(undefined, undefined, DiscordServers$ReactTemplate.make(/* array */[])), "index1");
 
 ReactDOMRe.renderToElementWithId(ReasonReact.element(undefined, undefined, Component2$ReactTemplate.make("Hello!", /* array */[])), "index2");
 
