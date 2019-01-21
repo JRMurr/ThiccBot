@@ -21,8 +21,11 @@ services:
       - DB_USER=${THICC_USER}
       - DB_PASS=${THICC_PASSWORD}
       - DB_NAME=${THICC_DB}
+      - DISCORD_CLIENT_ID=${DISCORD_CLIENT_ID}
+      - DISCORD_CLIENT_SECRET=${DISCORD_CLIENT_SECRET}
       - FLASK_APP=src
       - FLASK_ENV=development
+      - OAUTHLIB_INSECURE_TRANSPORT=1 #needed for oauth to work locally
     ports:
       # - "8000:8000"
       - "5000:5000"
