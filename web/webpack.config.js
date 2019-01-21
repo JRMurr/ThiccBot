@@ -30,7 +30,6 @@ module.exports = {
       },
       '/login': {
         target: 'http://localhost:5000',
-        // pathRewrite: {'^/login' : ''}
       }
   }
   }

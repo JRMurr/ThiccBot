@@ -8,8 +8,13 @@ This is a discord bot written in [discord.py](https://github.com/Rapptz/discord.
     1. Copy your Discord bot token into the `DISCORD_ID` field (you can find/make a bot [here](https://discordapp.com/developers/applications/))
     2. setup all other enviorment variables as needed
     3. look at `bot/src/config.yml` and set any settings to what you want
-2. Install docker and docker-compose https://docs.docker.com/compose/install/
-3. Run `docker-compose up`
+2. Set `BOT_API_TOKEN` in `.env` to a random string, you can run the following to generate one 
+```python
+import secrets
+print(secrets.token_urlsafe())
+```
+3. Install docker and docker-compose https://docs.docker.com/compose/install/
+4. Run `docker-compose up`
 
 # Developing 
 
