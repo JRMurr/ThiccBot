@@ -5,6 +5,7 @@ psycopg2
 Flask
 Flask-SQLAlchemy
 Flask-Migrate
+Flask-Dance
 gunicorn
 
 #dev
