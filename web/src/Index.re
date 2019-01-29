@@ -1,3 +1,3 @@
-ReactDOMRe.renderToElementWithId(<DiscordServers/>, "index1");
+ReactDOMRe.renderToElementWithId(<DiscordServers/>, "servers");
 
-ReactDOMRe.renderToElementWithId(<Component2 greeting="Hello!" />, "index2");
+/* ReactDOMRe.renderToElementWithId(<Component2 greeting="Hello!" />, "index2"); */

@@ -7,6 +7,8 @@ var React = require("react");
 var Belt_Array = require("bs-platform/lib/js/belt_Array.js");
 var Json_decode = require("@glennsl/bs-json/src/Json_decode.bs.js");
 var ReasonReact = require("reason-react/src/ReasonReact.js");
+var ApiUtil$ReactTemplate = require("./ApiUtil.bs.js");
+var DiscordServerCard$ReactTemplate = require("./DiscordServerCard.bs.js");
 
 function decodeServer(json) {
   return /* record */[
@@ -28,11 +30,7 @@ function decodeAllServers(param) {
 }
 
 function getServers(param) {
-  return fetch("api/servers").then((function (prim) {
-                  return prim.json();
-                })).then((function (json) {
-                return Promise.resolve(Json_decode.array(decodeServer, json));
-              }));
+  return ApiUtil$ReactTemplate.getJson("api/servers", decodeAllServers, param);
 }
 
 var API = /* module */[
@@ -62,14 +60,12 @@ function make(_children) {
                 if (match !== 0) {
                   return React.createElement("div", undefined, "An error occurred!");
                 } else {
-                  return React.createElement("div", undefined, "Poop...");
+                  return React.createElement("div", undefined, "Loading Severs...");
                 }
               } else {
-                return React.createElement("div", undefined, React.createElement("h1", undefined, "Servers"), React.createElement("ul", undefined, Belt_Array.map(match[0], (function (server) {
-                                      return React.createElement("li", {
-                                                  key: server[/* name */3]
-                                                }, server[/* name */3]);
-                                    }))));
+                return React.createElement("div", undefined, React.createElement("h1", undefined, "Servers"), Belt_Array.map(match[0], (function (server) {
+                                  return ReasonReact.element(undefined, undefined, DiscordServerCard$ReactTemplate.make(server[/* name */3], /* array */[]));
+                                })));
               }
             }),
           /* initialState */(function (_state) {
@@ -84,7 +80,7 @@ function make(_children) {
                   return /* UpdateWithSideEffects */Block.__(2, [
                             /* Loading */0,
                             (function (self) {
-                                getServers(/* () */0).then((function (results) {
+                                ApiUtil$ReactTemplate.getJson("api/servers", decodeAllServers, /* () */0).then((function (results) {
                                           Curry._1(self[/* send */3], /* ServersFetches */[results]);
                                           return Promise.resolve(/* () */0);
                                         })).catch((function (_err) {

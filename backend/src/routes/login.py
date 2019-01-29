@@ -1,9 +1,10 @@
 from src import app
-from flask import Flask, redirect, url_for
+from flask import redirect, url_for, request
 from flask_dance.contrib.discord import discord
 
+
 @app.route("/login")
-def index():
+def login():
     app.logger.info(f'poop')
     if not discord.authorized:
         app.logger.info(f'no auth')

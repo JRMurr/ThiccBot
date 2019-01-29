@@ -1,21 +1,21 @@
 /* The new stdlib additions */
 open Belt;
 
-type discordServers = {
-  admin_role: option(int),
-  command_prefixes: option(array(string)),
-  id: int,
-  name: string
-};
+type discordServer = {
+    admin_role: option(int),
+    command_prefixes: option(array(string)),
+    id: int,
+    name: string
+  };
 
 type state =
   | Loading
   | Error
-  | Loaded(array(discordServers));
+  | Loaded(array(discordServer));
 
 type action =
   | ServerFetch
-  | ServersFetches(array(discordServers))
+  | ServersFetches(array(discordServer))
   | ServersFailedToFetch;
 
 
@@ -31,12 +31,7 @@ module API = {
   
   let decodeAllServers = Json.Decode.array(decodeServer)
 
-  let getServers = () =>
-    Js.Promise.(
-      Fetch.fetch("api/servers")
-      |> then_(Fetch.Response.json)
-      |> then_(json => decodeAllServers(json) |> resolve)
-    );
+  let getServers = ApiUtil.getJson(~route="api/servers", ~decoder=decodeAllServers)
 };
 
 let component = ReasonReact.reducerComponent("DiscordServers");
@@ -68,18 +63,21 @@ let make = _children => {
   render: self =>
     switch (self.state) {
     | Error => <div> (ReasonReact.string("An error occurred!")) </div>
-    | Loading => <div> (ReasonReact.string("Poop...")) </div>
+    | Loading => <div> (ReasonReact.string("Loading Severs...")) </div>
     | Loaded(servers) =>
       <div>
         <h1> (ReasonReact.string("Servers")) </h1>
-        <ul>
+        /* <ul>
           (
             Array.map(servers, (server =>
-              <li key=server.name> (server.name |> ReasonReact.string) </li>
+              <li key=server.name> (server.name |> ReasonReact.string) (server.id |> string_of_int |> ReasonReact.string) </li>
             ))
             |> ReasonReact.array
           )
-        </ul>
+        </ul> */
+        (Array.map(servers, (server =>
+          <DiscordServerCard name=server.name/>
+        ))|> ReasonReact.array) 
       </div>
     },
 };
