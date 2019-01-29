@@ -1,5 +1,5 @@
 from src import app
-from flask import request, abort
+from flask import request, abort, g
 from pprint import pformat
 from src import db
 from src.models import DiscordServer
@@ -23,10 +23,6 @@ def serverRoute():
             app.logger.info(f'already had server: {server}')
         return jsonify(server.serialize)
     else:
-        if dAuth.authorized:
-            app.logger.info(f'BIG POOP')
-        else:
-            app.logger.info(f'small POOP')
         return jsonify([x.serialize for x in DiscordServer.query.all()])
 
 @app.route('/api/servers/<int:server_id>', methods=['PUT', 'GET'])

@@ -9,6 +9,7 @@ import asyncio
 import os
 
 BACKEND_URL = os.environ['BACKEND_URL']
+BOT_API_TOKEN = os.environ['BOT_API_TOKEN']
 if not BACKEND_URL.endswith('/'):
     BACKEND_URL += '/'
 
@@ -32,7 +33,8 @@ class ThiccBot(commands.Bot):
                             pm_help=None, owner_id= config['bot_admin'])
         self.config = config
         self.prefixes = {}
-        self.session = aiohttp.ClientSession(loop=self.loop)
+        headers={"bot-token": BOT_API_TOKEN}
+        self.session = aiohttp.ClientSession(headers=headers, loop=self.loop)
         # self.add_command(self.do)
         for extension in config['initial_extensions']:
             try:
