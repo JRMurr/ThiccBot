@@ -3,7 +3,7 @@
 /* ReactDOMRe.renderToElementWithId(<Component2 greeting="Hello!" />, "index2"); */
 
 type page =
-  | ServerList
+  | ServerList;
 
 module App = {
   type state = {route: page};
@@ -19,12 +19,10 @@ module App = {
       },
     render: ({state}) =>
       <div>
-        (
-          switch (state.route) {
-          | ServerList => <DiscordServers/>
-          }
-        )
+        {switch (state.route) {
+         | ServerList => <DiscordServers />
+         }}
       </div>,
   };
 };
-ReactDOMRe.renderToElementWithId(<App/>, "app");
+ReactDOMRe.renderToElementWithId(<App />, "app");
