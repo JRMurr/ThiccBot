@@ -7,7 +7,7 @@ var React = require("react");
 var Belt_Array = require("bs-platform/lib/js/belt_Array.js");
 var Json_decode = require("@glennsl/bs-json/src/Json_decode.bs.js");
 var ReasonReact = require("reason-react/src/ReasonReact.js");
-var ApiUtil$ReactTemplate = require("./ApiUtil.bs.js");
+var ApiUtil$ReactTemplate = require("../ApiUtil.bs.js");
 var DiscordServerCard$ReactTemplate = require("./DiscordServerCard.bs.js");
 
 function decodeServer(json) {
@@ -63,8 +63,10 @@ function make(_children) {
                   return React.createElement("div", undefined, "Loading Severs...");
                 }
               } else {
-                return React.createElement("div", undefined, React.createElement("h1", undefined, "Servers"), Belt_Array.map(match[0], (function (server) {
-                                  return ReasonReact.element(undefined, undefined, DiscordServerCard$ReactTemplate.make(server[/* name */3], /* array */[]));
+                return React.createElement("div", {
+                            className: "container"
+                          }, React.createElement("h1", undefined, "Servers"), Belt_Array.map(match[0], (function (server) {
+                                  return ReasonReact.element(undefined, undefined, DiscordServerCard$ReactTemplate.make(server, /* array */[]));
                                 })));
               }
             }),
