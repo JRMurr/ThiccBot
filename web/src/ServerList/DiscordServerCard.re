@@ -7,9 +7,9 @@ let make = (~server: discordServer, _children) => {
     <div className="card border-primary mb-3">
       /* <div className="card-header">(ReasonReact.string("Header"))</div> */
         <div className="card-body">
-            <h4 className="card-title"> {ReasonReact.string(server.name)} </h4>
-          </div>
-          /* <p className="card-text">(ReasonReact.string("Some quick example text to build on the card title and make up the bulk of the card's content."))</p> */
+          <h4 className="card-title"> {ReasonReact.string(server.name)} </h4>
+        </div>
       </div>;
+      /* <p className="card-text">(ReasonReact.string("Some quick example text to build on the card title and make up the bulk of the card's content."))</p> */
   },
 };
