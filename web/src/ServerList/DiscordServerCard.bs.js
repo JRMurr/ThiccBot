@@ -6,7 +6,7 @@ var ReasonReact = require("reason-react/src/ReasonReact.js");
 
 var component = ReasonReact.statelessComponent("DiscordServerCard");
 
-function make(name, _children) {
+function make(server, _children) {
   return /* record */[
           /* debugName */component[/* debugName */0],
           /* reactClassInternal */component[/* reactClassInternal */1],
@@ -18,7 +18,13 @@ function make(name, _children) {
           /* willUpdate */component[/* willUpdate */7],
           /* shouldUpdate */component[/* shouldUpdate */8],
           /* render */(function (_self) {
-              return React.createElement("div", undefined, name);
+              return React.createElement("div", {
+                          className: "card border-primary mb-3"
+                        }, React.createElement("div", {
+                              className: "card-body"
+                            }, React.createElement("h4", {
+                                  className: "card-title"
+                                }, server[/* name */3])));
             }),
           /* initialState */component[/* initialState */10],
           /* retainedProps */component[/* retainedProps */11],

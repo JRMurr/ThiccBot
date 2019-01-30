@@ -1,12 +1,6 @@
 /* The new stdlib additions */
 open Belt;
-
-type discordServer = {
-    admin_role: option(int),
-    command_prefixes: option(array(string)),
-    id: int,
-    name: string
-  };
+open ServerTypes;
 
 type state =
   | Loading
@@ -20,7 +14,6 @@ type action =
 
 
 module API = {
-  /* open Json.Decode; */
   let decodeServer = json =>
     Json.Decode.{
       admin_role: json |> field("admin_role", optional(int)),
@@ -65,18 +58,10 @@ let make = _children => {
     | Error => <div> (ReasonReact.string("An error occurred!")) </div>
     | Loading => <div> (ReasonReact.string("Loading Severs...")) </div>
     | Loaded(servers) =>
-      <div>
+      <div className="container">
         <h1> (ReasonReact.string("Servers")) </h1>
-        /* <ul>
-          (
-            Array.map(servers, (server =>
-              <li key=server.name> (server.name |> ReasonReact.string) (server.id |> string_of_int |> ReasonReact.string) </li>
-            ))
-            |> ReasonReact.array
-          )
-        </ul> */
         (Array.map(servers, (server =>
-          <DiscordServerCard name=server.name/>
+          <DiscordServerCard server/>
         ))|> ReasonReact.array) 
       </div>
     },
