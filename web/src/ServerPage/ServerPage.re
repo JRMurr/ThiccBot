@@ -1,22 +1,18 @@
-/* The new stdlib additions */
 open Belt;
 open ServerTypes;
 
 type state =
   | Loading
   | Error
-  | Loaded(array(discordServer));
+  | Loaded(discordServer);
 
 type action =
   | ServerFetch
-  | ServersFetches(array(discordServer))
+  | ServerFetched(discordServer)
   | ServersFailedToFetch;
 
-
-
-let component = ReasonReact.reducerComponent("DiscordServers");
-
-let make = _children => {
+let component = ReasonReact.reducerComponent("ServerPage");
+let make = (~id: string, _children) => {
   ...component,
   initialState: _state => Loading,
   reducer: (action, _state) =>
@@ -26,31 +22,29 @@ let make = _children => {
         Loading,
         self => {
           let _ =
-            ServerAPI.getServers()
-            |> Js.Promise.then_(results => {
-                 self.send(ServersFetches(results));
+            ServerAPI.getServer(id)
+            |> Js.Promise.then_(result => {
+                 self.send(ServerFetched(result));
                  Js.Promise.resolve();
                })
-            |> Js.Promise.catch(err =>{
+            |> Js.Promise.catch(err => {
                  Js.log(err);
                  Js.Promise.resolve(self.send(ServersFailedToFetch));
                });
           ();
         },
       )
-    | ServersFetches(servers) => ReasonReact.Update(Loaded(servers))
+    | ServerFetched(server) => ReasonReact.Update(Loaded(server))
     | ServersFailedToFetch => ReasonReact.Update(Error)
     },
   didMount: self => self.send(ServerFetch),
   render: self =>
     switch (self.state) {
     | Error => <div> {ReasonReact.string("An error occurred!")} </div>
-    | Loading => <div> {ReasonReact.string("Loading Severs...")} </div>
-    | Loaded(servers) =>
+    | Loading => <div> {ReasonReact.string("Loading Sever...")} </div>
+    | Loaded(server) =>
       <div className="container">
-        <h1> {ReasonReact.string("Servers")} </h1>
-        {Array.map(servers, server => <DiscordServerCard server />)
-         |> ReasonReact.array}
+        <h1> {ReasonReact.string("Server: " ++ server.id)} </h1>
       </div>
     },
 };

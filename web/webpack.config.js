@@ -22,11 +22,17 @@ module.exports = {
     contentBase: outputDir,
     port: process.env.PORT || 8000,
     host: '0.0.0.0',
-    historyApiFallback: true,
+    historyApiFallback: {
+      disableDotRule: true,
+      rewrites: [
+        { from: /Index\.js$/, to: '/Index.js' }
+      ],
+      logger: console.log.bind(console)
+    },
     proxy: {
       '/api': {
-          target: 'http://localhost:5000',
-          secure: false
+        target: 'http://localhost:5000',
+        secure: false
       },
       '/login': {
         target: 'http://localhost:5000',
