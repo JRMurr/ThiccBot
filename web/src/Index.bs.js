@@ -2,10 +2,40 @@
 'use strict';
 
 var Block = require("bs-platform/lib/js/block.js");
+var Curry = require("bs-platform/lib/js/curry.js");
 var React = require("react");
 var ReactDOMRe = require("reason-react/src/ReactDOMRe.js");
+var Caml_format = require("bs-platform/lib/js/caml_format.js");
 var ReasonReact = require("reason-react/src/ReasonReact.js");
+var Caml_js_exceptions = require("bs-platform/lib/js/caml_js_exceptions.js");
+var Caml_builtin_exceptions = require("bs-platform/lib/js/caml_builtin_exceptions.js");
+var ServerPage$ReactTemplate = require("./ServerPage/ServerPage.bs.js");
 var DiscordServers$ReactTemplate = require("./ServerList/DiscordServers.bs.js");
+
+function int_of_string_opt($$var) {
+  var exit = 0;
+  var int_var;
+  try {
+    int_var = Caml_format.caml_int_of_string($$var);
+    exit = 1;
+  }
+  catch (raw_exn){
+    var exn = Caml_js_exceptions.internalToOCamlException(raw_exn);
+    if (exn[0] === Caml_builtin_exceptions.failure) {
+      if (exn[1] === "int_of_string") {
+        return undefined;
+      } else {
+        throw exn;
+      }
+    } else {
+      throw exn;
+    }
+  }
+  if (exit === 1) {
+    return int_var;
+  }
+  
+}
 
 var component = ReasonReact.reducerComponent("App");
 
@@ -15,13 +45,43 @@ function make(_children) {
           /* reactClassInternal */component[/* reactClassInternal */1],
           /* handedOffState */component[/* handedOffState */2],
           /* willReceiveProps */component[/* willReceiveProps */3],
-          /* didMount */component[/* didMount */4],
+          /* didMount */(function (self) {
+              var handle_url = function (url) {
+                var match = url[/* path */0];
+                var exit = 0;
+                if (match && match[0] === "server") {
+                  var match$1 = match[1];
+                  if (match$1 && !match$1[1]) {
+                    return Curry._1(self[/* send */3], /* UpdatePage */[/* Sever */Block.__(0, [match$1[0]])]);
+                  } else {
+                    exit = 1;
+                  }
+                } else {
+                  exit = 1;
+                }
+                if (exit === 1) {
+                  console.log(url);
+                  return Curry._1(self[/* send */3], /* UpdatePage */[/* ServerList */0]);
+                }
+                
+              };
+              handle_url(ReasonReact.Router[/* dangerouslyGetInitialUrl */3](/* () */0));
+              var watcherID = ReasonReact.Router[/* watchUrl */1](handle_url);
+              return Curry._1(self[/* onUnmount */4], (function (param) {
+                            return ReasonReact.Router[/* unwatchUrl */2](watcherID);
+                          }));
+            }),
           /* didUpdate */component[/* didUpdate */5],
           /* willUnmount */component[/* willUnmount */6],
           /* willUpdate */component[/* willUpdate */7],
           /* shouldUpdate */component[/* shouldUpdate */8],
           /* render */(function (param) {
-              return React.createElement("div", undefined, ReasonReact.element(undefined, undefined, DiscordServers$ReactTemplate.make(/* array */[])));
+              var match = param[/* state */1][/* route */0];
+              var tmp;
+              tmp = typeof match === "number" ? ReasonReact.element(undefined, undefined, DiscordServers$ReactTemplate.make(/* array */[])) : (
+                  match.tag ? React.createElement("div", undefined, match[0]) : ReasonReact.element(undefined, undefined, ServerPage$ReactTemplate.make(match[0], /* array */[]))
+                );
+              return React.createElement("div", undefined, tmp);
             }),
           /* initialState */(function (param) {
               return /* record */[/* route : ServerList */0];
@@ -41,5 +101,6 @@ var App = /* module */[
 
 ReactDOMRe.renderToElementWithId(ReasonReact.element(undefined, undefined, make(/* array */[])), "app");
 
+exports.int_of_string_opt = int_of_string_opt;
 exports.App = App;
 /* component Not a pure module */

@@ -7,6 +7,13 @@ from flask import jsonify
 from flask_dance.contrib.discord import discord as dAuth
 
 
+def id_to_str(serverJson):
+    # The reason front end has issues with big int
+    # so if not the bot conver the id to a string
+    if not g.is_bot:
+        serverJson['id'] = str(serverJson['id'])
+    return serverJson
+
 @app.route("/api/servers", methods=['GET','POST'])
 def serverRoute():
     if request.method == 'POST':
@@ -21,9 +28,9 @@ def serverRoute():
             app.logger.info(f'added server: {server}')
         else:
             app.logger.info(f'already had server: {server}')
-        return jsonify(server.serialize)
+        return jsonify(id_to_str(server.serialize))
     else:
-        return jsonify([x.serialize for x in DiscordServer.query.all()])
+        return jsonify([id_to_str(x.serialize) for x in DiscordServer.query.all()])
 
 @app.route('/api/servers/<int:server_id>', methods=['PUT', 'GET'])
 def getServer(server_id):
@@ -32,5 +39,5 @@ def getServer(server_id):
         form = request.get_json()
         if form['admin_role']:
             server.admin_role = form['admin_role']
-        db.session.commit()        
-    return jsonify(server.serialize)
+        db.session.commit()
+    return jsonify(id_to_str(server.serialize))

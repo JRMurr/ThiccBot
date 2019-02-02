@@ -47,3 +47,9 @@ docker-compose up
 docker-compose run flask flask db migrate
 docker-compose run flask flask db upgrade
 ```
+
+## connect to db
+With the deafult db user name and passwords you can use pgcli (or psql) to connect to the db
+```sh
+pgcli postgresql://testusr:password@localhost:5432/thiccdb
+```
