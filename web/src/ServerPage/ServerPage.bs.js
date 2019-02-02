@@ -4,14 +4,12 @@
 var Block = require("bs-platform/lib/js/block.js");
 var Curry = require("bs-platform/lib/js/curry.js");
 var React = require("react");
-var Belt_Array = require("bs-platform/lib/js/belt_Array.js");
 var ReasonReact = require("reason-react/src/ReasonReact.js");
 var ServerTypes$ReactTemplate = require("../Utils/ServerTypes.bs.js");
-var DiscordServerCard$ReactTemplate = require("./DiscordServerCard.bs.js");
 
-var component = ReasonReact.reducerComponent("DiscordServers");
+var component = ReasonReact.reducerComponent("ServerPage");
 
-function make(_children) {
+function make(id, _children) {
   return /* record */[
           /* debugName */component[/* debugName */0],
           /* reactClassInternal */component[/* reactClassInternal */1],
@@ -30,14 +28,12 @@ function make(_children) {
                 if (match !== 0) {
                   return React.createElement("div", undefined, "An error occurred!");
                 } else {
-                  return React.createElement("div", undefined, "Loading Severs...");
+                  return React.createElement("div", undefined, "Loading Sever...");
                 }
               } else {
                 return React.createElement("div", {
                             className: "container"
-                          }, React.createElement("h1", undefined, "Servers"), Belt_Array.map(match[0], (function (server) {
-                                  return ReasonReact.element(undefined, undefined, DiscordServerCard$ReactTemplate.make(server, /* array */[]));
-                                })));
+                          }, React.createElement("h1", undefined, "Server: " + match[0][/* id */2]));
               }
             }),
           /* initialState */(function (_state) {
@@ -52,8 +48,8 @@ function make(_children) {
                   return /* UpdateWithSideEffects */Block.__(2, [
                             /* Loading */0,
                             (function (self) {
-                                ServerTypes$ReactTemplate.ServerAPI[/* getServers */2](/* () */0).then((function (results) {
-                                          Curry._1(self[/* send */3], /* ServersFetches */[results]);
+                                ServerTypes$ReactTemplate.ServerAPI[/* getServer */3](id).then((function (result) {
+                                          Curry._1(self[/* send */3], /* ServerFetched */[result]);
                                           return Promise.resolve(/* () */0);
                                         })).catch((function (err) {
                                         console.log(err);
