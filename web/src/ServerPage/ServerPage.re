@@ -43,7 +43,7 @@ let make = (~id: string, _children) => {
     | Error => <div> {ReasonReact.string("An error occurred!")} </div>
     | Loading => <div> {ReasonReact.string("Loading Sever...")} </div>
     | Loaded(server) =>
-      <div className="container">
+      <div className="container-fluid">
         <h1> {ReasonReact.string("Server: " ++ server.id)} </h1>
       </div>
     },
