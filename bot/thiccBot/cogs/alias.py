@@ -17,12 +17,13 @@ class Alias:
             return
         for prefix in self.bot.get_command_prefixes(message):
             if message.content.startswith(prefix):
-                alias_name = message.content[len(prefix) :]
-                if alias_name in self.bot.commands:  # TODO: this is not working
+                alias_name = message.content[len(prefix) :].split(" ")[0]
+                comand_names = [x.name for x in self.bot.commands]
+                if alias_name in comand_names:
                     continue
                 server_id = message.guild.id
                 async with self.bot.backend_request(
-                    "get", f"/alias/{server_id}/{alias_name}"
+                    "get", f"/alias/{server_id}/{alias_name}/discord"
                 ) as r:
                     if r.status == 200:
                         data = await r.json()
@@ -54,7 +55,7 @@ class Alias:
             async with self.bot.backend_request(
                 "post",
                 "/alias",
-                json={"name": name, "command": args, "server_id": server_id},
+                json={"name": name, "command": args, "discord_id": server_id},
             ) as r:
                 if r.status == 200:
                     await ctx.send("Created alias " + name)
