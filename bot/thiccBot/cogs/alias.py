@@ -50,7 +50,6 @@ class Alias:
         if name in self.bot.commands or name is "help":
             await ctx.send("dont overwrite big boi commands")
         else:
-            pass
             server_id = ctx.guild.id
             async with self.bot.backend_request(
                 "post",

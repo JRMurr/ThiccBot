@@ -8,6 +8,13 @@ import io
 from contextlib import redirect_stdout
 from pprint import pprint
 
+
+def add_cog_prefix(module):
+    if not module.startswith("cogs."):
+        module = f"cogs.{module}"
+    return module
+
+
 # Most of this has been taken from robo danny
 class BotAdmin:
     """Bot admin only commands"""
@@ -27,15 +34,13 @@ class BotAdmin:
         return content.strip("` \n")
 
     async def __local_check(self, ctx):
-        print("00000000000000")
-        pprint(ctx.author)
         return await self.bot.is_owner(ctx.author)
 
     @commands.command(hidden=True)
     async def load(self, ctx, *, module):
         """Loads a module."""
         try:
-            self.bot.load_extension(module)
+            self.bot.load_extension(add_cog_prefix(module))
         except Exception as e:
             await ctx.send(f"```py\n{traceback.format_exc()}\n```")
         else:
@@ -45,7 +50,7 @@ class BotAdmin:
     async def unload(self, ctx, *, module):
         """Unloads a module."""
         try:
-            self.bot.unload_extension(module)
+            self.bot.unload_extension(add_cog_prefix(module))
         except Exception as e:
             await ctx.send(f"```py\n{traceback.format_exc()}\n```")
         else:
@@ -55,8 +60,8 @@ class BotAdmin:
     async def _reload(self, ctx, *, module):
         """Reloads a module."""
         try:
-            self.bot.unload_extension(module)
-            self.bot.load_extension(module)
+            self.bot.unload_extension(add_cog_prefix(module))
+            self.bot.load_extension(add_cog_prefix(module))
         except Exception as e:
             await ctx.send(f"```py\n{traceback.format_exc()}\n```")
         else:

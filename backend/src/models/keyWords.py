@@ -1,13 +1,13 @@
 from src import db
-from sqlalchemy.dialects.postgresql import BIGINT
+from sqlalchemy.dialects.postgresql import ARRAY
 
 
-class Alias(db.Model):
-    __tablename__ = "alias"
+class KeyWords(db.Model):
+    __tablename__ = "keywords"
     id = db.Column(db.Integer, primary_key=True)
     server_group_id = db.Column(db.Integer, db.ForeignKey("servergroup.id"))
-    name = db.Column(db.String, doc="name of the alias")
-    command = db.Column(db.String, doc="the command with args that the alias maps to")
+    name = db.Column(db.String, doc="name of the keyword")
+    responses = db.Column(ARRAY(db.String), doc="list of keyword resposnes")
 
     server = db.relationship("ServerGroup")
 
@@ -18,5 +18,5 @@ class Alias(db.Model):
             "id": self.id,
             "server_group_id": self.server_group_id,
             "name": self.name,
-            "command": self.command,
+            "responses": self.responses,
         }

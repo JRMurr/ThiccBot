@@ -28,7 +28,6 @@ def aliasPost():
 @app.route("/api/alias/<int:server_id>/<alias_name>/<server_type>")
 def aliasGet(server_id, alias_name, server_type):
     alias = None
-    app.logger.info(f"server_type: {server_type}")
 
     if server_type is None:
         alias = Alias.query.filter_by(server_id=server_id, name=alias_name).first()
