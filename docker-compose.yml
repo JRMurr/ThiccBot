@@ -45,6 +45,8 @@ services:
       - DISCORD_ID=${DISCORD_ID}
       - BACKEND_URL=http://flask:5000/api
       - BOT_API_TOKEN=${BOT_API_TOKEN}
+      - BOT_ADMIN=${BOT_ADMIN}
+
       volumes:
       - ./bot:/thiccbot:rw
       depends_on:

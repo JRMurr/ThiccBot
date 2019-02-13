@@ -8,6 +8,8 @@ import aiohttp
 import asyncio
 import os
 
+BOT_ADMIN = int(os.environ["BOT_ADMIN"])
+
 BACKEND_URL = os.environ["BACKEND_URL"]
 BOT_API_TOKEN = os.environ["BOT_API_TOKEN"]
 if not BACKEND_URL.endswith("/"):
@@ -35,7 +37,7 @@ class ThiccBot(commands.Bot):
             command_prefix=_prefix_callable,
             description=description,
             pm_help=None,
-            owner_id=config["bot_admin"],
+            owner_id=BOT_ADMIN,
         )
         self.config = config
         self.prefixes = {}
@@ -64,7 +66,7 @@ class ThiccBot(commands.Bot):
 
     async def add_guild(self, guild):
         async with self.backend_request(
-            "post", "/servers", data={"name": guild.name, "id": guild.id}
+            "post", "/discordServers", json={"name": guild.name, "id": guild.id}
         ) as r:
             data = await r.json()
             if "command_prefix" in data and data["command_prefix"] is not None:
