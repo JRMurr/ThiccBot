@@ -4,3 +4,4 @@ initial_extensions:
     - 'cogs.basics'
     - 'cogs.admin'
     - 'cogs.botAdmin'
+    - 'cogs.keyWords'

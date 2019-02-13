@@ -24,10 +24,15 @@ blueprint = make_discord_blueprint(
 app.register_blueprint(blueprint, url_prefix="/login")
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
-from src.models import Alias, DiscordServer, serverGroup
+from src.models import Alias, DiscordServer, ServerGroup, KeyWords
 
 db.create_all(app=app)
-from src.routes import alias as aRoute, discordServers as dsRoute, login as loginRoute
+from src.routes import (
+    alias as aRoute,
+    discordServers as dsRoute,
+    login as loginRoute,
+    keyWords as keyRoute,
+)
 
 
 @app.before_request
