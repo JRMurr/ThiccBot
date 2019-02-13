@@ -6,7 +6,7 @@ import textwrap
 import traceback
 import io
 from contextlib import redirect_stdout
-
+from pprint import pprint
 
 # Most of this has been taken from robo danny
 class BotAdmin:
@@ -27,6 +27,8 @@ class BotAdmin:
         return content.strip("` \n")
 
     async def __local_check(self, ctx):
+        print("00000000000000")
+        pprint(ctx.author)
         return await self.bot.is_owner(ctx.author)
 
     @commands.command(hidden=True)
