@@ -4,6 +4,7 @@ from thiccBot.bot import ThiccBot
 from yaml import load
 import logging
 from contextlib import contextmanager, asynccontextmanager
+
 try:
     import uvloop
 except ImportError:
@@ -11,22 +12,27 @@ except ImportError:
 else:
     asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
-BOT_ID = os.environ['DISCORD_ID']
-with open(f'{os.path.dirname(os.path.abspath(__file__))}/config.yml', 'r') as stream:
+BOT_ID = os.environ["DISCORD_ID"]
+with open(f"{os.path.dirname(os.path.abspath(__file__))}/config.yml", "r") as stream:
     config = load(stream)
+
 
 @contextmanager
 def setup_logging():
     try:
         # __enter__
-        logging.getLogger('discord').setLevel(logging.INFO)
-        logging.getLogger('discord.http').setLevel(logging.WARNING)
+        logging.getLogger("discord").setLevel(logging.INFO)
+        logging.getLogger("discord.http").setLevel(logging.WARNING)
 
         log = logging.getLogger()
         log.setLevel(logging.INFO)
-        handler = logging.FileHandler(filename='thiccBot.log', encoding='utf-8', mode='w')
-        dt_fmt = '%Y-%m-%d %H:%M:%S'
-        fmt = logging.Formatter('[{asctime}] [{levelname:<7}] {name}: {message}', dt_fmt, style='{')
+        handler = logging.FileHandler(
+            filename="thiccBot.log", encoding="utf-8", mode="w"
+        )
+        dt_fmt = "%Y-%m-%d %H:%M:%S"
+        fmt = logging.Formatter(
+            "[{asctime}] [{levelname:<7}] {name}: {message}", dt_fmt, style="{"
+        )
         handler.setFormatter(fmt)
         log.addHandler(handler)
         yield
@@ -36,6 +42,7 @@ def setup_logging():
         for hdlr in handlers:
             hdlr.close()
             log.removeHandler(hdlr)
+
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
