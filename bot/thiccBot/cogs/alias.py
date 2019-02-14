@@ -54,7 +54,7 @@ class Alias:
             async with self.bot.backend_request(
                 "post",
                 f"/alias/discord/{server_id}",
-                json={"name": name, "command": args, "discord_id": server_id},
+                json={"name": name, "command": args},
             ) as r:
                 if r.status == 200:
                     await ctx.send("Created alias " + name)
