@@ -10,12 +10,18 @@ from pprint import pformat
 def keyWordsPost():
     form = request.get_json()
     app.logger.info(f"form: {pformat(form)}")
-
     server_group_id = None
     if "discord_id" in form:
         server_group_id = DiscordServer.query.get(form["discord_id"]).server_group_id
     else:
         server_group_id = form["server_group_id"]
+    if (
+        KeyWords.query.filter_by(
+            server_group_id=server_group_id, name=form["name"]
+        ).first()
+        is not None
+    ):
+        abort(400)  # key word already exitsts
     keyWords = KeyWords(
         server_group_id=server_group_id, name=form["name"], responses=form["responses"]
     )

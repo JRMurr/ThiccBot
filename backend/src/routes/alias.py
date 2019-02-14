@@ -16,6 +16,13 @@ def aliasPost():
         server_group_id = DiscordServer.query.get(form["discord_id"]).server_group_id
     else:
         server_group_id = form["server_group_id"]
+    if (
+        Alias.query.filter_by(
+            server_group_id=server_group_id, name=form["name"]
+        ).first()
+        is not None
+    ):
+        abort(400)  # alias already exitsts
     alias = Alias(
         server_group_id=server_group_id, name=form["name"], command=form["command"]
     )
