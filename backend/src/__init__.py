@@ -1,11 +1,13 @@
 from flask import Flask, request, abort, redirect, url_for, g
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from flask_restplus import Api
 from flask_dance.contrib.discord import make_discord_blueprint, discord as dAuth
+import os
 
 app = Flask(__name__)
 app.secret_key = "supersekrit"  # TODO: do good things here
-import os
+api = Api(app)
 
 DB_USER = os.environ["DB_USER"]
 DB_PASS = os.environ["DB_PASS"]
