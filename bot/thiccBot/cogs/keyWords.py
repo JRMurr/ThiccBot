@@ -22,7 +22,7 @@ class KeyWords:
         key_word = message.content.strip()
         server_id = message.guild.id
         async with self.bot.backend_request(
-            "get", f"/keyWords/{server_id}/{key_word}/discord"
+            "get", f"/keyWords/discord/{server_id}/{key_word}"
         ) as r:
             if r.status == 200:
                 data = await r.json()
@@ -49,8 +49,8 @@ class KeyWords:
         server_id = ctx.guild.id
         async with self.bot.backend_request(
             "post",
-            "/keyWords",
-            json={"name": name, "responses": [response], "discord_id": server_id},
+            f"/keyWords/discord/{server_id}",
+            json={"name": name, "responses": [response]},
         ) as r:
             if r.status == 200:
                 await ctx.send(f"created keyword: <{name}>\nresponse: <{response}>")

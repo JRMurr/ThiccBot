@@ -2,9 +2,7 @@ from src import app, api
 from flask import request, abort
 from src import db
 from src.models import Alias, DiscordServer, ServerGroup
-from src.utils import jsonModel
 from flask_restplus import Resource, fields
-from pprint import pformat, pprint
 
 ns = api.namespace("api/alias", description="Alias operations")
 
