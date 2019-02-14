@@ -3,7 +3,7 @@ from flask import request, abort, g
 from pprint import pformat
 from src import db
 from src.models import DiscordServer, ServerGroup
-from flask import jsonify
+from flask import jsonify, url_for
 from flask_dance.contrib.discord import discord as dAuth
 from pprint import pprint
 
@@ -47,7 +47,7 @@ def serverRoute():
         return jsonify([id_to_str(x.serialize) for x in DiscordServer.query.all()])
 
 
-@app.route(PREFIX + "<int:server_id>", methods=["PUT", "GET"])
+@app.route(PREFIX + "/<int:server_id>", methods=["PUT", "GET"])
 def getServer(server_id):
     server = DiscordServer.query.get_or_404(server_id)
     if request.method == "PUT":

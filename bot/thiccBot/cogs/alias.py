@@ -23,7 +23,7 @@ class Alias:
                     continue
                 server_id = message.guild.id
                 async with self.bot.backend_request(
-                    "get", f"/alias/{server_id}/{alias_name}/discord"
+                    "get", f"/alias/discord/{server_id}/{alias_name}"
                 ) as r:
                     if r.status == 200:
                         data = await r.json()
@@ -53,14 +53,16 @@ class Alias:
             server_id = ctx.guild.id
             async with self.bot.backend_request(
                 "post",
-                "/alias",
+                f"/alias/discord/{server_id}",
                 json={"name": name, "command": args, "discord_id": server_id},
             ) as r:
                 if r.status == 200:
                     await ctx.send("Created alias " + name)
                 else:
                     await ctx.send("Error creating alias")
-                    log.error("error sending request to server : ")  # TODO: error msg
+                    log.error(
+                        f"error creating alias:{name}, server failed with {r.reason}"
+                    )  # TODO: error msg
 
 
 def setup(bot):
