@@ -7,6 +7,7 @@ Flask-SQLAlchemy
 Flask-Migrate
 Flask-Dance
 gunicorn
+flask-restplus
 
 #dev
 pylint-flask #handles pylint errors for models
