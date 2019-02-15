@@ -1,6 +1,9 @@
 from discord.ext import commands
 import discord
 import logging
+import random
+import copy
+import emoji
 from pprint import pprint
 
 log = logging.getLogger(__name__)
@@ -16,6 +19,100 @@ class Basics:
     async def say(self, ctx, *, args: str):
         """The bot says what you want it to"""
         await ctx.send(args)
+
+    @commands.command(description="For when you wanna settle the score some other way")
+    async def choose(self, ctx, *choices: str):
+        await ctx.send(random.choice(choices))
+
+    @commands.command(description="Randomly shuffles your choices")
+    async def choose_list(self, ctx, *choices: str):
+        """Randomly shuffles your choices"""
+        res = list(choices)
+        random.shuffle(res)  # in-place shuffle
+        print(res)
+        await ctx.send(", ".join(res))
+
+    @commands.command()
+    async def do_multiple(self, ctx, numTimes: int, *, command: str):
+        """does the passed command the specified number of times"""
+        if command.startswith("do_multiple"):
+            await ctx.send("u fukin thot")
+            return
+        msg = copy.copy(ctx.message)
+        msg.content = f"{ctx.prefix}{command}"
+
+        if numTimes > 5:
+            await ctx.send("thats too many times boi chill")
+            return
+        new_ctx = await self.bot.get_context(msg)
+        for i in range(numTimes):
+            await new_ctx.reinvoke()
+
+    @commands.command()
+    async def meme_text(self, ctx, *args):
+        msg = ""
+        if len(args) < 1:
+            return
+        for word in args:
+            for char in word:
+                if char not in emoji.UNICODE_EMOJI:
+                    msg += chr(0xFEE0 + ord(char))
+                else:
+                    msg += char
+            msg += "  "
+        await ctx.send(msg)
+
+    def digit_to_word(self, digit):
+        if not isinstance(digit, str):
+            digit = str(digit)
+        if not digit.isalnum():
+            return ""
+        if digit == "1":
+            return "one"
+        elif digit == "2":
+            return "two"
+        elif digit == "3":
+            return "three"
+        elif digit == "4":
+            return "four"
+        elif digit == "5":
+            return "five"
+        elif digit == "6":
+            return "six"
+        elif digit == "7":
+            return "seven"
+        elif digit == "8":
+            return "eight"
+        elif digit == "9":
+            return "nine"
+        elif digit == "0":
+            return "zero"
+        return digit
+
+    @commands.command()
+    async def emoji_text(self, ctx, *args):
+        """Usage: emoji_text <Words to be returned in emoji characters>
+
+        Uses discord regional indicators to return text as emojis
+        """
+        msg = ""
+        if len(args) < 1:
+            return
+        for word in args:
+            for char in word:
+                if char.isalnum():
+                    if char.isdigit():
+                        msg += ":{}:".format(self.digit_to_word(char))
+                    else:
+                        msg += ":regional_indicator_{}:".format(char.lower())
+                else:
+                    msg += char
+            if len(msg) >= 1500:
+                await ctx.send(msg)
+                msg = ""
+            msg += "  "
+
+        await ctx.send(msg)
 
     @commands.command()
     async def about(self, ctx):
