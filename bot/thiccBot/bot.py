@@ -7,6 +7,7 @@ import logging
 import aiohttp
 import asyncio
 import os
+from thiccBot.cogs.utils.logError import get_error_str
 
 BOT_ADMIN = int(os.environ["BOT_ADMIN"])
 
@@ -64,24 +65,35 @@ class ThiccBot(commands.Bot):
         # TODO: auth stuff
         return self.session.request(method, url, **kwargs)
 
+    async def get_guild(self, guild):
+        async with self.backend_request("get", f"/discord/{guild.id}") as r:
+            if r.status == 200:
+                return await r.json()
+            else:
+                return None
+
     async def add_guild(self, guild):
         async with self.backend_request(
-            "post", "/discordServers", json={"name": guild.name, "id": guild.id}
+            "post", "/discord", json={"name": guild.name, "id": guild.id}
         ) as r:
-            data = await r.json()
-            if "command_prefix" in data and data["command_prefix"] is not None:
-                # TODO: check if command prefix is list and make it one if not
-                self.prefixes[data["id"]] = data["command_prefix"]
-                log.info(
-                    "server: %s, id: %s, has command_prefix: %s",
-                    data["name"],
-                    data["id"],
-                    data["command_prefix"],
-                )
+            if r.status == 200:
+                data = await r.json()
+                if "command_prefix" in data and data["command_prefix"] is not None:
+                    # TODO: check if command prefix is list and make it one if not
+                    self.prefixes[data["id"]] = data["command_prefix"]
+                    log.info(
+                        "server: %s, id: %s, has command_prefix: %s",
+                        data["name"],
+                        data["id"],
+                        data["command_prefix"],
+                    )
+            else:
+                log.error(get_error_str(r, "Error adding guild: "))
 
     async def on_ready(self):
         for guild in self.guilds:
-            await self.add_guild(guild)
+            if not await self.get_guild(guild):
+                await self.add_guild(guild)
         print("Logged on as {0}!".format(self.user))
 
     async def close(self):
