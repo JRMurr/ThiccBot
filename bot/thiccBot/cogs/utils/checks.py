@@ -19,7 +19,7 @@ def is_bot_admin():
         bot = ctx.bot
         author = ctx.message.author
         server_id = ctx.message.guild.id
-        async with bot.backend_request("get", f"/servers/{server_id}") as r:
+        async with bot.backend_request("get", f"/discord/{server_id}") as r:
             if r.status == 200:
                 data = await r.json()
                 if data["admin_role"]:
@@ -29,6 +29,7 @@ def is_bot_admin():
             elif r.status == 403:
                 log.error(f"no server with id {server_id} found")
             else:
+                # TODO: server error so for now just let them run it
                 pass
         return author.guild_permissions.manage_roles
 

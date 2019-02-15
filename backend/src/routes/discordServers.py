@@ -3,7 +3,7 @@ from flask import request, abort, g
 from pprint import pformat
 from src import db
 from src.models import DiscordServer, ServerGroup
-from flask import jsonify, url_for
+from flask import url_for
 from flask_dance.contrib.discord import discord as dAuth
 from flask_restplus import Resource, fields
 from pprint import pprint
@@ -25,7 +25,7 @@ serverModel = ns.model(
 
 def id_to_str(serverJson):
     # The reason front end has issues with big int
-    # so if not the bot conver the id to a string
+    # so if not the bot convert the id to a string
     if not g.is_bot:
         serverJson["id"] = str(serverJson["id"])
     return serverJson

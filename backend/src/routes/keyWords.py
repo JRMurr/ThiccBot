@@ -39,7 +39,7 @@ class KeyWordList(Resource):
             ).first()
             is not None
         ):
-            abort(400)  # key word already exitsts
+            abort(400)  # key word already exist
         keyWords = KeyWords(
             server_group_id=server_group_id,
             name=form["name"],
