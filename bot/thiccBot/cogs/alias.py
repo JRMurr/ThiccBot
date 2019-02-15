@@ -4,6 +4,7 @@ from thiccBot.cogs.utils import checks
 import logging
 from pprint import pprint
 from copy import copy
+from thiccBot.cogs.utils.logError import get_error_str
 
 log = logging.getLogger(__name__)
 
@@ -30,8 +31,8 @@ class Alias:
                         msg = copy(message)
                         msg.content = prefix + data["command"]
                         await self.bot.process_commands(msg)
-                    elif r.status == 403:
-                        log.error("error making alias get request")  # TODO: error info
+                    elif not r.status == 404:
+                        log.error(get_error_str(r, "error making alias get request: "))
                 break
 
     async def on_message(self, message: discord.Message):
