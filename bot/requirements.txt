@@ -11,3 +11,6 @@ aiodns
 
 #faster async loop
 uvloop
+
+#meme stuff
+emoji
