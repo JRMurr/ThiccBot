@@ -100,10 +100,48 @@ class ThiccBot(commands.Bot):
         await super().close()
         await self.session.close()
 
+    # https://gist.github.com/EvieePy/7822af90858ef65012ea500bcecf1612
+    async def on_command_error(self, ctx, error):
+        """The event triggered when an error is raised while invoking a command.
+        ctx   : Context
+        error : Exception"""
+
+        # This prevents any commands with local handlers being handled here in on_command_error.
+        if hasattr(ctx.command, "on_error"):
+            return
+
+        ignored = (commands.CommandNotFound, commands.UserInputError)
+
+        # Allows us to check for original exceptions raised and sent to CommandInvokeError.
+        # If nothing is found. We keep the exception passed to on_command_error.
+        error = getattr(error, "original", error)
+
+        # Anything in ignored will return and prevent anything happening.
+        if isinstance(error, ignored):
+            return
+
+        elif isinstance(error, commands.DisabledCommand):
+            return await ctx.send(f"{ctx.command} has been disabled.")
+
+        elif isinstance(error, commands.NoPrivateMessage):
+            try:
+                return await ctx.author.send(
+                    f"{ctx.command} can not be used in Private Messages."
+                )
+            except:
+                pass
+
+        # All other Errors not returned come here... And we can just print the default TraceBack.
+        print("Ignoring exception in command {}:".format(ctx.command), file=sys.stderr)
+        traceback.print_exception(
+            type(error), error, error.__traceback__, file=sys.stderr
+        )
+
     async def on_message(self, message):
-        await self.process_commands(message)
-        # try:
-        #     await self.process_commands(message)
-        # except commands.CommandNotFound:
-        #     # swallow not found errors since all aliases are not 'real' commands
-        #     pass
+        # await self.process_commands(message)
+        try:
+            await self.process_commands(message)
+        except commands.errors.CommandNotFound:
+            print("NOT FOUND ERROR")
+            # swallow not found errors since all aliases are not 'real' commands
+            pass
