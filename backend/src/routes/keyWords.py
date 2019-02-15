@@ -1,8 +1,8 @@
 from src import app, api
-from flask import request, abort
+from flask import request
 from src import db
 from src.models import KeyWords, DiscordServer, ServerGroup
-from flask_restplus import Resource, fields
+from flask_restplus import Resource, fields, abort
 
 
 ns = api.namespace("api/keyWords", description="Keyword operations")
@@ -18,8 +18,17 @@ keyWordModel = ns.model(
 class KeyWordList(Resource):
     "Shows all Aliases and lets you post to add a new one"
 
+    @ns.doc("list_keywords")
+    @ns.marshal_with(keyWordModel)
     def get(self, server_type, server_id):
-        pass
+        if server_type == "discord":
+            return (
+                KeyWords.query.join(ServerGroup)
+                .join(DiscordServer)
+                .filter(DiscordServer.id == server_id)
+            ).all()
+        else:
+            abort(400, f"server type {server_type} is not supported")
 
     @ns.doc("create_keyword")
     @ns.expect(keyWordModel)
@@ -39,7 +48,7 @@ class KeyWordList(Resource):
             ).first()
             is not None
         ):
-            abort(400)  # key word already exist
+            abort(400, f"Key word {form['name']} already exists")
         keyWords = KeyWords(
             server_group_id=server_group_id,
             name=form["name"],
@@ -50,29 +59,49 @@ class KeyWordList(Resource):
         return keyWords
 
 
+def get_keyword(server_type, server_id, key_name):
+    keyWords = None
+    if server_type is None:
+        keyWords = KeyWords.query.filter_by(server_id=server_id, name=key_name).first()
+    else:
+        # TODO: add constants for accepted server type
+        if server_type == "discord":
+            keyWords = (
+                KeyWords.query.join(ServerGroup)
+                .join(DiscordServer)
+                .filter(DiscordServer.id == server_id, KeyWords.name == key_name)
+            ).first()
+        else:
+            abort(400, f"server type {server_type} is not supported")
+    if keyWords is None:
+        abort(404, f"Key word {key_name} does not exist")
+    else:
+        return keyWords
+
+
 @ns.route("/<server_type>/<int:server_id>/<key_name>")
 @ns.param("server_type", "The sever type (discord, irc, etc)")
 @ns.param("server_id", "The id of the server")
 @ns.param("key_name", "The name of the alias")
 class AliasRoute(Resource):
+    @ns.doc("get_keyword")
     @ns.marshal_with(keyWordModel)
     def get(self, server_type, server_id, key_name):
-        keyWords = None
-        if server_type is None:
-            keyWords = KeyWords.query.filter_by(
-                server_id=server_id, name=key_name
-            ).first()
-        else:
-            # TODO: add constants for accepted server type
-            if server_type == "discord":
-                keyWords = (
-                    KeyWords.query.join(ServerGroup)
-                    .join(DiscordServer)
-                    .filter(DiscordServer.id == server_id, KeyWords.name == key_name)
-                ).first()
-            else:
-                abort(400)
-        if keyWords is None:
-            abort(404)
-        else:
-            return keyWords
+        return get_keyword(server_type, server_id, key_name)
+
+    @ns.doc("update_keyword")
+    @ns.expect(keyWordModel)
+    @ns.marshal_with(keyWordModel)
+    def put(self, server_type, server_id, key_name):
+        keyWord = get_keyword(server_type, server_id, key_name)
+        keyWord.responses = ns.payload["responses"]
+        db.session.commit()
+        return keyWord
+
+    @ns.doc("delete_keyword")
+    @ns.response(204, "Key word deleted")
+    def delete(self, server_type, server_id, key_name):
+        keyWord = get_keyword(server_type, server_id, key_name)
+        db.session.delete(keyWord)
+        db.session.commit()
+        return ""

@@ -66,13 +66,15 @@ class Alias:
                 if r.status == 200:
                     verb = "Updated" if is_update else "Created"
                     await ctx.send(f"{verb} alias {name}")
-                elif r.status == 400:
+                elif (r.status == 400 and not is_update) or (
+                    is_update and r.status == 404
+                ):
                     msg = f"Alias with name {name} "
                     if is_update:
                         msg += "does not exist."
                         msg += f"\nIf you want to create the alias use '{ctx.prefix}alias create {name} {args}'"
                     else:
-                        msg = "already exists."
+                        msg += "already exists."
                         msg += f"\nIf you want to update the alias use '{ctx.prefix}alias update {name} {args}'"
                     await ctx.send(msg)
                 else:
@@ -130,7 +132,7 @@ class Alias:
                 await ctx.send(f"deleted alias {alias_name}")
             elif not r.status == 404:
                 await ctx.send(f"Error deleting alias {alias_name}")
-                log.error(get_error_str(r, "error making alias get request: "))
+                log.error(get_error_str(r, "error making alias delete request: "))
             else:
                 await ctx.send(f"{alias_name} not found")
 

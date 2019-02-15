@@ -1,8 +1,8 @@
 from src import app, api
-from flask import request, abort
+from flask import request
 from src import db
 from src.models import Alias, DiscordServer, ServerGroup
-from flask_restplus import Resource, fields
+from flask_restplus import Resource, fields, abort
 
 ns = api.namespace("api/alias", description="Alias operations")
 
@@ -19,11 +19,14 @@ class AliasList(Resource):
     @ns.doc("list_aliases")
     @ns.marshal_with(aliasModel)
     def get(self, server_type, server_id):
-        return (
-            Alias.query.join(ServerGroup)
-            .join(DiscordServer)
-            .filter(DiscordServer.id == server_id)
-        ).all()
+        if server_type == "discord":
+            return (
+                Alias.query.join(ServerGroup)
+                .join(DiscordServer)
+                .filter(DiscordServer.id == server_id)
+            ).all()
+        else:
+            abort(400, f"server type {server_type} is not supported")
 
     @ns.doc("create_alias")
     @ns.expect(aliasModel)
@@ -43,7 +46,7 @@ class AliasList(Resource):
             ).first()
             is not None
         ):
-            abort(400)  # alias already exist
+            abort(400, f"Alias {form['name']} already exists")
         alias = Alias(
             server_group_id=server_group_id, name=form["name"], command=form["command"]
         )
@@ -62,9 +65,9 @@ def get_alias(server_type, server_id, alias_name):
             .filter(DiscordServer.id == server_id, Alias.name == alias_name)
         ).first()
     else:
-        abort(400)
+        abort(400, f"server type {server_type} is not supported")
     if alias is None:
-        abort(404)
+        abort(404, f"Alias {alias_name} does not exist")
     else:
         return alias
 
