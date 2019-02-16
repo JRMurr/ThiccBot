@@ -7,6 +7,8 @@ import logging
 import aiohttp
 import asyncio
 import os
+import functools
+import copy
 from thiccBot.cogs.utils.logError import get_error_str
 
 BOT_ADMIN = int(os.environ["BOT_ADMIN"])
@@ -32,6 +34,28 @@ def _prefix_callable(bot, msg):
     return base
 
 
+def message_checks(delete_check=False):
+    def actualDec(f):
+        @functools.wraps(f)
+        async def wrapper(*args, **kw):
+            args = list(args)
+            message = copy.copy(args[1])  # 0 is self
+            if message.author.bot:
+                return
+            deleteMessage = False
+            if message.content.lower().endswith("-del"):
+                deleteMessage = delete_check
+                message.content = message.content[:-4].strip()
+                args[1] = message
+            await f(*args, **kw)
+            if deleteMessage:
+                await args[1].delete()  # use the 'real' message to call delete
+
+        return wrapper
+
+    return actualDec
+
+
 class ThiccBot(commands.Bot):
     def __init__(self, config):
         super().__init__(
@@ -44,7 +68,6 @@ class ThiccBot(commands.Bot):
         self.prefixes = {}
         headers = {"bot-token": BOT_API_TOKEN}
         self.session = aiohttp.ClientSession(headers=headers, loop=self.loop)
-        # self.add_command(self.do)
         for extension in config["initial_extensions"]:
             try:
                 self.load_extension(extension)
@@ -137,11 +160,6 @@ class ThiccBot(commands.Bot):
             type(error), error, error.__traceback__, file=sys.stderr
         )
 
+    @message_checks(delete_check=True)
     async def on_message(self, message):
-        # await self.process_commands(message)
-        try:
-            await self.process_commands(message)
-        except commands.errors.CommandNotFound:
-            print("NOT FOUND ERROR")
-            # swallow not found errors since all aliases are not 'real' commands
-            pass
+        await self.process_commands(message)
