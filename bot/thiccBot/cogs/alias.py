@@ -3,7 +3,7 @@ import discord
 from thiccBot.cogs.utils import checks
 from thiccBot.cogs.utils.paginator import Pages
 from thiccBot.cogs.utils.logError import get_error_str
-
+from thiccBot import message_checks
 import logging
 from pprint import pprint
 from copy import copy
@@ -44,10 +44,8 @@ class Alias:
                         log.error(get_error_str(r, "error making alias get request: "))
                 break
 
+    @message_checks()
     async def on_message(self, message: discord.Message):
-        author = message.author
-        if author.id == self.bot.user.id:
-            return
         alias_info = await self.get_alias_command(message)
 
     async def create_or_update_alias(self, ctx, name, args, is_update=False):
