@@ -10,13 +10,3 @@ class KeyWords(db.Model):
     responses = db.Column(ARRAY(db.String), doc="list of keyword resposnes")
 
     server = db.relationship("ServerGroup")
-
-    @property
-    def serialize(self):
-        """Return object data in easily serializeable format"""
-        return {
-            "id": self.id,
-            "server_group_id": self.server_group_id,
-            "name": self.name,
-            "responses": self.responses,
-        }

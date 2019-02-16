@@ -82,8 +82,8 @@ def get_keyword(server_type, server_id, key_name):
 @ns.route("/<server_type>/<int:server_id>/<key_name>")
 @ns.param("server_type", "The sever type (discord, irc, etc)")
 @ns.param("server_id", "The id of the server")
-@ns.param("key_name", "The name of the alias")
-class AliasRoute(Resource):
+@ns.param("key_name", "The name of the key word")
+class KeyWordRoute(Resource):
     @ns.doc("get_keyword")
     @ns.marshal_with(keyWordModel)
     def get(self, server_type, server_id, key_name):
