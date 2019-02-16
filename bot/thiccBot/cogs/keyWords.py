@@ -3,6 +3,8 @@ import discord
 from thiccBot.cogs.utils import checks
 from thiccBot.cogs.utils.paginator import Pages
 from thiccBot.cogs.utils.logError import get_error_str
+from thiccBot import message_checks
+
 import logging
 from pprint import pprint
 from copy import copy
@@ -32,10 +34,8 @@ class KeyWords:
             elif r.status == 403:
                 log.error("error making key word get request")  # TODO: error info
 
+    @message_checks()
     async def on_message(self, message: discord.Message):
-        author = message.author
-        if author.id == self.bot.user.id:
-            return
         responses = await self.get_key_word(message)
         if responses:
             ctx = await self.bot.get_context(message)
