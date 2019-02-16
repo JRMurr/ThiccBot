@@ -53,3 +53,6 @@ With the deafult db user name and passwords you can use pgcli (or psql) to conne
 ```sh
 pgcli postgresql://testusr:password@localhost:5432/thiccdb
 ```
+
+## Python formatting
+Use the python formatter black, install it with `pip install black`.
