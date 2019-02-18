@@ -3,7 +3,7 @@ from flask import request
 from src import db
 from src.models import Quotes, DiscordServer, ServerGroup
 from flask_restplus import Resource, fields, abort
-from flask_sqlalchemy import func
+from sqlalchemy.sql import func
 
 
 ns = api.namespace("api/quotes", description="Quoute operations")
@@ -102,7 +102,7 @@ class QuoteIdRoute(Resource):
 class QuiteSearchRoute(Resource):
     @ns.doc("get_search_quote")
     @ns.marshal_with(quoteModel)
-    def get(server_type, server_id, search_str):
+    def get(self, server_type, server_id, search_str):
         quote = None
         search_str = search_str.lower()
         searchOr = func.lower(Quotes.quote_str).like(f"%{search_str}%") | func.lower(

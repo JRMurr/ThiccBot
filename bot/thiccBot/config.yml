@@ -5,3 +5,4 @@ initial_extensions:
     - 'cogs.admin'
     - 'cogs.botAdmin'
     - 'cogs.keyWords'
+    - 'cogs.quotes'
