@@ -34,6 +34,7 @@ from src.routes import (
     discordServers as dsRoute,
     login as loginRoute,
     keyWords as keyRoute,
+    quotes as quotesRoute,
 )
 
 

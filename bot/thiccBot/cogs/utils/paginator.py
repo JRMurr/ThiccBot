@@ -25,6 +25,8 @@ class Pages:
         How many entries show up per page.
     show_entry_count: bool
         Whether to show an entry count in the footer.
+    show_index: bool
+        Whether to show the index of each entry or not
 
     Attributes
     -----------
@@ -36,7 +38,9 @@ class Pages:
         Our permissions for the channel.
     """
 
-    def __init__(self, ctx, *, entries, per_page=12, show_entry_count=True):
+    def __init__(
+        self, ctx, *, entries, per_page=12, show_entry_count=True, show_index=True
+    ):
         self.bot = ctx.bot
         self.entries = entries
         self.message = ctx.message
@@ -50,6 +54,7 @@ class Pages:
         self.embed = discord.Embed(colour=discord.Colour.blurple())
         self.paginating = len(entries) > per_page
         self.show_entry_count = show_entry_count
+        self.show_index = show_index
         self.reaction_emojis = [
             (
                 "\N{BLACK LEFT-POINTING DOUBLE TRIANGLE WITH VERTICAL BAR}",
@@ -94,7 +99,10 @@ class Pages:
     def prepare_embed(self, entries, page, *, first=False):
         p = []
         for index, entry in enumerate(entries, 1 + ((page - 1) * self.per_page)):
-            p.append(f"{index}. {entry}")
+            if self.show_index:
+                p.append(f"{index}. {entry}")
+            else:
+                p.append(f"{entry}")
 
         if self.maximum_pages > 1:
             if self.show_entry_count:
