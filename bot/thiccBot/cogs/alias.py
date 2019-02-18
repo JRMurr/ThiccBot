@@ -87,7 +87,7 @@ class Alias:
         """Commands for creating and mangaging aliases"""
         if ctx.invoked_subcommand is None:  # or ctx.subcommand_passed == 'box':
             await ctx.send(
-                "to create command run 'alias create <alias_name> <command_to_run>'"
+                "to create alias run 'alias create <alias_name> <command_to_run>'"
             )
 
     @alias.group(name="create", aliases=["set", "make"])
