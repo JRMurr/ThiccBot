@@ -89,7 +89,7 @@ class Alias:
                 "to create alias run 'alias create <alias_name> <command_to_run>'"
             )
 
-    @alias.group(name="create", aliases=["set", "make"])
+    @alias.group(name="create", aliases=["set", "make", "save"])
     @checks.is_bot_admin()
     async def alias_create(self, ctx, name: str, *, args: str):
         """Creates a alias command
@@ -112,7 +112,6 @@ class Alias:
         async with self.bot.backend_request("get", f"/alias/discord/{server_id}") as r:
             if r.status == 200:
                 data = await r.json()
-
                 rows = [get_alias_str(x, show_command) for x in data]
                 p = Pages(ctx, entries=rows, per_page=10)
                 await p.paginate()
