@@ -6,3 +6,4 @@ initial_extensions:
     - 'cogs.botAdmin'
     - 'cogs.keyWords'
     - 'cogs.quotes'
+    - 'cogs.album'

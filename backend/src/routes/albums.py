@@ -10,6 +10,7 @@ ns = api.namespace("api/albums", description="Album operations")
 
 albumModel = ns.model("album", {"name": fields.String})
 
+albumEntry = ns.model("albumEntry", {"id": fields.Integer, "link": fields.String})
 
 @ns.route("/<server_type>/<int:server_id>")
 @ns.param("server_type", "The sever type (discord, irc, etc)")
@@ -55,6 +56,11 @@ def get_album(server_type, server_id, album_name):
         return album
 
 
+def get_album_entries(server_type, server_id, album_name):
+    album = get_album(server_type, server_id, album_name)
+    return AlbumEntry.query.join(album).all()
+
+
 @ns.route("/<server_type>/<int:server_id>/<album_name>")
 @ns.param("server_type", "The sever type (discord, irc, etc)")
 @ns.param("server_id", "The id of the server")
@@ -66,9 +72,45 @@ class AlbumRoute(Resource):
         return get_album(server_type, server_id, album_name)
 
     @ns.doc("delete_album")
-    @ns.response(204, "Alias deleted")
+    @ns.response(204, "Album deleted")
     def delete(self, server_type, server_id, album_name):
         album = get_album(server_type, server_id, album_name)
+        db.session.query(AlbumEntry).filter(album_id=album.id).delete()
         db.session.delete(album)
+        db.session.commit()
+        return ""
+
+
+@ns.route("/<server_type>/<int:server_id>/<album_name>/entries")
+@ns.param("server_type", "The sever type (discord, irc, etc)")
+@ns.param("server_id", "The id of the server")
+class AlbumEntryList(Resource):
+    @ns.doc("get_album_entries")
+    @ns.marshal_with(albumEntry)
+    def get(self, server_type, server_id, album_name):
+        return get_album_entries(server_type, server_id, album_name)
+
+    @ns.doc("add_album_entry")
+    @ns.expect(albumEntry)
+    @ns.marshal_with(albumEntry, code=201)
+    def post(self, server_type, server_id, album_name):
+        album = get_album(server_type, server_id, album_name)
+        entry = AlbumEntry(link=ns.payload["link"], album=album)
+        db.session.add(entry)
+        db.session.commit()
+        return entry
+
+
+@ns.route("/<server_type>/<int:server_id>/entry/<entry_id>")
+@ns.param("server_type", "The sever type (discord, irc, etc)")
+@ns.param("server_id", "The id of the server")
+@ns.param("entry_id", "The Id of the entry")
+class AlbumEntryRoute(Resource):
+    @ns.doc("add_album_entry")
+    @ns.doc("delete_album_entry")
+    @ns.response(204, "Album entry deleted")
+    def delete(self, server_type, server_id, entry_id):
+        entry = AlbumEntry.get(entry_id)
+        db.session.delete(entry)
         db.session.commit()
         return ""
