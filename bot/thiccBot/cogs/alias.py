@@ -82,7 +82,6 @@ class Alias:
 
     @commands.group()
     @commands.guild_only()
-    @checks.is_bot_admin()
     async def alias(self, ctx):
         """Commands for creating and mangaging aliases"""
         if ctx.invoked_subcommand is None:  # or ctx.subcommand_passed == 'box':
@@ -91,6 +90,7 @@ class Alias:
             )
 
     @alias.group(name="create", aliases=["set", "make"])
+    @checks.is_bot_admin()
     async def alias_create(self, ctx, name: str, *, args: str):
         """Creates a alias command
 
@@ -98,6 +98,7 @@ class Alias:
         await self.create_or_update_alias(ctx, name, args)
 
     @alias.group(name="update")
+    @checks.is_bot_admin()
     async def alias_update(self, ctx, name: str, *, args: str):
         """Updates a alias command
 
@@ -117,9 +118,10 @@ class Alias:
                 await p.paginate()
             else:
                 await ctx.send("Error getting aliases")
-                log.error(get_error_str(r, "error creating alias {name}: "))
+                log.error(get_error_str(r, "error listing quotes"))
 
     @alias.group(name="delete")
+    @checks.is_bot_admin()
     async def alias_delete(self, ctx, alias_name):
         """Deletes the specified alias"""
         server_id = ctx.guild.id
