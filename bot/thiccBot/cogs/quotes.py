@@ -29,6 +29,7 @@ class Quotes:
     # @checks.is_bot_admin()
     async def quotes(self, ctx):
         """Commands for creating and mangaging quotes"""
+        # TODO: get rand quote
         if ctx.invoked_subcommand is None:  # or ctx.subcommand_passed == 'box':
             await ctx.send(
                 "to create command run 'alias create <alias_name> <command_to_run>'"
@@ -84,7 +85,7 @@ class Quotes:
 
     @quotes.group(name="delete")
     @checks.is_bot_admin()
-    async def alias_delete(self, ctx, quote_id):
+    async def quote_delete(self, ctx, quote_id):
         """Deletes the specified quote
         
             Pass the quote id to delete, you can get them by using \"quote list\"
