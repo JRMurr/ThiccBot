@@ -29,11 +29,10 @@ class Quotes:
     # @checks.is_bot_admin()
     async def quotes(self, ctx):
         """Commands for creating and mangaging quotes"""
-        pass
-        # if ctx.invoked_subcommand is None:  # or ctx.subcommand_passed == 'box':
-        #     await ctx.send(
-        #         "to create command run 'alias create <alias_name> <command_to_run>'"
-        #     )
+        if ctx.invoked_subcommand is None:  # or ctx.subcommand_passed == 'box':
+            await ctx.send(
+                "to create command run 'alias create <alias_name> <command_to_run>'"
+            )
 
     @quotes.group(name="search")
     async def quote_search(self, ctx, search: str):
@@ -56,7 +55,7 @@ class Quotes:
         async with self.bot.backend_request("get", f"/quotes/discord/{server_id}") as r:
             if r.status == 200:
                 data = await r.json()
-
+                pprint(data)
                 rows = [quote_page_entry(x) for x in data]
                 p = Pages(ctx, entries=rows, per_page=10, show_index=False)
                 await p.paginate()
@@ -78,7 +77,6 @@ class Quotes:
         ) as r:
             if r.status == 200:
                 data = await r.json()
-                pprint(data)
                 await ctx.send(f"Saved quote: {get_str(quote_str, author)}")
             else:
                 await ctx.send("Error saving quote")

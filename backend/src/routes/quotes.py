@@ -4,6 +4,7 @@ from src import db
 from src.models import Quotes, DiscordServer, ServerGroup
 from flask_restplus import Resource, fields, abort
 from sqlalchemy.sql import func
+from src.utils import server_group_join, get_group_id
 
 
 ns = api.namespace("api/quotes", description="Quoute operations")
@@ -27,14 +28,7 @@ class QuoteList(Resource):
     @ns.doc("list_quotes")
     @ns.marshal_with(quoteModel)
     def get(self, server_type, server_id):
-        if server_type == "discord":
-            return (
-                Quotes.query.join(ServerGroup)
-                .join(DiscordServer)
-                .filter(DiscordServer.id == server_id)
-            ).all()
-        else:
-            abort(400, f"server type {server_type} is not supported")
+        return server_group_join(Quotes, server_type, server_id).all()
 
     @ns.doc("create_quote")
     @ns.expect(quoteModel)
@@ -42,12 +36,8 @@ class QuoteList(Resource):
     def post(self, server_type, server_id):
         """Create a new Quote"""
         form = ns.payload
-        server_group_id = None
-        # TODO:make util for getting group id from server_type
-        if server_type == "discord":
-            server_group_id = DiscordServer.query.get(server_id).server_group_id
-        else:
-            server_group_id = server_id
+        print(f"server_type: {server_type}, server_id: {server_id}")
+        server_group_id = get_group_id(server_type, server_id)
 
         quote = Quotes(
             server_group_id=server_group_id,
@@ -60,19 +50,9 @@ class QuoteList(Resource):
 
 
 def get_quote(server_type, server_id, quote_id):
-    quote = None
-    if server_type is None:
-        quote = Quotes.query.filter_by(server_id=server_id, id=quote_id).first()
-    else:
-        # TODO: add constants for accepted server type
-        if server_type == "discord":
-            quote = (
-                Quotes.query.join(ServerGroup)
-                .join(DiscordServer)
-                .filter(DiscordServer.id == server_id, Quotes.id == quote_id)
-            ).first()
-        else:
-            abort(400, f"server type {server_type} is not supported")
+    quote = (
+        server_group_join(Quotes, server_type, server_id).filter(Quotes.id == quote_id)
+    ).first()
     if quote is None:
         abort(404, f"quote with id {quote_id} does not exist")
     else:
@@ -103,24 +83,14 @@ class QuiteSearchRoute(Resource):
     @ns.doc("get_search_quote")
     @ns.marshal_with(quoteModel)
     def get(self, server_type, server_id, search_str):
-        quote = None
         search_str = search_str.lower()
         searchOr = func.lower(Quotes.quote_str).like(f"%{search_str}%") | func.lower(
             Quotes.author
         ).like(f"%{search_str}%")
-        if server_type is None:
-            quote = Quotes.query.filter_by(searchOr, server_id=server_id).first()
-        else:
-            # TODO: add constants for accepted server type
-            if server_type == "discord":
-                quote = (
-                    Quotes.query.join(ServerGroup)
-                    .join(DiscordServer)
-                    .filter(searchOr, DiscordServer.id == server_id)
-                ).all()
-            else:
-                abort(400, f"server type {server_type} is not supported")
-        if quote is None or len(quote) == 0:
+        quotes = (
+            server_group_join(Quotes, server_type, server_id).filter(searchOr).all()
+        )
+        if quotes is None or len(quotes) == 0:
             abort(404, f"quote not found")
         else:
-            return quote
+            return quotes

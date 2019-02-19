@@ -3,6 +3,7 @@ from flask import request
 from src import db
 from src.models import KeyWords, DiscordServer, ServerGroup
 from flask_restplus import Resource, fields, abort
+from src.utils import server_group_join, get_group_id
 
 
 ns = api.namespace("api/keyWords", description="Keyword operations")
@@ -16,19 +17,12 @@ keyWordModel = ns.model(
 @ns.param("server_type", "The sever type (discord, irc, etc)")
 @ns.param("server_id", "The id of the server")
 class KeyWordList(Resource):
-    "Shows all Aliases and lets you post to add a new one"
+    "Shows all Key Words and lets you post to add a new one"
 
     @ns.doc("list_keywords")
     @ns.marshal_with(keyWordModel)
     def get(self, server_type, server_id):
-        if server_type == "discord":
-            return (
-                KeyWords.query.join(ServerGroup)
-                .join(DiscordServer)
-                .filter(DiscordServer.id == server_id)
-            ).all()
-        else:
-            abort(400, f"server type {server_type} is not supported")
+        return server_group_join(KeyWords, server_type, server_id).all()
 
     @ns.doc("create_keyword")
     @ns.expect(keyWordModel)
@@ -36,12 +30,8 @@ class KeyWordList(Resource):
     def post(self, server_type, server_id):
         """Create a new KeyWord"""
         form = ns.payload
-        server_group_id = None
-        # TODO:make util for getting group id from server_type
-        if server_type == "discord":
-            server_group_id = DiscordServer.query.get(server_id).server_group_id
-        else:
-            server_group_id = server_id
+        server_group_id = get_group_id(server_type, server_id)
+
         if (
             KeyWords.query.filter_by(
                 server_group_id=server_group_id, name=form["name"]
@@ -60,19 +50,11 @@ class KeyWordList(Resource):
 
 
 def get_keyword(server_type, server_id, key_name):
-    keyWords = None
-    if server_type is None:
-        keyWords = KeyWords.query.filter_by(server_id=server_id, name=key_name).first()
-    else:
-        # TODO: add constants for accepted server type
-        if server_type == "discord":
-            keyWords = (
-                KeyWords.query.join(ServerGroup)
-                .join(DiscordServer)
-                .filter(DiscordServer.id == server_id, KeyWords.name == key_name)
-            ).first()
-        else:
-            abort(400, f"server type {server_type} is not supported")
+    keyWords = (
+        server_group_join(KeyWords, server_type, server_id).filter(
+            KeyWords.name == key_name
+        )
+    ).first()
     if keyWords is None:
         abort(404, f"Key word {key_name} does not exist")
     else:

@@ -3,6 +3,7 @@ from flask import request
 from src import db
 from src.models import Alias, DiscordServer, ServerGroup
 from flask_restplus import Resource, fields, abort
+from src.utils import server_group_join, get_group_id
 
 ns = api.namespace("api/alias", description="Alias operations")
 
@@ -19,14 +20,7 @@ class AliasList(Resource):
     @ns.doc("list_aliases")
     @ns.marshal_with(aliasModel)
     def get(self, server_type, server_id):
-        if server_type == "discord":
-            return (
-                Alias.query.join(ServerGroup)
-                .join(DiscordServer)
-                .filter(DiscordServer.id == server_id)
-            ).all()
-        else:
-            abort(400, f"server type {server_type} is not supported")
+        return server_group_join(Alias, server_type, server_id).all()
 
     @ns.doc("create_alias")
     @ns.expect(aliasModel)
@@ -35,11 +29,7 @@ class AliasList(Resource):
         """Create a new Alias"""
         form = ns.payload
 
-        server_group_id = None
-        if server_type == "discord":
-            server_group_id = DiscordServer.query.get(server_id).server_group_id
-        else:
-            server_group_id = server_id
+        server_group_id = get_group_id(server_type, server_id)
         if (
             Alias.query.filter_by(
                 server_group_id=server_group_id, name=form["name"]
@@ -56,16 +46,11 @@ class AliasList(Resource):
 
 
 def get_alias(server_type, server_id, alias_name):
-    alias = None
-    # TODO: add constants for accepted server type
-    if server_type == "discord":
-        alias = (
-            Alias.query.join(ServerGroup)
-            .join(DiscordServer)
-            .filter(DiscordServer.id == server_id, Alias.name == alias_name)
-        ).first()
-    else:
-        abort(400, f"server type {server_type} is not supported")
+    alias = (
+        server_group_join(Alias, server_type, server_id).filter(
+            Alias.name == alias_name
+        )
+    ).first()
     if alias is None:
         abort(404, f"Alias {alias_name} does not exist")
     else:
