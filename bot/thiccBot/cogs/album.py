@@ -19,20 +19,19 @@ class Album:
     # @checks.is_bot_admin()
     async def album(self, ctx):
         """Commands for creating and mangaging albums"""
-        pass
-        # if ctx.invoked_subcommand is None:  # or ctx.subcommand_passed == 'box':
-        #     await ctx.send(
-        #         "to create command run 'alias create <alias_name> <command_to_run>'"
-        #     )
+        print(f"ctx.subcommand_passed: {ctx.subcommand_passed}")
+        if ctx.invoked_subcommand is None:
+            await ctx.send(f"run {ctx.prefix}help album")
 
     @album.group(name="list")
     async def album_list(self, ctx):
         """List all the albums for this server"""
         server_id = ctx.guild.id
+        print("howdy")
         async with self.bot.backend_request("get", f"/albums/discord/{server_id}") as r:
             if r.status == 200:
                 data = await r.json()
-                rows = [x['name'] for x in data]
+                rows = [x["name"] for x in data]
                 p = Pages(ctx, entries=rows, per_page=10)
                 await p.paginate()
             else:
@@ -47,9 +46,7 @@ class Album:
             ex: album create "Nice Memes" """
         server_id = ctx.guild.id
         async with self.bot.backend_request(
-            "post",
-            f"/albums/discord/{server_id}",
-            json={"name": album_name},
+            "post", f"/albums/discord/{server_id}", json={"name": album_name}
         ) as r:
             if r.status == 200:
                 data = await r.json()
@@ -77,38 +74,35 @@ class Album:
                 await ctx.send("Error adding entry")
                 log.error(get_error_str(r, "error adding entry: "))
 
-    @album.group(name="entries")
-    async def album_list(self, ctx, album_name: str):
-        """List all the entries in the album """
+    @album.group(name="get")
+    async def album_entry(self, ctx, album_name: str):
         server_id = ctx.guild.id
-        async with self.bot.backend_request("get", f"/albums/discord/{server_id}/{album_name}/entries") as r:
+        async with self.bot.backend_request(
+            "get", f"/albums/discord/{server_id}/{album_name}/entries"
+        ) as r:
             if r.status == 200:
                 data = await r.json()
-                rows = [x['link'] for x in data]
+                entry = random.choice(data)
+                await ctx.send(entry["link"])
+            else:
+                await ctx.send("Error getting entries")
+                log.error(get_error_str(r, "error getting entries: "))
+
+    @album.group(name="entries")
+    async def album_entry_list(self, ctx, album_name: str):
+        """List all the entries in the album """
+        server_id = ctx.guild.id
+        async with self.bot.backend_request(
+            "get", f"/albums/discord/{server_id}/{album_name}/entries"
+        ) as r:
+            if r.status == 200:
+                data = await r.json()
+                rows = [x["link"] for x in data]
                 p = Pages(ctx, entries=rows, per_page=10)
                 await p.paginate()
             else:
                 await ctx.send("Error getting entries")
                 log.error(get_error_str(r, "error getting entries: "))
-
-    # @quotes.group(name="delete")
-    # @checks.is_bot_admin()
-    # async def alias_delete(self, ctx, quote_id):
-    #     """Deletes the specified quote
-        
-    #         Pass the quote id to delete, you can get them by using \"quote list\"
-    #     """
-    #     server_id = ctx.guild.id
-    #     async with self.bot.backend_request(
-    #         "delete", f"/quotes/discord/{server_id}/{quote_id}"
-    #     ) as r:
-    #         if r.status == 200:
-    #             await ctx.send(f"deleted quote {quote_id}")
-    #         elif not r.status == 404:
-    #             await ctx.send(f"Error deleting alias {quote_id}")
-    #             log.error(get_error_str(r, "error making quote delete request: "))
-    #         else:
-    #             await ctx.send(f"{quote_id} not found")
 
 
 def setup(bot):

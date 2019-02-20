@@ -12,6 +12,7 @@ albumModel = ns.model("album", {"name": fields.String})
 
 albumEntry = ns.model("albumEntry", {"id": fields.Integer, "link": fields.String})
 
+
 @ns.route("/<server_type>/<int:server_id>")
 @ns.param("server_type", "The sever type (discord, irc, etc)")
 @ns.param("server_id", "The id of the server")
@@ -21,6 +22,7 @@ class AlbumList(Resource):
     @ns.doc("list_albums")
     @ns.marshal_with(albumModel)
     def get(self, server_type, server_id):
+        """List all albums on this server"""
         return server_group_join(Album, server_type, server_id).all()
 
     @ns.doc("create_album")
@@ -58,7 +60,7 @@ def get_album(server_type, server_id, album_name):
 
 def get_album_entries(server_type, server_id, album_name):
     album = get_album(server_type, server_id, album_name)
-    return AlbumEntry.query.join(album).all()
+    return AlbumEntry.query.join(Album).filter(Album.id == album.id).all()
 
 
 @ns.route("/<server_type>/<int:server_id>/<album_name>")
