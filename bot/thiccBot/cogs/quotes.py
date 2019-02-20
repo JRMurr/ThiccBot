@@ -35,7 +35,7 @@ class Quotes:
                 "to create command run 'alias create <alias_name> <command_to_run>'"
             )
 
-    @quotes.group(name="search")
+    @quotes.command(name="search")
     async def quote_search(self, ctx, search: str):
         server_id = ctx.guild.id
         async with self.bot.backend_request(
@@ -49,7 +49,7 @@ class Quotes:
                 await ctx.send("Error searching for quotes")
                 log.error(get_error_str(r, "error saving quote: "))
 
-    @quotes.group(name="list")
+    @quotes.command(name="list")
     async def quotes_list(self, ctx):
         """List all the quotes for this server"""
         server_id = ctx.guild.id
@@ -63,7 +63,7 @@ class Quotes:
                 await ctx.send("Error getting quotes")
                 log.error(get_error_str(r, "error getting quotes: "))
 
-    @quotes.group(name="get")
+    @quotes.command(name="get")
     async def quote_get(self, ctx):
         """Get random quote from this server"""
         server_id = ctx.guild.id
@@ -76,7 +76,7 @@ class Quotes:
                 await ctx.send("Error getting quotes")
                 log.error(get_error_str(r, "error getting quotes: "))
 
-    @quotes.group(name="save")
+    @quotes.command(name="save")
     @checks.is_bot_admin()
     async def quote_save(self, ctx, quote_str: str, author: str):
         """Creates a quote
@@ -95,7 +95,7 @@ class Quotes:
                 await ctx.send("Error saving quote")
                 log.error(get_error_str(r, "error saving quote: "))
 
-    @quotes.group(name="delete")
+    @quotes.command(name="delete")
     @checks.is_bot_admin()
     async def quote_delete(self, ctx, quote_id):
         """Deletes the specified quote

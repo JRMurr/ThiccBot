@@ -19,11 +19,10 @@ class Album:
     # @checks.is_bot_admin()
     async def album(self, ctx):
         """Commands for creating and mangaging albums"""
-        print(f"ctx.subcommand_passed: {ctx.subcommand_passed}")
         if ctx.invoked_subcommand is None:
             await ctx.send(f"run {ctx.prefix}help album")
 
-    @album.group(name="list")
+    @album.command(name="list")
     async def album_list(self, ctx):
         """List all the albums for this server"""
         server_id = ctx.guild.id
@@ -38,7 +37,7 @@ class Album:
                 await ctx.send("Error getting albums")
                 log.error(get_error_str(r, "error getting albums: "))
 
-    @album.group(name="create")
+    @album.command(name="create")
     @checks.is_bot_admin()
     async def album_create(self, ctx, album_name: str):
         """Creates an album
@@ -55,7 +54,7 @@ class Album:
                 await ctx.send("Error creating album")
                 log.error(get_error_str(r, "error creating album: "))
 
-    @album.group(name="add")
+    @album.command(name="add")
     @checks.is_bot_admin()
     async def album_entry_add(self, ctx, album_name: str, entry: str):
         """Adds link to an album
@@ -74,8 +73,9 @@ class Album:
                 await ctx.send("Error adding entry")
                 log.error(get_error_str(r, "error adding entry: "))
 
-    @album.group(name="get")
+    @album.command(name="get")
     async def album_entry(self, ctx, album_name: str):
+        """Returns random entry in the album"""
         server_id = ctx.guild.id
         async with self.bot.backend_request(
             "get", f"/albums/discord/{server_id}/{album_name}/entries"
@@ -89,6 +89,12 @@ class Album:
                 log.error(get_error_str(r, "error getting entries: "))
 
     @album.group(name="entries")
+    async def entries(self, ctx):
+        """Commands for listing and deleting entries"""
+        if ctx.invoked_subcommand is None:
+            await ctx.send(f"run {ctx.prefix}help album entries")
+
+    @entries.command(name="list")
     async def album_entry_list(self, ctx, album_name: str):
         """List all the entries in the album """
         server_id = ctx.guild.id
@@ -97,12 +103,31 @@ class Album:
         ) as r:
             if r.status == 200:
                 data = await r.json()
-                rows = [x["link"] for x in data]
-                p = Pages(ctx, entries=rows, per_page=10)
+                pprint(data)
+                rows = [f"{x['id']}: {x['link']}" for x in data]
+                p = Pages(ctx, entries=rows, per_page=10, show_index=False)
                 await p.paginate()
             else:
                 await ctx.send("Error getting entries")
                 log.error(get_error_str(r, "error getting entries: "))
+
+    @entries.command(name="delete")
+    async def album_entry_delete(self, ctx, entry_id: int):
+        """Deletes the specified entry in the album
+        
+        To get the id of the entry to delete run "album entries list <album name>"
+        """
+        server_id = ctx.guild.id
+        async with self.bot.backend_request(
+            "delete", f"/albums/discord/{server_id}/entry/{entry_id}"
+        ) as r:
+            if r.status == 200:
+                data = await r.json()
+                pprint(data)
+                await ctx.send(f"Deleted entry: {entry_id}")
+            else:
+                await ctx.send("Error deleting entry")
+                log.error(get_error_str(r, "error deleting entry: "))
 
 
 def setup(bot):
