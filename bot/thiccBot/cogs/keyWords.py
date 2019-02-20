@@ -78,21 +78,21 @@ class KeyWords:
                 "to create command run 'keyWord create <key_name> <response>'"
             )
 
-    @keyWord.group(name="create", aliases=["set", "make"])
+    @keyWord.command(name="create", aliases=["set", "make"])
     async def key_create(self, ctx, name: str, *, response: str):
         """Creates a key word
 
             ex: keyWord create ayy lmao"""
         await self.create_or_update_key(ctx, name, response)
 
-    @keyWord.group(name="update")
+    @keyWord.command(name="update")
     async def key_update(self, ctx, name: str, *, response: str):
         """Updates a key word
 
             ex: keyWord update ayy lmao"""
         await self.create_or_update_key(ctx, name, response, True)
 
-    @keyWord.group(name="delete")
+    @keyWord.command(name="delete")
     async def key_delete(self, ctx, key_name):
         """Deletes the specified key word"""
         server_id = ctx.guild.id

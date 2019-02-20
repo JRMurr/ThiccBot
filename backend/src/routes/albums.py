@@ -110,9 +110,10 @@ class AlbumEntryList(Resource):
 class AlbumEntryRoute(Resource):
     @ns.doc("add_album_entry")
     @ns.doc("delete_album_entry")
-    @ns.response(204, "Album entry deleted")
+    @ns.marshal_with(albumEntry, code=204)
+    # @ns.response(204, "Album entry deleted")
     def delete(self, server_type, server_id, entry_id):
-        entry = AlbumEntry.get(entry_id)
+        entry = AlbumEntry.query.get(entry_id)
         db.session.delete(entry)
         db.session.commit()
-        return ""
+        return entry
