@@ -56,10 +56,22 @@ class Quotes:
         async with self.bot.backend_request("get", f"/quotes/discord/{server_id}") as r:
             if r.status == 200:
                 data = await r.json()
-                pprint(data)
                 rows = [quote_page_entry(x) for x in data]
                 p = Pages(ctx, entries=rows, per_page=10, show_index=False)
                 await p.paginate()
+            else:
+                await ctx.send("Error getting quotes")
+                log.error(get_error_str(r, "error getting quotes: "))
+
+    @quotes.group(name="get")
+    async def quote_get(self, ctx):
+        """Get random quote from this server"""
+        server_id = ctx.guild.id
+        async with self.bot.backend_request("get", f"/quotes/discord/{server_id}") as r:
+            if r.status == 200:
+                data = await r.json()
+                quoute_info = random.choice(data)
+                await ctx.send(get_str(quoute_info["quote"], quoute_info["author"]))
             else:
                 await ctx.send("Error getting quotes")
                 log.error(get_error_str(r, "error getting quotes: "))
