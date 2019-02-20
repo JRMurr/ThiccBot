@@ -89,7 +89,7 @@ class Alias:
                 "to create alias run 'alias create <alias_name> <command_to_run>'"
             )
 
-    @alias.group(name="create", aliases=["set", "make", "save"])
+    @alias.command(name="create", aliases=["set", "make", "save"])
     @checks.is_bot_admin()
     async def alias_create(self, ctx, name: str, *, args: str):
         """Creates a alias command
@@ -97,7 +97,7 @@ class Alias:
             ex: alias create sayHi say hi"""
         await self.create_or_update_alias(ctx, name, args)
 
-    @alias.group(name="update")
+    @alias.command(name="update")
     @checks.is_bot_admin()
     async def alias_update(self, ctx, name: str, *, args: str):
         """Updates a alias command
@@ -105,7 +105,7 @@ class Alias:
             ex: alias update sayHi say hi"""
         await self.create_or_update_alias(ctx, name, args, True)
 
-    @alias.group(name="list")
+    @alias.command(name="list")
     async def alias_list(self, ctx, show_command: bool = False):
         """List all the aliases for this server"""
         server_id = ctx.guild.id
@@ -119,7 +119,7 @@ class Alias:
                 await ctx.send("Error getting aliases")
                 log.error(get_error_str(r, "error listing quotes"))
 
-    @alias.group(name="delete")
+    @alias.command(name="delete")
     @checks.is_bot_admin()
     async def alias_delete(self, ctx, alias_name):
         """Deletes the specified alias"""
