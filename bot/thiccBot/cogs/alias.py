@@ -18,7 +18,7 @@ def get_alias_str(alias_info, show_commands):
     return s
 
 
-class Alias:
+class Alias(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 

@@ -20,7 +20,7 @@ def quote_page_entry(quoute_info):
     )
 
 
-class Quotes:
+class Quotes(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
