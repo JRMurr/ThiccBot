@@ -24,7 +24,7 @@ class Admin(commands.Cog):
         desired_role = next((x for x in server_roles if x.name == role_name), None)
         if desired_role is None:
             await ctx.send(
-                f"role with name ({role_name}) not found, make sure spelling and capitilization are the same"
+                f"role with name ({role_name}) not found, make sure spelling and capitalization are the same"
             )
             return
         async with self.bot.backend_request(
