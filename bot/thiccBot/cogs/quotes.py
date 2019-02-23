@@ -2,7 +2,7 @@ from discord.ext import commands
 import discord
 from thiccBot.cogs.utils import checks
 from thiccBot.cogs.utils.paginator import Pages
-from thiccBot.cogs.utils.logError import get_error_str
+from thiccBot.cogs.utils.logError import log_and_send_error
 import random
 import logging
 from pprint import pprint
@@ -46,8 +46,7 @@ class Quotes(commands.Cog):
                 chosen = random.choice(data)
                 await ctx.send(get_str(chosen["quote"], chosen["author"]))
             else:
-                await ctx.send("Error searching for quotes")
-                log.error(get_error_str(r, "error saving quote: "))
+                await log_and_send_error(log, r, ctx, "Error searching for quotes")
 
     @quotes.command(name="list")
     async def quotes_list(self, ctx):
@@ -60,8 +59,7 @@ class Quotes(commands.Cog):
                 p = Pages(ctx, entries=rows, per_page=10, show_index=False)
                 await p.paginate()
             else:
-                await ctx.send("Error getting quotes")
-                log.error(get_error_str(r, "error getting quotes: "))
+                await log_and_send_error(log, r, ctx, "Error getting quotes")
 
     @quotes.command(name="get")
     async def quote_get(self, ctx):
@@ -73,8 +71,7 @@ class Quotes(commands.Cog):
                 quoute_info = random.choice(data)
                 await ctx.send(get_str(quoute_info["quote"], quoute_info["author"]))
             else:
-                await ctx.send("Error getting quotes")
-                log.error(get_error_str(r, "error getting quotes: "))
+                await log_and_send_error(log, r, ctx, "Error getting quotes")
 
     @quotes.command(name="save")
     @checks.is_bot_admin()
@@ -92,8 +89,7 @@ class Quotes(commands.Cog):
                 data = await r.json()
                 await ctx.send(f"Saved quote: {get_str(quote_str, author)}")
             else:
-                await ctx.send("Error saving quote")
-                log.error(get_error_str(r, "error saving quote: "))
+                await log_and_send_error(log, r, ctx, "Error saving quote")
 
     @quotes.command(name="delete")
     @checks.is_bot_admin()
@@ -109,8 +105,9 @@ class Quotes(commands.Cog):
             if r.status == 200:
                 await ctx.send(f"deleted quote {quote_id}")
             elif not r.status == 404:
-                await ctx.send(f"Error deleting alias {quote_id}")
-                log.error(get_error_str(r, "error making quote delete request: "))
+                await log_and_send_error(
+                    log, r, ctx, f"Error deleting alias {quote_id}"
+                )
             else:
                 await ctx.send(f"{quote_id} not found")
 

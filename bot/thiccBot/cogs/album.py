@@ -2,7 +2,7 @@ from discord.ext import commands
 import discord
 from thiccBot.cogs.utils import checks
 from thiccBot.cogs.utils.paginator import Pages
-from thiccBot.cogs.utils.logError import get_error_str
+from thiccBot.cogs.utils.logError import log_and_send_error
 import random
 import logging
 from pprint import pprint
@@ -34,8 +34,7 @@ class Album(commands.Cog):
                 p = Pages(ctx, entries=rows, per_page=10)
                 await p.paginate()
             else:
-                await ctx.send("Error getting albums")
-                log.error(get_error_str(r, "error getting albums: "))
+                await log_and_send_error(log, r, ctx, "Error getting albums")
 
     @album.command(name="create")
     @checks.is_bot_admin()
@@ -51,8 +50,7 @@ class Album(commands.Cog):
                 data = await r.json()
                 await ctx.send(f"Created Album: {album_name}")
             else:
-                await ctx.send("Error creating album")
-                log.error(get_error_str(r, "error creating album: "))
+                await log_and_send_error(log, r, ctx, "Error creating album")
 
     @album.command(name="add")
     @checks.is_bot_admin()
@@ -70,8 +68,7 @@ class Album(commands.Cog):
                 data = await r.json()
                 await ctx.send(f"Added entry {entry} to {album_name}")
             else:
-                await ctx.send("Error adding entry")
-                log.error(get_error_str(r, "error adding entry: "))
+                await log_and_send_error(log, r, ctx, "Error adding entry")
 
     @album.command(name="get")
     async def album_entry(self, ctx, album_name: str):
@@ -85,8 +82,7 @@ class Album(commands.Cog):
                 entry = random.choice(data)
                 await ctx.send(entry["link"])
             else:
-                await ctx.send("Error getting entries")
-                log.error(get_error_str(r, "error getting entries: "))
+                await log_and_send_error(log, r, ctx, "Error getting entries")
 
     @album.group(name="entries")
     async def entries(self, ctx):
@@ -108,8 +104,7 @@ class Album(commands.Cog):
                 p = Pages(ctx, entries=rows, per_page=10, show_index=False)
                 await p.paginate()
             else:
-                await ctx.send("Error getting entries")
-                log.error(get_error_str(r, "error getting entries: "))
+                await log_and_send_error(log, r, ctx, "Error getting entries")
 
     @entries.command(name="delete")
     async def album_entry_delete(self, ctx, entry_id: int):
@@ -123,11 +118,10 @@ class Album(commands.Cog):
         ) as r:
             if r.status == 200:
                 data = await r.json()
-                pprint(data)
+                # pprint(data)
                 await ctx.send(f"Deleted entry: {entry_id}")
             else:
-                await ctx.send("Error deleting entry")
-                log.error(get_error_str(r, "error deleting entry: "))
+                await log_and_send_error(log, r, ctx, "Error deleting entry")
 
 
 def setup(bot):

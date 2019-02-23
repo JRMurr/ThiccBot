@@ -2,7 +2,7 @@ from discord.ext import commands
 import discord
 from thiccBot.cogs.utils import checks
 from thiccBot.cogs.utils.paginator import Pages
-from thiccBot.cogs.utils.logError import get_error_str
+from thiccBot.cogs.utils.logError import log_and_send_error, get_error_str
 from thiccBot import message_checks
 import logging
 from pprint import pprint
@@ -22,14 +22,17 @@ class Alias(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    def get_bot_command_names(self):
+        return (x.name for x in self.bot.commands)
+
     async def get_alias_command(self, message: discord.Message):
         if message.guild is None:
             return
         for prefix in self.bot.get_command_prefixes(message):
             if message.content.startswith(prefix):
                 alias_name = message.content[len(prefix) :].split(" ")[0]
-                comand_names = [x.name for x in self.bot.commands]
-                if alias_name in comand_names:
+                command_names = self.get_bot_command_names()
+                if alias_name in command_names:
                     continue
                 server_id = message.guild.id
                 async with self.bot.backend_request(
@@ -41,7 +44,9 @@ class Alias(commands.Cog):
                         msg.content = prefix + data["command"]
                         await self.bot.process_commands(msg)
                     elif not r.status == 404:
-                        log.error(get_error_str(r, "error making alias get request: "))
+                        log.error(
+                            await get_error_str(r, "error making alias get request: ")
+                        )
                 break
 
     @message_checks()
@@ -57,8 +62,9 @@ class Alias(commands.Cog):
             url += f"/{name}"
         else:
             jsonData["name"] = name
-        if name in self.bot.commands or name is "help":
-            await ctx.send(f"Alias {name} is a built in bot command")
+        command_names = self.get_bot_command_names()
+        if name in command_names or name is "help":
+            await ctx.send(f"{name} is a built in bot command")
         else:
             async with self.bot.backend_request(http_method, url, json=jsonData) as r:
                 if r.status == 200:
@@ -77,8 +83,9 @@ class Alias(commands.Cog):
                     await ctx.send(msg)
                 else:
                     verb = "updating" if is_update else "creating"
-                    await ctx.send(f"Error {verb} alias")
-                    log.error(get_error_str(r, f"error {verb} alias {name}: "))
+                    await log_and_send_error(
+                        log, r, ctx, f"Error {verb} alias {name}: "
+                    )
 
     @commands.group()
     @commands.guild_only()
@@ -116,8 +123,7 @@ class Alias(commands.Cog):
                 p = Pages(ctx, entries=rows, per_page=10)
                 await p.paginate()
             else:
-                await ctx.send("Error getting aliases")
-                log.error(get_error_str(r, "error listing quotes"))
+                await log_and_send_error(log, r, ctx, "Error getting aliases")
 
     @alias.command(name="delete")
     @checks.is_bot_admin()
@@ -130,8 +136,9 @@ class Alias(commands.Cog):
             if r.status == 200:
                 await ctx.send(f"deleted alias {alias_name}")
             elif not r.status == 404:
-                await ctx.send(f"Error deleting alias {alias_name}")
-                log.error(get_error_str(r, "error making alias delete request: "))
+                await log_and_send_error(
+                    log, r, ctx, f"Error deleting alias {alias_name}"
+                )
             else:
                 await ctx.send(f"{alias_name} not found")
 
