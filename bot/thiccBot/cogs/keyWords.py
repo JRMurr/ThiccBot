@@ -13,7 +13,7 @@ import random
 log = logging.getLogger(__name__)
 
 
-class KeyWords:
+class KeyWords(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 

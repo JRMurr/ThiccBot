@@ -16,7 +16,7 @@ def add_cog_prefix(module):
 
 
 # Most of this has been taken from robo danny
-class BotAdmin:
+class BotAdmin(commands.Cog):
     """Bot admin only commands"""
 
     def __init__(self, bot):

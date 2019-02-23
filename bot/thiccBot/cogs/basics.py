@@ -9,7 +9,7 @@ from pprint import pprint
 log = logging.getLogger(__name__)
 
 
-class Basics:
+class Basics(commands.Cog):
     """Basic/simple commands"""
 
     def __init__(self, bot):
