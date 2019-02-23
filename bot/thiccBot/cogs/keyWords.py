@@ -2,7 +2,7 @@ from discord.ext import commands
 import discord
 from thiccBot.cogs.utils import checks
 from thiccBot.cogs.utils.paginator import Pages
-from thiccBot.cogs.utils.logError import get_error_str
+from thiccBot.cogs.utils.logError import log_and_send_error
 from thiccBot import message_checks
 
 import logging
@@ -65,8 +65,7 @@ class KeyWords(commands.Cog):
                 await ctx.send(msg)
             else:
                 verb = "updating" if is_update else "creating"
-                await ctx.send(f"Error {verb} key word")
-                log.error(get_error_str(r, f"error {verb} key word {name}: "))
+                await log_and_send_error(log, r, ctx, f"Error {verb} key word")
 
     @commands.group()
     @commands.guild_only()
@@ -102,8 +101,9 @@ class KeyWords(commands.Cog):
             if r.status == 200:
                 await ctx.send(f"deleted key word {key_name}")
             elif not r.status == 404:
-                await ctx.send(f"Error deleting key word {key_name}")
-                log.error(get_error_str(r, "error making key word delete request: "))
+                await log_and_send_error(
+                    log, r, ctx, f"Error deleting key word {key_name}"
+                )
             else:
                 await ctx.send(f"{key_name} not found")
 

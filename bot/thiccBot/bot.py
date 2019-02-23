@@ -111,7 +111,7 @@ class ThiccBot(commands.Bot):
                         data["command_prefix"],
                     )
             else:
-                log.error(get_error_str(r, "Error adding guild: "))
+                log.error(await get_error_str(r, "Error adding guild: "))
 
     async def on_ready(self):
         for guild in self.guilds:
@@ -129,8 +129,6 @@ class ThiccBot(commands.Bot):
         ctx   : Context
         error : Exception"""
 
-        print("ERRROR")
-        print(error)
         # This prevents any commands with local handlers being handled here in on_command_error.
         if hasattr(ctx.command, "on_error"):
             return
