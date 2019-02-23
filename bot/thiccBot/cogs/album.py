@@ -10,7 +10,7 @@ from pprint import pprint
 log = logging.getLogger(__name__)
 
 
-class Album:
+class Album(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 

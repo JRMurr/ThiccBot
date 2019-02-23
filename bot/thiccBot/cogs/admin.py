@@ -7,7 +7,7 @@ from pprint import pprint
 log = logging.getLogger(__name__)
 
 
-class Admin:
+class Admin(commands.Cog):
     """Admin commands to manage the bot in each server"""
 
     def __init__(self, bot):
