@@ -3,7 +3,7 @@ from flask import request
 from src import db
 from src.models import Album, AlbumEntry, DiscordServer, ServerGroup
 from flask_restplus import Resource, fields, abort
-from src.utils import server_group_join, get_group_id
+from src.utils import server_group_join, get_group_id, get_server_group
 
 ns = api.namespace("api/albums", description="Album operations")
 
@@ -31,7 +31,6 @@ class AlbumList(Resource):
     def post(self, server_type, server_id):
         """Create a new Album"""
         form = ns.payload
-
         server_group_id = get_group_id(server_type, server_id)
         if (
             Album.query.filter_by(
@@ -111,9 +110,15 @@ class AlbumEntryRoute(Resource):
     @ns.doc("add_album_entry")
     @ns.doc("delete_album_entry")
     @ns.marshal_with(albumEntry, code=204)
-    # @ns.response(204, "Album entry deleted")
     def delete(self, server_type, server_id, entry_id):
         entry = AlbumEntry.query.get(entry_id)
-        db.session.delete(entry)
-        db.session.commit()
-        return entry
+        server_group = get_server_group(server_type, server_id)
+        if entry.album.server_group_id == server_group.id:
+            db.session.delete(entry)
+            db.session.commit()
+            return entry
+        else:
+            abort(
+                400,
+                f"Album entry {entry_id} is not part of an album in the specified server",
+            )
