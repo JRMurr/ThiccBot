@@ -10,10 +10,8 @@ services:
       - POSTGRES_USER=${THICC_USER}
       - POSTGRES_PASSWORD=${THICC_PASSWORD}
       - POSTGRES_DB=${THICC_DB}
-    # volumes:
-    #   - ./postgres-data/postgres:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
+    volumes:
+      - ./postgres-data/postgres:/var/lib/postgresql/data:rw
   flask:
     build: ./backend
     tty: true
@@ -24,35 +22,35 @@ services:
       - DISCORD_CLIENT_ID=${DISCORD_CLIENT_ID}
       - DISCORD_CLIENT_SECRET=${DISCORD_CLIENT_SECRET}
       - BOT_API_TOKEN=${BOT_API_TOKEN}
-      - SECRET_KEY=verysecurekey
-      - FLASK_APP=src
-      - FLASK_ENV=development
-      - OAUTHLIB_INSECURE_TRANSPORT=1 #needed for oauth to work locally
-    ports:
-      # - "8000:8000"
-      - "5000:5000"
-    volumes:
-      - ./backend:/thiccflask:rw
+      - SECRET_KEY=${FLASK_SECRET_KEY}
+      # - FLASK_APP=src
+      - FLASK_ENV=production
     depends_on:
       - postgres
     # run this command when you change db models, this does not detect all changes https://flask-migrate.readthedocs.io/en/latest/ 
     # command: sh -c "dockerize -wait tcp://postgres:5432 && flask db migrate"
-    command: sh -c "dockerize -wait tcp://postgres:5432 && python initDB.py && flask run --host=0.0.0.0" #&& flask db upgrade
+    command: sh -c "dockerize -wait tcp://postgres:5432 && python initDB.py && gunicorn -w 4 -b 0.0.0.0:8000 src:app" #&& flask db upgrade
+    # command: sh -c "ls "
   bot:
       build: ./bot
       tty: true
       image: thiccbot
       environment:
       - DISCORD_ID=${DISCORD_ID}
-      - BACKEND_URL=http://flask:5000/api
+      - BACKEND_URL=http://ngix/api
       - BOT_API_TOKEN=${BOT_API_TOKEN}
       - BOT_ADMIN=${BOT_ADMIN}
-
       volumes:
       - ./bot:/thiccbot:rw
       depends_on:
       - flask
       command: python thiccBot/main.py
+  ngix:
+    build: ./prod
+    depends_on:
+      - flask
+    ports:
+      - "80:80"
   # web: 
   #   build: ./web
   #   tty: true
