@@ -29,15 +29,20 @@ class Admin(commands.Cog):
                 f"role with name ({role_name}) not found, make sure spelling and capitalization are the same"
             )
             return
-        async with self.bot.backend_request(
-            "put", f"/discord/{guild.id}", json={"admin_role": desired_role.id}
-        ) as r:
-            if r.status == 200:
-                await ctx.send(
-                    f"set the bot admin role to {desired_role.name}, any one who has this role or one above it can run any admin only command"
-                )
-            else:
-                await log_and_send_error(log, r, ctx, "Error setting admin role")
+
+        async def on_200(r):
+            await ctx.send(
+                f"set the bot admin role to {desired_role.name}, any one who has this role or one above it can run any admin only command"
+            )
+
+        await self.bot.request_helper(
+            "put",
+            f"/discord/{guild.id}",
+            ctx,
+            json={"admin_role": desired_role.id},
+            error_prefix="Error setting admin role",
+            success_function=on_200,
+        )
 
     @commands.group()
     @checks.is_bot_admin()
