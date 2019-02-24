@@ -1,11 +1,11 @@
 from src import app, api
-from flask import request, abort, g
+from flask import request, g
 from pprint import pformat
 from src import db
 from src.models import DiscordServer, ServerGroup
 from flask import url_for
 from flask_dance.contrib.discord import discord as dAuth
-from flask_restplus import Resource, fields
+from flask_restplus import Resource, fields, abort
 from pprint import pprint
 
 ns = api.namespace("api/discord", description="Discord Server operations")
@@ -51,7 +51,7 @@ class ServerList(Resource):
             if "server_group_id" in form:
                 serverGroup = ServerGroup.query.get(form["server_group_id"])
                 if serverGroup is None:
-                    abort(400)  # TODO: error message for bad id
+                    abort(400, "Passed server group does not exist")
             else:
                 serverGroup = ServerGroup(name=f"{serverName}_group")
                 db.session.add(serverGroup)
@@ -67,6 +67,43 @@ class ServerList(Resource):
             abort(404)
 
 
+POSSIBLE_PREFIXES = ["command_prefixes", "message_prefixes"]
+
+
+def get_prefixes(server, prefix_type):
+    if prefix_type not in POSSIBLE_PREFIXES:
+        abort(500)
+    if prefix_type == "command_prefixes":
+        return server.command_prefixes if server.command_prefixes is not None else []
+    else:
+        return server.message_prefixes if server.message_prefixes is not None else []
+
+
+def add_prefix(server, prefix_type, new_prefix):
+    prefixes = get_prefixes(server, prefix_type)
+    if new_prefix in prefixes:
+        abort(400, f"({new_prefix}) is already a prefix")
+    prefixes.append(new_prefix)
+    if prefix_type == "command_prefixes":
+        server.command_prefixes = prefixes
+    else:
+        server.message_prefixes = prefixes
+    return server
+
+
+def remove_prefix(server, prefix_type, delete_prefix):
+    prefixes = get_prefixes(server, prefix_type)
+    if delete_prefix in prefixes:
+        prefixes.remove(delete_prefix)
+    else:
+        abort(400, f"({delete_prefix}) is not in the list of prefixes for this server")
+    if prefix_type == "command_prefixes":
+        server.command_prefixes = prefixes
+    else:
+        server.message_prefixes = prefixes
+    return server
+
+
 @ns.route("/<int:server_id>")
 class DiscordRoute(Resource):
     @ns.marshal_with(serverModel)
@@ -76,10 +113,25 @@ class DiscordRoute(Resource):
     @ns.expect(serverModel)
     @ns.marshal_with(serverModel)
     def put(self, server_id):
-        form = ns.payload
         server = DiscordServer.query.get_or_404(server_id)
-        if form["admin_role"]:
-            server.admin_role = form["admin_role"]
+        if "admin_role" in ns.payload:
+            server.admin_role = ns.payload["admin_role"]
+        if "command_prefix" in ns.payload:
+            server = add_prefix(
+                server, "command_prefixes", ns.payload["command_prefix"]
+            )
+        if "delete_command_prefix" in ns.payload:
+            server = remove_prefix(
+                server, "command_prefixes", ns.payload["delete_command_prefix"]
+            )
+        if "message_prefix" in ns.payload:
+            server = add_prefix(
+                server, "message_prefixes", ns.payload["message_prefix"]
+            )
+        if "delete_message_prefix" in ns.payload:
+            server = remove_prefix(
+                server, "message_prefixes", ns.payload["delete_message_prefix"]
+            )
         db.session.commit()
         return server
 

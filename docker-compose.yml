@@ -24,6 +24,7 @@ services:
       - DISCORD_CLIENT_ID=${DISCORD_CLIENT_ID}
       - DISCORD_CLIENT_SECRET=${DISCORD_CLIENT_SECRET}
       - BOT_API_TOKEN=${BOT_API_TOKEN}
+      - SECRET_KEY=verysecurekey
       - FLASK_APP=src
       - FLASK_ENV=development
       - OAUTHLIB_INSECURE_TRANSPORT=1 #needed for oauth to work locally
