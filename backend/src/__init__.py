@@ -42,7 +42,7 @@ from src.models import (
     AlbumEntry,
 )
 
-db.create_all(app=app)
+# db.create_all(app=app)
 from src.routes import (
     alias as aRoute,
     discordServers as dsRoute,
