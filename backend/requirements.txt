@@ -9,5 +9,8 @@ Flask-Dance
 gunicorn
 flask-restplus
 
+python-twitter
+
+
 #dev
 pylint-flask #handles pylint errors for models

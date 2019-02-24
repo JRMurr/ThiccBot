@@ -1,21 +1,26 @@
 from discord.ext import commands
-from discord import utils
+import discord
+from thiccBot.cogs.utils.logError import log_with_ctx
 import logging
+from pprint import pprint
 
 log = logging.getLogger(__name__)
 
 
+def bool_or_bot_owner(ctx, pred_bool):
+    owner_id = ctx.bot.owner_id
+    author = ctx.message.author
+    return pred_bool or author.id == owner_id
+
+
 def is_bot_admin():
-    """Checks if the user is in the server bot admin role. If it is not set checks if they have manage role permissions"""
+    """Checks if the user has the server bot admin role. If it is not set checks if they have manage role permissions"""
 
     async def predicate(ctx: commands.Context):
         command_name = ctx.command.name
         if not ctx.message.guild:
-            log.info(f"attempted to run ${command_name} outside of a server")
+            log.info(f"attempted to run {command_name} outside of a server")
             return False
-        # if not ctx.command_failed:
-        #     log.info(f'attempted to run ${command_name} but it failed')
-        #     return False
         bot = ctx.bot
         author = ctx.message.author
         server_id = ctx.message.guild.id
@@ -25,13 +30,18 @@ def is_bot_admin():
                 if data["admin_role"]:
                     admin_role = ctx.message.guild.get_role(data["admin_role"])
                     highest_role = author.roles[-1]
-                    return highest_role >= admin_role
-            elif r.status == 403:
-                log.error(f"no server with id {server_id} found")
+                    return bool_or_bot_owner(ctx, highest_role >= admin_role)
+            elif r.status == 404:
+                log_with_ctx(
+                    log,
+                    r,
+                    ctx,
+                    f"Error checking roles, Server with id {server_id} found: ",
+                )
             else:
-                # TODO: server error so for now just let them run it
-                pass
-        return author.guild_permissions.manage_roles
+                await log_with_ctx(log, r, ctx, "Error checking roles: ")
+        # if there was an error just see if they can manage roles
+        return bool_or_bot_owner(ctx, author.guild_permissions.manage_roles)
 
     return commands.check(predicate)
 
@@ -42,6 +52,6 @@ def is_server_owner():
     async def predicate(ctx: commands.Context):
         owner = server_id = ctx.message.guild.owner
         author = ctx.message.author
-        return author == owner
+        return bool_or_bot_owner(ctx, author == owner)
 
     return commands.check(predicate)

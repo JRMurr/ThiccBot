@@ -9,7 +9,7 @@ import asyncio
 import os
 import functools
 import copy
-from thiccBot.cogs.utils.logError import get_error_str
+from thiccBot.cogs.utils.logError import get_error_str, log_and_send_error
 
 BOT_ADMIN = int(os.environ["BOT_ADMIN"])
 
@@ -23,6 +23,9 @@ description = """THICC BOI"""
 log = logging.getLogger(__name__)
 
 
+# TODO: when web ui is working see how bad it would be to query server to get prefixes
+# instead of keeping them in stored in mem
+# could possibly just have a cache of server info that would be used for admin and prefix info
 def _prefix_callable(bot, msg):
     config = bot.config
     user_id = bot.user.id
@@ -30,7 +33,11 @@ def _prefix_callable(bot, msg):
     if msg.guild is None:
         base.append(config["command_prefix"])
     else:
-        base.extend(bot.prefixes.get(msg.guild.id, [config["command_prefix"]]))
+        guild_prefixes = bot.prefixes.get(msg.guild.id, [])
+        if len(guild_prefixes) == 0:
+            base.append(config["command_prefix"])
+        else:
+            base.extend(guild_prefixes)
     return base
 
 
@@ -85,8 +92,23 @@ class ThiccBot(commands.Bot):
         if api_end_point.startswith("/"):
             api_end_point = api_end_point[1:]
         url = BACKEND_URL + api_end_point
-        # TODO: auth stuff
         return self.session.request(method, url, **kwargs)
+
+    async def request_helper(
+        self,
+        method: str,
+        api_end_point: str,
+        ctx,
+        *,
+        success_function,
+        error_prefix,
+        json=None,
+    ):
+        async with self.backend_request(method, api_end_point, json=json) as r:
+            if r.status == 200:
+                await success_function(r)
+            else:
+                await log_and_send_error(log, r, ctx, error_prefix)
 
     async def get_guild(self, guild):
         async with self.backend_request("get", f"/discord/{guild.id}") as r:
@@ -101,14 +123,13 @@ class ThiccBot(commands.Bot):
         ) as r:
             if r.status == 200:
                 data = await r.json()
-                if "command_prefix" in data and data["command_prefix"] is not None:
-                    # TODO: check if command prefix is list and make it one if not
-                    self.prefixes[data["id"]] = data["command_prefix"]
+                if "command_prefixes" in data and data["command_prefixes"] is not None:
+                    self.prefixes[guild.id] = data["command_prefixes"]
                     log.info(
-                        "server: %s, id: %s, has command_prefix: %s",
+                        "server: %s, id: %s, has command_prefixes: %s",
                         data["name"],
                         data["id"],
-                        data["command_prefix"],
+                        data["command_prefixes"],
                     )
             else:
                 log.error(await get_error_str(r, "Error adding guild: "))

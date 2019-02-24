@@ -6,7 +6,13 @@ from flask_dance.contrib.discord import make_discord_blueprint, discord as dAuth
 import os
 
 app = Flask(__name__)
-app.secret_key = "supersekrit"  # TODO: do good things here
+
+if "SECRET_KEY" in os.environ:
+    app.secret_key = os.environ["SECRET_KEY"]
+else:
+    app.logger.warning("PLEASE SET A SECRET KEY, USING A DEFAULT KEY IS SAD TIMES")
+    app.secret_key = "supersekrit"
+
 api = Api(app)
 
 DB_USER = os.environ["DB_USER"]
@@ -25,7 +31,7 @@ blueprint = make_discord_blueprint(
 )
 app.register_blueprint(blueprint, url_prefix="/login")
 db = SQLAlchemy(app)
-migrate = Migrate(app, db)
+# migrate = Migrate(app, db)
 from src.models import (
     Alias,
     DiscordServer,
