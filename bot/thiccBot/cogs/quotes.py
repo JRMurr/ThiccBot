@@ -14,82 +14,96 @@ def get_str(quote_str, author):
     return f'"{quote_str}" - "{author}"'
 
 
-def quote_page_entry(quoute_info):
-    return (
-        f"{quoute_info['id']}: {get_str(quoute_info['quote'], quoute_info['author'])}"
-    )
-
-
 class Quotes(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.group()
+    async def get_rand_quote(self, ctx):
+        server_id = ctx.guild.id
+
+        async def on_200(r):
+            data = await r.json()
+            quoute_info = random.choice(data)
+            await ctx.send(get_str(quoute_info["quote"], quoute_info["author"]))
+
+        await self.bot.request_helper(
+            "get",
+            f"/quotes/discord/{server_id}",
+            ctx,
+            error_prefix="Error getting quotes",
+            success_function=on_200,
+        )
+
+    @commands.group(name="quotes", aliases=["quote"])
     @commands.guild_only()
     # @checks.is_bot_admin()
     async def quotes(self, ctx):
         """Commands for creating and mangaging quotes"""
-        # TODO: get rand quote
-        if ctx.invoked_subcommand is None:  # or ctx.subcommand_passed == 'box':
-            await ctx.send(
-                "to create command run 'alias create <alias_name> <command_to_run>'"
-            )
+        self.get_rand_quote(ctx)
 
     @quotes.command(name="search")
     async def quote_search(self, ctx, search: str):
         server_id = ctx.guild.id
-        async with self.bot.backend_request(
-            "get", f"/quotes/discord/{server_id}/{search}"
-        ) as r:
-            if r.status == 200:
-                data = await r.json()
-                chosen = random.choice(data)
-                await ctx.send(get_str(chosen["quote"], chosen["author"]))
-            else:
-                await log_and_send_error(log, r, ctx, "Error searching for quotes")
+
+        async def on_200(r):
+            data = await r.json()
+            chosen = random.choice(data)
+            await ctx.send(get_str(chosen["quote"], chosen["author"]))
+
+        await self.bot.request_helper(
+            "get",
+            f"/quotes/discord/{server_id}/{search}",
+            ctx,
+            error_prefix="Error searching for quotes",
+            success_function=on_200,
+        )
 
     @quotes.command(name="list")
     async def quotes_list(self, ctx):
         """List all the quotes for this server"""
         server_id = ctx.guild.id
-        async with self.bot.backend_request("get", f"/quotes/discord/{server_id}") as r:
-            if r.status == 200:
-                data = await r.json()
-                rows = [quote_page_entry(x) for x in data]
-                p = Pages(ctx, entries=rows, per_page=10, show_index=False)
-                await p.paginate()
-            else:
-                await log_and_send_error(log, r, ctx, "Error getting quotes")
+
+        def quote_page_entry(quoute_info):
+            return f"{quoute_info['id']}: {get_str(quoute_info['quote'], quoute_info['author'])}"
+
+        async def on_200(r):
+            data = await r.json()
+            rows = [quote_page_entry(x) for x in data]
+            p = Pages(ctx, entries=rows, per_page=10, show_index=False)
+            await p.paginate()
+
+        await self.bot.request_helper(
+            "get",
+            f"/quotes/discord/{server_id}",
+            ctx,
+            error_prefix="Error getting quotes",
+            success_function=on_200,
+        )
 
     @quotes.command(name="get")
     async def quote_get(self, ctx):
         """Get random quote from this server"""
-        server_id = ctx.guild.id
-        async with self.bot.backend_request("get", f"/quotes/discord/{server_id}") as r:
-            if r.status == 200:
-                data = await r.json()
-                quoute_info = random.choice(data)
-                await ctx.send(get_str(quoute_info["quote"], quoute_info["author"]))
-            else:
-                await log_and_send_error(log, r, ctx, "Error getting quotes")
+        self.get_rand_quote(ctx)
 
-    @quotes.command(name="save")
+    @quotes.command(name="save", aliases=["create"])
     @checks.is_bot_admin()
     async def quote_save(self, ctx, quote_str: str, author: str):
         """Creates a quote
 
             ex: quote save \"some quote\" \"some author\""""
         server_id = ctx.guild.id
-        async with self.bot.backend_request(
+
+        async def on_200(r):
+            await ctx.send(f"Saved quote: {get_str(quote_str, author)}")
+
+        await self.bot.request_helper(
             "post",
             f"/quotes/discord/{server_id}",
+            ctx,
+            error_prefix="Error saving quote",
             json={"quote": quote_str, "author": author},
-        ) as r:
-            if r.status == 200:
-                data = await r.json()
-                await ctx.send(f"Saved quote: {get_str(quote_str, author)}")
-            else:
-                await log_and_send_error(log, r, ctx, "Error saving quote")
+            success_function=on_200,
+        )
 
     @quotes.command(name="delete")
     @checks.is_bot_admin()
@@ -99,17 +113,21 @@ class Quotes(commands.Cog):
             Pass the quote id to delete, you can get them by using \"quote list\"
         """
         server_id = ctx.guild.id
-        async with self.bot.backend_request(
-            "delete", f"/quotes/discord/{server_id}/{quote_id}"
-        ) as r:
-            if r.status == 200:
-                await ctx.send(f"deleted quote {quote_id}")
-            elif not r.status == 404:
-                await log_and_send_error(
-                    log, r, ctx, f"Error deleting alias {quote_id}"
-                )
-            else:
-                await ctx.send(f"{quote_id} not found")
+
+        async def on_200(r):
+            await ctx.send(f"deleted quote {quote_id}")
+
+        async def on_404(r):
+            await ctx.send(f"{quote_id} not found")
+
+        await self.bot.request_helper(
+            "delete",
+            f"/quotes/discord/{server_id}/{quote_id}",
+            ctx,
+            error_prefix=f"Error deleting quote {quote_id}",
+            success_function=on_200,
+            error_handler={404: on_404},
+        )
 
 
 def setup(bot):

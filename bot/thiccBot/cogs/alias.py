@@ -1,4 +1,5 @@
 from discord.ext import commands
+from discord.ext.commands import Cog
 import discord
 from thiccBot.cogs.utils import checks
 from thiccBot.cogs.utils.paginator import Pages
@@ -11,21 +12,16 @@ from copy import copy
 log = logging.getLogger(__name__)
 
 
-def get_alias_str(alias_info, show_commands):
-    s = f"{alias_info['name']}"
-    if show_commands:
-        s += f" -> {alias_info['command']}"
-    return s
-
-
-class Alias(commands.Cog):
+class Alias(Cog):
     def __init__(self, bot):
         self.bot = bot
 
     def get_bot_command_names(self):
         return (x.name for x in self.bot.commands)
 
-    async def get_alias_command(self, message: discord.Message):
+    @Cog.listener()
+    @message_checks()
+    async def on_message(self, message: discord.Message):
         if message.guild is None:
             return
         for prefix in self.bot.get_command_prefixes(message):
@@ -48,10 +44,6 @@ class Alias(commands.Cog):
                             await get_error_str(r, "error making alias get request: ")
                         )
                 break
-
-    @message_checks()
-    async def on_message(self, message: discord.Message):
-        alias_info = await self.get_alias_command(message)
 
     async def create_or_update_alias(self, ctx, name, args, is_update=False):
         server_id = ctx.guild.id
@@ -96,7 +88,7 @@ class Alias(commands.Cog):
                 "to create alias run 'alias create <alias_name> <command_to_run>'"
             )
 
-    @alias.command(name="create", aliases=["set", "make", "save"])
+    @alias.command(name="create", aliases=["set", "make", "add"])
     @checks.is_bot_admin()
     async def alias_create(self, ctx, name: str, *, args: str):
         """Creates a alias command
@@ -116,31 +108,47 @@ class Alias(commands.Cog):
     async def alias_list(self, ctx, show_command: bool = False):
         """List all the aliases for this server"""
         server_id = ctx.guild.id
-        async with self.bot.backend_request("get", f"/alias/discord/{server_id}") as r:
-            if r.status == 200:
-                data = await r.json()
-                rows = [get_alias_str(x, show_command) for x in data]
-                p = Pages(ctx, entries=rows, per_page=10)
-                await p.paginate()
-            else:
-                await log_and_send_error(log, r, ctx, "Error getting aliases")
+
+        def get_alias_str(alias_info, show_commands):
+            s = f"{alias_info['name']}"
+            if show_commands:
+                s += f" -> {alias_info['command']}"
+            return s
+
+        async def on_200(r):
+            data = await r.json()
+            rows = [get_alias_str(x, show_command) for x in data]
+            p = Pages(ctx, entries=rows, per_page=10)
+            await p.paginate()
+
+        await self.bot.request_helper(
+            "get",
+            f"/alias/discord/{server_id}",
+            ctx,
+            error_prefix="Error getting aliases",
+            success_function=on_200,
+        )
 
     @alias.command(name="delete")
     @checks.is_bot_admin()
     async def alias_delete(self, ctx, alias_name):
         """Deletes the specified alias"""
         server_id = ctx.guild.id
-        async with self.bot.backend_request(
-            "delete", f"/alias/discord/{server_id}/{alias_name}"
-        ) as r:
-            if r.status == 200:
-                await ctx.send(f"deleted alias {alias_name}")
-            elif not r.status == 404:
-                await log_and_send_error(
-                    log, r, ctx, f"Error deleting alias {alias_name}"
-                )
-            else:
-                await ctx.send(f"{alias_name} not found")
+
+        async def on_200(r):
+            await ctx.send(f"deleted alias {alias_name}")
+
+        async def on_404(r):
+            await ctx.send(f"{alias_name} not found")
+
+        await self.bot.request_helper(
+            "delete",
+            f"/alias/discord/{server_id}/{alias_name}",
+            ctx,
+            error_prefix=f"Error deleting alias {alias_name}",
+            success_function=on_200,
+            error_handler={404: on_404},
+        )
 
 
 def setup(bot):
