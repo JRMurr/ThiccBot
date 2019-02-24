@@ -101,14 +101,17 @@ class ThiccBot(commands.Bot):
         ctx,
         *,
         success_function,
-        error_prefix,
+        error_prefix: str = None,
         json=None,
+        error_handler={},
     ):
         async with self.backend_request(method, api_end_point, json=json) as r:
             if r.status == 200:
-                await success_function(r)
-            else:
-                await log_and_send_error(log, r, ctx, error_prefix)
+                return await success_function(r)
+            elif r.status in error_handler:
+                return await error_handler[r.status](r)
+            elif error_prefix is not None:
+                return await log_and_send_error(log, r, ctx, error_prefix)
 
     async def get_guild(self, guild):
         async with self.backend_request("get", f"/discord/{guild.id}") as r:

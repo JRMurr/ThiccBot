@@ -2,7 +2,7 @@ from discord.ext import commands
 import discord
 from thiccBot.cogs.utils import checks
 from thiccBot.cogs.utils.paginator import Pages
-from thiccBot.cogs.utils.logError import log_and_send_error
+from thiccBot.cogs.utils.logError import log_and_send_error, get_error_str
 from thiccBot import message_checks
 
 import logging
@@ -32,7 +32,7 @@ class KeyWords(commands.Cog):
                 data = await r.json()
                 return data["responses"]
             elif r.status == 403:
-                log.error("error making key word get request")  # TODO: error info
+                log.error(await get_error_str(r, "Error making key word get request: "))
 
     @message_checks()
     async def on_message(self, message: discord.Message):
@@ -67,7 +67,7 @@ class KeyWords(commands.Cog):
                 verb = "updating" if is_update else "creating"
                 await log_and_send_error(log, r, ctx, f"Error {verb} key word")
 
-    @commands.group()
+    @commands.group(name="keyWord", aliases=["keyword"])
     @commands.guild_only()
     @checks.is_bot_admin()
     async def keyWord(self, ctx):
@@ -77,7 +77,7 @@ class KeyWords(commands.Cog):
                 "to create command run 'keyWord create <key_name> <response>'"
             )
 
-    @keyWord.command(name="create", aliases=["set", "make"])
+    @keyWord.command(name="create", aliases=["set", "make", "add"])
     async def key_create(self, ctx, name: str, *, response: str):
         """Creates a key word
 
@@ -91,21 +91,50 @@ class KeyWords(commands.Cog):
             ex: keyWord update ayy lmao"""
         await self.create_or_update_key(ctx, name, response, True)
 
+    @keyWord.command(name="list")
+    async def key_list(self, ctx, show_response: bool = False):
+        """List all the aliases for this server"""
+        server_id = ctx.guild.id
+
+        def get_key_str(key_info, show_reposnes):
+            s = f"{key_info['name']}"
+            if show_reposnes:
+                s += f" -> {key_info['responses']}"
+            return s
+
+        async def on_200(r):
+            data = await r.json()
+            rows = [get_key_str(x, show_response) for x in data]
+            p = Pages(ctx, entries=rows, per_page=10)
+            await p.paginate()
+
+        await self.bot.request_helper(
+            "get",
+            f"/keyWords/discord/{server_id}",
+            ctx,
+            error_prefix="Error getting key words",
+            success_function=on_200,
+        )
+
     @keyWord.command(name="delete")
     async def key_delete(self, ctx, key_name):
         """Deletes the specified key word"""
         server_id = ctx.guild.id
-        async with self.bot.backend_request(
-            "delete", f"/keyWords/discord/{server_id}/{key_name}"
-        ) as r:
-            if r.status == 200:
-                await ctx.send(f"deleted key word {key_name}")
-            elif not r.status == 404:
-                await log_and_send_error(
-                    log, r, ctx, f"Error deleting key word {key_name}"
-                )
-            else:
-                await ctx.send(f"{key_name} not found")
+
+        async def on_200(r):
+            await ctx.send(f"deleted key word {key_name}")
+
+        async def on_404(r):
+            await ctx.send(f"{key_name} not found")
+
+        await self.bot.request_helper(
+            "delete",
+            f"/keyWords/discord/{server_id}/{key_name}",
+            ctx,
+            error_prefix=f"Error deleting alias {key_name}",
+            success_function=on_200,
+            error_handler={404: on_404},
+        )
 
 
 def setup(bot):
