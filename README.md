@@ -13,6 +13,7 @@ This is a discord bot written in [discord.py](https://github.com/Rapptz/discord.
 import secrets
 print(secrets.token_urlsafe())
 ```
+use the same process to set `FLASK_SECRET_KEY`
 3. Install docker and docker-compose https://docs.docker.com/compose/install/
 4. Run `docker-compose up`
 
@@ -40,7 +41,6 @@ docker-compose up
 # in a different tab
 ./runWeb.sh
 ```
-
 
 ## DB migrate
 ```sh
