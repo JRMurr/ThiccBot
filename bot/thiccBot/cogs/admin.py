@@ -9,6 +9,13 @@ from pprint import pprint
 log = logging.getLogger(__name__)
 
 
+def get_clean_prefix(prefix_type):
+    if prefix_type == "command_prefix":
+        return "command prefix"
+    else:
+        return "message prefix"
+
+
 class Admin(commands.Cog):
     """Admin commands to manage the bot in each server"""
 
@@ -44,76 +51,128 @@ class Admin(commands.Cog):
             success_function=on_200,
         )
 
+    async def add_prefix(self, ctx, prefix_type, prefix):
+        server_id = ctx.message.guild.id
+        clean_prefix_type = get_clean_prefix(prefix_type)
+
+        async def on_200(r):
+            data = await r.json()
+            self.bot.prefixes[server_id] = data["command_prefixes"]
+            self.bot.message_prefixes[server_id] = data["command_prefixes"]
+            await ctx.send(
+                f"({prefix}) has been added to the list of possible {clean_prefix_type}es"
+            )
+
+        jsonData = {}
+        jsonData[prefix_type] = prefix
+        await self.bot.request_helper(
+            "put",
+            f"/discord/{server_id}",
+            ctx,
+            json=jsonData,
+            error_prefix=f"Error adding {clean_prefix_type}",
+            success_function=on_200,
+        )
+
+    async def delete_prefix(self, ctx, prefix_type, prefix):
+        server_id = ctx.message.guild.id
+        clean_prefix_type = get_clean_prefix(prefix_type)
+
+        async def on_200(r):
+            data = await r.json()
+            self.bot.prefixes[server_id] = data["command_prefixes"]
+            self.bot.message_prefixes[server_id] = data["message_prefixes"]
+            await ctx.send(
+                f"({prefix}) has been removed from the list of possible {clean_prefix_type}es"
+            )
+
+        jsonData = {}
+        jsonData[f"delete_{prefix_type}"] = prefix
+        await self.bot.request_helper(
+            "put",
+            f"/discord/{server_id}",
+            ctx,
+            json=jsonData,
+            error_prefix=f"Error deleting {clean_prefix_type}",
+            success_function=on_200,
+        )
+
+    async def list_prefixes(self, ctx, prefix_type):
+        server_id = ctx.message.guild.id
+        clean_prefix_type = get_clean_prefix(prefix_type)
+
+        async def on_200(r):
+            data = await r.json()
+            prefixes = data[f"{prefix_type}es"]
+            if prefixes is None:
+                prefixes = []
+            # TODO: show the @botuser command prefix?
+            if len(prefixes) > 0:
+                if prefix_type == "command_prefix":
+                    rows = [f"({x})" for x in prefixes]
+                else:
+                    rows = prefixes
+                p = Pages(ctx, entries=rows, per_page=10)
+                await p.paginate()
+            elif prefix_type == "command_prefix":
+                msg = "This server has no command_prefixes set, "
+                msg += f"currently using default prefix ({self.bot.config['command_prefix']})"
+                ctx.send(msg)
+            else:
+                ctx.send("This server has no message prefixes")
+
+        await self.bot.request_helper(
+            "get",
+            f"/discord/{server_id}",
+            ctx,
+            error_prefix=f"Error getting {clean_prefix_type}es",
+            success_function=on_200,
+        )
+
     @commands.group()
     @checks.is_bot_admin()
     async def command_prefix(self, ctx):
         """Commands for mangaging command prefixes"""
         if ctx.invoked_subcommand is None:
-            await ctx.send(f"run {ctx.prefix}help add_command_prefix")
+            await ctx.send(f"run {ctx.prefix}help command_prefix")
 
     @command_prefix.command(name="add")
     async def add_command_prefix(self, ctx, prefix: str):
         """Adds a command prefix to the list of possible command prefixes"""
         server_id = ctx.message.guild.id
 
-        async def on_200(r):
-            data = await r.json()
-            self.bot.prefixes[server_id] = data["command_prefixes"]
-            await ctx.send(
-                f"({prefix}) has been added to the list of possible command prefixes"
-            )
-
-        await self.bot.request_helper(
-            "put",
-            f"/discord/{server_id}",
-            ctx,
-            json={"command_prefix": prefix},
-            error_prefix="Error adding command prefix",
-            success_function=on_200,
-        )
+        await self.add_prefix(ctx, "command_prefix", prefix)
 
     @command_prefix.command(name="list")
     async def list_command_prefix(self, ctx):
-        """List all command prefixes"""
-        server_id = ctx.message.guild.id
-
-        async def on_200(r):
-            data = await r.json()
-            prefixes = data["command_prefixes"]
-            if prefixes is None:
-                prefixes = []
-            # TODO: show the @botuser prefix?
-            if len(prefixes) > 0:
-                rows = [f"({x})" for x in data["command_prefixes"]]
-                p = Pages(ctx, entries=rows, per_page=10)
-                await p.paginate()
-            else:
-                msg = "This server has no command_prefixes set, "
-                msg += f"currently using default prefix ({self.bot.config['command_prefix']})"
-
-        await self.bot.request_helper(
-            "get",
-            f"/discord/{server_id}",
-            ctx,
-            error_prefix="Error getting command prefixes",
-            success_function=on_200,
-        )
+        await self.list_prefixes(ctx, "command_prefix")
 
     @command_prefix.command(name="delete")
     async def delete_command_prefix(self, ctx, prefix: str):
         """Removes a prefix from list of command prefixes for this sever"""
+        await self.delete_prefix(ctx, "command_prefix", prefix)
+
+    @commands.group()
+    @checks.is_bot_admin()
+    async def message_prefix(self, ctx):
+        """Commands for mangaging message prefixes"""
+        if ctx.invoked_subcommand is None:
+            await ctx.send(f"run {ctx.prefix}help message_prefix")
+
+    @message_prefix.command(name="add")
+    async def add_message_prefix(self, ctx, prefix: str):
+        """Adds a command prefix to the list of possible message prefixes"""
         server_id = ctx.message.guild.id
-        async with self.bot.backend_request(
-            "put", f"/discord/{server_id}", json={"delete_command_prefix": prefix}
-        ) as r:
-            if r.status == 200:
-                data = await r.json()
-                self.bot.prefixes[server_id] = data["command_prefixes"]
-                await ctx.send(
-                    f"({prefix}) has been removed from the list of command_prefixes"
-                )
-            else:
-                await log_and_send_error(log, r, ctx, "Error deleting command prefix")
+        await self.add_prefix(ctx, "message_prefix", prefix)
+
+    @message_prefix.command(name="list")
+    async def list_message_prefix(self, ctx):
+        await self.list_prefixes(ctx, "message_prefix")
+
+    @message_prefix.command(name="delete")
+    async def delete_message_prefix(self, ctx, prefix: str):
+        """Removes a prefix from list of command message for this sever"""
+        await self.delete_prefix(ctx, "message_prefix", prefix)
 
 
 def setup(bot):
