@@ -10,12 +10,14 @@ from pprint import pprint
 
 ns = api.namespace("api/discord", description="Discord Server operations")
 
-
+# NOTE: discord bot assumes both command_prefixes and message_prefixes will always be returned
+# this only matters for commands that updates prefixes
 serverModel = ns.model(
     "DiscordServer",
     {
         "name": fields.String,
         "command_prefixes": fields.List(fields.String),
+        "message_prefixes": fields.List(fields.String),
         "server_group_id": fields.Integer,
         "id": fields.Integer,
         "admin_role": fields.Integer,
