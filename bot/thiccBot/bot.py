@@ -34,7 +34,7 @@ def _prefix_callable(bot, msg):
         base.append(config["command_prefix"])
     else:
         guild_prefixes = bot.prefixes.get(msg.guild.id, [])
-        if len(guild_prefixes) == 0:
+        if guild_prefixes is None or len(guild_prefixes) == 0:
             base.append(config["command_prefix"])
         else:
             base.extend(guild_prefixes)
@@ -73,6 +73,7 @@ class ThiccBot(commands.Bot):
         )
         self.config = config
         self.prefixes = {}
+        self.message_prefixes = {}
         headers = {"bot-token": BOT_API_TOKEN}
         self.session = aiohttp.ClientSession(headers=headers, loop=self.loop)
         for extension in config["initial_extensions"]:
@@ -128,6 +129,7 @@ class ThiccBot(commands.Bot):
                 data = await r.json()
                 if "command_prefixes" in data and data["command_prefixes"] is not None:
                     self.prefixes[guild.id] = data["command_prefixes"]
+                    self.message_prefixes[guild.id] = data["command_prefixes"]
                     log.info(
                         "server: %s, id: %s, has command_prefixes: %s",
                         data["name"],
