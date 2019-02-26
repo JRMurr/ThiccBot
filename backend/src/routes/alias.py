@@ -1,5 +1,4 @@
 from src import app, api
-from flask import request
 from src import db
 from src.models import Alias, DiscordServer, ServerGroup
 from flask_restplus import Resource, fields, abort

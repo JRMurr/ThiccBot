@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_restplus import Api
 from flask_dance.contrib.discord import make_discord_blueprint, discord as dAuth
+from .constants import CONSTANTS
 import os
 
 app = Flask(__name__)
@@ -50,6 +51,7 @@ from src.routes import (
     keyWords as keyRoute,
     quotes as quotesRoute,
     albums as albumsRoute,
+    lastfm as lastFmRoute,
 )
 
 

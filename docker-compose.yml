@@ -25,6 +25,8 @@ services:
       - DISCORD_CLIENT_ID=${DISCORD_CLIENT_ID}
       - DISCORD_CLIENT_SECRET=${DISCORD_CLIENT_SECRET}
       - BOT_API_TOKEN=${BOT_API_TOKEN}
+      - LAST_FM_API_KEY=${LAST_FM_API_KEY}
+      - LAST_FM_SECRET=${LAST_FM_SECRET}
       - SECRET_KEY=verysecurekey
       - FLASK_APP=src
       - FLASK_ENV=development
