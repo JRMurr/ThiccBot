@@ -9,6 +9,7 @@ import asyncio
 import os
 import functools
 import copy
+import re
 from thiccBot.cogs.utils.logError import get_error_str, log_and_send_error
 
 BOT_ADMIN = int(os.environ["BOT_ADMIN"])
@@ -39,28 +40,6 @@ def _prefix_callable(bot, msg):
         else:
             base.extend(guild_prefixes)
     return base
-
-
-def message_checks(delete_check=False):
-    def actualDec(f):
-        @functools.wraps(f)
-        async def wrapper(*args, **kw):
-            args = list(args)
-            message = copy.copy(args[1])  # 0 is self
-            if message.author.bot:
-                return
-            deleteMessage = False
-            if message.content.lower().endswith("-del"):
-                deleteMessage = delete_check
-                message.content = message.content[:-4].strip()
-                args[1] = message
-            await f(*args, **kw)
-            if deleteMessage:
-                await args[1].delete()  # use the 'real' message to call delete
-
-        return wrapper
-
-    return actualDec
 
 
 class ThiccBot(commands.Bot):
@@ -117,7 +96,10 @@ class ThiccBot(commands.Bot):
     async def get_guild(self, guild):
         async with self.backend_request("get", f"/discord/{guild.id}") as r:
             if r.status == 200:
-                return await r.json()
+                data = await r.json()
+                self.prefixes[guild.id] = data["command_prefixes"]
+                self.message_prefixes[guild.id] = data["message_prefixes"]
+                return data
             else:
                 return None
 
@@ -127,15 +109,8 @@ class ThiccBot(commands.Bot):
         ) as r:
             if r.status == 200:
                 data = await r.json()
-                if "command_prefixes" in data and data["command_prefixes"] is not None:
-                    self.prefixes[guild.id] = data["command_prefixes"]
-                    self.message_prefixes[guild.id] = data["command_prefixes"]
-                    log.info(
-                        "server: %s, id: %s, has command_prefixes: %s",
-                        data["name"],
-                        data["id"],
-                        data["command_prefixes"],
-                    )
+                self.prefixes[guild.id] = data["command_prefixes"]
+                self.message_prefixes[guild.id] = data["message_prefixes"]
             else:
                 log.error(await get_error_str(r, "Error adding guild: "))
 
@@ -186,6 +161,30 @@ class ThiccBot(commands.Bot):
             type(error), error, error.__traceback__, file=sys.stderr
         )
 
-    @message_checks(delete_check=True)
-    async def on_message(self, message):
+    async def process_message(self, message: discord.Message):
+        """Used in any `on_message` function to do preprocessing on a message"""
+        # TODO: if performance becomes an issue have a `on_message` object that
+        # calls the alias and keyword on_msg so this function is not called 3 times
+        # binding of the cog class methods might be weird
+        deleteMessage = False
+        if message.content.lower().endswith("-del"):
+            deleteMessage = True
+            message.content = message.content[:-4].strip()
+        guild_id = message.guild.id
+        prefixes = self.message_prefixes.get(guild_id, [])
+        if prefixes is None:
+            prefixes = []
+        for prefix in prefixes:
+            match = re.match(prefix, message.content)
+            if match:
+                message.content = message.content[match.end() :]
+                break
+        return message, deleteMessage
+
+    async def on_message(self, message: discord.Message):
+        if message.author == self.user:
+            return
+        message, deleteMessage = await self.process_message(message)
         await self.process_commands(message)
+        if deleteMessage:
+            await message.delete()
