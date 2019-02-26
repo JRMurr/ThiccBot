@@ -1,10 +1,9 @@
 from discord.ext import commands
+from discord.ext.commands import Cog
 import discord
 from thiccBot.cogs.utils import checks
 from thiccBot.cogs.utils.paginator import Pages
 from thiccBot.cogs.utils.logError import log_and_send_error, get_error_str
-from thiccBot import message_checks
-
 import logging
 from pprint import pprint
 from copy import copy
@@ -13,13 +12,11 @@ import random
 log = logging.getLogger(__name__)
 
 
-class KeyWords(commands.Cog):
+class KeyWords(Cog):
     def __init__(self, bot):
         self.bot = bot
 
     async def get_key_word(self, message: discord.Message):
-        if message.guild is None:
-            return
         for prefix in self.bot.get_command_prefixes(message):
             if message.content.startswith(prefix):
                 return
@@ -34,8 +31,11 @@ class KeyWords(commands.Cog):
             elif r.status == 403:
                 log.error(await get_error_str(r, "Error making key word get request: "))
 
-    @message_checks()
+    @Cog.listener()
     async def on_message(self, message: discord.Message):
+        if message.guild is None or message.author == self.bot.user:
+            return
+        message, _ = await self.bot.process_message(message)
         responses = await self.get_key_word(message)
         if responses:
             ctx = await self.bot.get_context(message)
@@ -67,7 +67,7 @@ class KeyWords(commands.Cog):
                 verb = "updating" if is_update else "creating"
                 await log_and_send_error(log, r, ctx, f"Error {verb} key word")
 
-    @commands.group(name="keyWord", aliases=["keyword"])
+    @commands.group(name="keyWord", aliases=["keyword", "keywords", "keyWords"])
     @commands.guild_only()
     @checks.is_bot_admin()
     async def keyWord(self, ctx):
@@ -77,7 +77,7 @@ class KeyWords(commands.Cog):
                 "to create command run 'keyWord create <key_name> <response>'"
             )
 
-    @keyWord.command(name="create", aliases=["set", "make", "add"])
+    @keyWord.command(name="create", aliases=["set", "make", "add", "save"])
     async def key_create(self, ctx, name: str, *, response: str):
         """Creates a key word
 
@@ -96,9 +96,9 @@ class KeyWords(commands.Cog):
         """List all the aliases for this server"""
         server_id = ctx.guild.id
 
-        def get_key_str(key_info, show_reposnes):
+        def get_key_str(key_info, show_responses):
             s = f"{key_info['name']}"
-            if show_reposnes:
+            if show_responses:
                 s += f" -> {key_info['responses']}"
             return s
 
