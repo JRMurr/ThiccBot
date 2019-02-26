@@ -4,7 +4,6 @@ import discord
 from thiccBot.cogs.utils import checks
 from thiccBot.cogs.utils.paginator import Pages
 from thiccBot.cogs.utils.logError import log_and_send_error, get_error_str
-from thiccBot import message_checks
 import logging
 from pprint import pprint
 from copy import copy
@@ -20,10 +19,11 @@ class Alias(Cog):
         return (x.name for x in self.bot.commands)
 
     @Cog.listener()
-    @message_checks()
+    # @message_checks()
     async def on_message(self, message: discord.Message):
-        if message.guild is None:
+        if message.guild is None or message.author == self.bot.user:
             return
+        message, _ = await self.bot.process_message(message)
         for prefix in self.bot.get_command_prefixes(message):
             if message.content.startswith(prefix):
                 alias_name = message.content[len(prefix) :].split(" ")[0]
@@ -88,7 +88,7 @@ class Alias(Cog):
                 "to create alias run 'alias create <alias_name> <command_to_run>'"
             )
 
-    @alias.command(name="create", aliases=["set", "make", "add"])
+    @alias.command(name="create", aliases=["set", "make", "add", "save"])
     @checks.is_bot_admin()
     async def alias_create(self, ctx, name: str, *, args: str):
         """Creates a alias command
