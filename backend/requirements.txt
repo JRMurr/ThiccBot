@@ -9,11 +9,14 @@ Flask-Dance
 gunicorn
 flask-restplus
 
+DotMap
 
-gunicorn
-
+#######twitter#######
 python-twitter
 
+#######last fm#######
+pylast
+Pillow
 
 #dev
 pylint-flask #handles pylint errors for models
