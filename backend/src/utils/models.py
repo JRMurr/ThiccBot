@@ -4,11 +4,6 @@ from src.models import DiscordServer, ServerGroup
 from flask_restplus import abort
 
 
-def jsonModel(model):
-    """calls `.serialize` on model and returns it as json"""
-    return jsonify(model.serialize)
-
-
 def get_server_group(server_type, server_id):
     if server_type == "GROUP":
         return ServerGroup.query.get(server_id)
