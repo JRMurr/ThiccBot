@@ -67,8 +67,9 @@ def before_request():
         os.environ["FLASK_ENV"] == "development"
         and request.headers.get("Host", "") == "localhost:5000"
     )
+    g.is_bot = api_key_passed == BOT_API_TOKEN
     # if (api_key_passed == '') and (not is_user) and request.endpoint not in ('login', 'discord.login', 'discord.authorized'):
     #     return redirect(url_for("login"))
-    if not allow_debug and ((not is_user) or api_key_passed != BOT_API_TOKEN):
+    if not allow_debug and not (is_user or g.is_bot):
         return abort(403)  # a token was passed and it was bad
     g.is_bot = api_key_passed == BOT_API_TOKEN

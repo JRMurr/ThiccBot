@@ -75,9 +75,7 @@ class Alias(Cog):
                     await ctx.send(msg)
                 else:
                     verb = "updating" if is_update else "creating"
-                    await log_and_send_error(
-                        log, r, ctx, f"Error {verb} alias {name}: "
-                    )
+                    await log_and_send_error(log, r, ctx, f"Error {verb} alias {name}")
 
     @commands.group()
     @commands.guild_only()
