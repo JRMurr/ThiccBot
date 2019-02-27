@@ -1,6 +1,6 @@
 from src import app, api
 from flask_restplus import Resource, abort
-from flask import url_for
+from flask import send_file
 from src.utils import LastFmHelper
 from src import CONSTANTS
 
@@ -17,7 +17,7 @@ class GridMaker(Resource):
     """Makes a grid image of the user's LastFm scrobbles"""
 
     @ns.doc("get_grid")
+    @ns.produces(["image/png"])
     def get(self, lastfm_user, period):
         """List all albums on this server"""
-        image_path = lastFmHelper.grid(lastfm_user, period)
-        return url_for(image_path)
+        return send_file(lastFmHelper.grid(lastfm_user, period), mimetype="image/jpeg")

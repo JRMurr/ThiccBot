@@ -30,6 +30,7 @@ services:
       - SECRET_KEY=verysecurekey
       - FLASK_APP=src
       - FLASK_ENV=development
+      - SEND_FILE_MAX_AGE_DEFAULT=15
       - OAUTHLIB_INSECURE_TRANSPORT=1 #needed for oauth to work locally
     ports:
       # - "8000:8000"
