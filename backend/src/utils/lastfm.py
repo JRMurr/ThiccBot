@@ -21,7 +21,6 @@ PERIOD_STR = ", ".join(PERIODS)
 
 FONT_PATH = "fonts/Butler_ExtraBold.otf"
 FONT_SIZE = 14
-IMG_SAVE_DIR = "lastfm_images/"
 
 
 class LastFmHelper:
@@ -79,7 +78,10 @@ class LastFmHelper:
                 text = "{}\n{}".format(album.get_artist().get_name(), album.get_title())
                 alb_image = self.image_text(alb_image, text)
                 new_im.paste(alb_image, (x_idx * 300, y_idx * 300))
-        img_path = "{}/{}_grid.jpg".format(IMG_SAVE_DIR, username)
-        new_im.save(img_path, format="JPEG")
-        return img_path
+                alb_image.close()
+        img_io = BytesIO()
+        new_im.save(img_io, format="JPEG")
+        img_io.seek(0)
+        new_im.close()
+        return img_io
 

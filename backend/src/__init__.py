@@ -5,8 +5,12 @@ from flask_restplus import Api
 from flask_dance.contrib.discord import make_discord_blueprint, discord as dAuth
 from .constants import CONSTANTS
 import os
+from pprint import pprint
 
 app = Flask(__name__)
+app.config["SEND_FILE_MAX_AGE_DEFAULT"] = os.environ.get(
+    "SEND_FILE_MAX_AGE_DEFAULT", 30
+)
 
 if "SECRET_KEY" in os.environ:
     app.secret_key = os.environ["SECRET_KEY"]
@@ -59,8 +63,12 @@ from src.routes import (
 def before_request():
     is_user = dAuth.authorized
     api_key_passed = request.headers.get("bot-token", "")
+    allow_debug = (
+        os.environ["FLASK_ENV"] == "development"
+        and request.headers.get("Host", "") == "localhost:5000"
+    )
     # if (api_key_passed == '') and (not is_user) and request.endpoint not in ('login', 'discord.login', 'discord.authorized'):
     #     return redirect(url_for("login"))
-    if (not is_user) and api_key_passed != BOT_API_TOKEN and api_key_passed != "":
+    if not allow_debug and ((not is_user) or api_key_passed != BOT_API_TOKEN):
         return abort(403)  # a token was passed and it was bad
     g.is_bot = api_key_passed == BOT_API_TOKEN
