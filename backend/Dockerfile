@@ -19,7 +19,7 @@ RUN mkdir lastfm_images
 COPY requirements.txt .
 COPY setup.py .
 COPY initDB.py .
-RUN pip install --no-cache-dir  -U -r requirements.txt
+RUN pip install --upgrade pip && pip install --no-cache-dir  -U -r requirements.txt
 
 
 COPY . .
