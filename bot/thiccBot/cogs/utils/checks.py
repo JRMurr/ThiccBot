@@ -32,7 +32,7 @@ def is_bot_admin():
                     highest_role = author.roles[-1]
                     return bool_or_bot_owner(ctx, highest_role >= admin_role)
             elif r.status == 404:
-                log_with_ctx(
+                await log_with_ctx(
                     log,
                     r,
                     ctx,
