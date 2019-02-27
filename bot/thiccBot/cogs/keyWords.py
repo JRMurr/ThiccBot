@@ -91,9 +91,36 @@ class KeyWords(Cog):
             ex: keyWord update ayy lmao"""
         await self.create_or_update_key(ctx, name, response, True)
 
+    @keyWord.command(name="set_case_match")
+    async def key_set_case_match(self, ctx, key_name: str, match_case: bool):
+        """Sets if the key should match case or not
+        
+            ex: `keyWord set_case_match ayy true` or `keyWord set_case_match ayy false`
+        """
+        server_id = ctx.guild.id
+
+        async def on_200(r):
+            if match_case:
+                await ctx.send(f"{key_name} will now check if cases match")
+            else:
+                await ctx.send(f"{key_name} will not check if cases match")
+
+        async def on_404(r):
+            await ctx.send(f"{key_name} not found")
+
+        await self.bot.request_helper(
+            "put",
+            f"/keyWords/discord/{server_id}/{key_name}",
+            ctx,
+            json={"match_case": match_case},
+            error_prefix=f"Error updating case of key word {key_name}",
+            success_function=on_200,
+            error_handler={404: on_404},
+        )
+
     @keyWord.command(name="list")
     async def key_list(self, ctx, show_response: bool = False):
-        """List all the aliases for this server"""
+        """List all the key word for this server"""
         server_id = ctx.guild.id
 
         def get_key_str(key_info, show_responses):
@@ -131,7 +158,7 @@ class KeyWords(Cog):
             "delete",
             f"/keyWords/discord/{server_id}/{key_name}",
             ctx,
-            error_prefix=f"Error deleting alias {key_name}",
+            error_prefix=f"Error deleting key word {key_name}",
             success_function=on_200,
             error_handler={404: on_404},
         )

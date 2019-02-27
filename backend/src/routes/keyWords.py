@@ -4,12 +4,17 @@ from src import db
 from src.models import KeyWords, DiscordServer, ServerGroup
 from flask_restplus import Resource, fields, abort
 from src.utils import server_group_join, get_group_id
-
+from sqlalchemy.sql import func
 
 ns = api.namespace("api/keyWords", description="Keyword operations")
 
 keyWordModel = ns.model(
-    "KeyWord", {"name": fields.String, "responses": fields.List(fields.String)}
+    "KeyWord",
+    {
+        "name": fields.String,
+        "responses": fields.List(fields.String),
+        "match_case": fields.Boolean,
+    },
 )
 
 
@@ -33,32 +38,34 @@ class KeyWordList(Resource):
         server_group_id = get_group_id(server_type, server_id)
 
         if (
-            KeyWords.query.filter_by(
-                server_group_id=server_group_id, name=form["name"]
-            ).first()
+            KeyWords.query.filter_by(server_group_id=server_group_id)
+            .filter(func.lower(KeyWords.name) == form["name"].lower())
+            .first()
             is not None
         ):
             abort(400, f"Key word {form['name']} already exists")
-        keyWords = KeyWords(
+        keyWord = KeyWords(
             server_group_id=server_group_id,
             name=form["name"],
             responses=form["responses"],
         )
-        db.session.add(keyWords)
+        db.session.add(keyWord)
         db.session.commit()
-        return keyWords
+        return keyWord
 
 
-def get_keyword(server_type, server_id, key_name):
-    keyWords = (
+def get_keyword(server_type, server_id, key_name, check_case=True):
+    keyWord = (
         server_group_join(KeyWords, server_type, server_id).filter(
-            KeyWords.name == key_name
+            func.lower(KeyWords.name) == key_name.lower()
         )
     ).first()
-    if keyWords is None:
+    if keyWord is None:
         abort(404, f"Key word {key_name} does not exist")
+    if check_case and keyWord.match_case and keyWord.name != key_name:
+        abort(400, f"Key word {key_name} does not match the casing of {keyWord.name}")
     else:
-        return keyWords
+        return keyWord
 
 
 @ns.route("/<server_type>/<int:server_id>/<key_name>")
@@ -75,8 +82,11 @@ class KeyWordRoute(Resource):
     @ns.expect(keyWordModel)
     @ns.marshal_with(keyWordModel)
     def put(self, server_type, server_id, key_name):
-        keyWord = get_keyword(server_type, server_id, key_name)
-        keyWord.responses = ns.payload["responses"]
+        keyWord = get_keyword(server_type, server_id, key_name, False)
+        if "responses" in ns.payload:
+            keyWord.responses = ns.payload["responses"]
+        if "match_case" in ns.payload:
+            keyWord.match_case = ns.payload["match_case"]
         db.session.commit()
         return keyWord
 
