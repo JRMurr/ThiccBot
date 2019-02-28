@@ -36,7 +36,7 @@ blueprint = make_discord_blueprint(
 )
 app.register_blueprint(blueprint, url_prefix="/login")
 db = SQLAlchemy(app)
-# migrate = Migrate(app, db)
+migrate = Migrate(app, db)
 from src.models import (
     Alias,
     DiscordServer,
@@ -45,6 +45,7 @@ from src.models import (
     Quotes,
     Album,
     AlbumEntry,
+    Counter,
 )
 
 # db.create_all(app=app)
