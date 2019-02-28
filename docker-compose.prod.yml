@@ -25,13 +25,13 @@ services:
       - SECRET_KEY=${FLASK_SECRET_KEY}
       - LAST_FM_API_KEY=${LAST_FM_API_KEY}
       - LAST_FM_SECRET=${LAST_FM_SECRET}
-      # - FLASK_APP=src
+      - FLASK_APP=src
       - FLASK_ENV=production
     depends_on:
       - postgres
     # run this command when you change db models, this does not detect all changes https://flask-migrate.readthedocs.io/en/latest/ 
     # command: sh -c "dockerize -wait tcp://postgres:5432 && flask db migrate"
-    command: sh -c "dockerize -wait tcp://postgres:5432 && python initDB.py && gunicorn -w 4 -b 0.0.0.0:8000 src:app" #&& flask db upgrade
+    command: sh -c "dockerize -wait tcp://postgres:5432 && flask db upgrade && gunicorn -w 4 -b 0.0.0.0:8000 src:app" #&& flask db upgrade
     # command: sh -c "ls "
   bot:
       build: ./bot

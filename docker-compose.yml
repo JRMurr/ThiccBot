@@ -41,7 +41,7 @@ services:
       - postgres
     # run this command when you change db models, this does not detect all changes https://flask-migrate.readthedocs.io/en/latest/ 
     # command: sh -c "dockerize -wait tcp://postgres:5432 && flask db migrate"
-    command: sh -c "dockerize -wait tcp://postgres:5432 && python initDB.py && flask run --host=0.0.0.0" #&& flask db upgrade
+    command: sh -c "dockerize -wait tcp://postgres:5432 && flask db upgrade && flask run --host=0.0.0.0" #&& flask db upgrade
   bot:
       build: ./bot
       tty: true
