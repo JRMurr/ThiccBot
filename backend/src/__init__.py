@@ -57,6 +57,7 @@ from src.routes import (
     quotes as quotesRoute,
     albums as albumsRoute,
     lastfm as lastFmRoute,
+    counter as counterRoute,
 )
 
 

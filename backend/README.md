@@ -9,6 +9,8 @@
 
 ## Adding models
 When you add a model, put the sql alchemy code in its own file in the `models` folder. Then import in the `_init_.py` file. Then in the root `_init_.py` file add the model to the line with the other model imports `from src.models import...`
+Then run the db migration commands described in the root readme
+
 
 ## Adding Routes
 If you make a new route file in the root `_init_.py` file, import the route where the other routes are imported `from src.routes import ...`
