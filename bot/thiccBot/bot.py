@@ -13,7 +13,7 @@ import re
 from thiccBot.cogs.utils.logError import get_error_str, log_and_send_error
 
 BOT_ADMIN = int(os.environ["BOT_ADMIN"])
-
+IS_DEVELOPMENT = os.environ["BOT_ENV"] == "development"
 BACKEND_URL = os.environ["BACKEND_URL"]
 BOT_API_TOKEN = os.environ["BOT_API_TOKEN"]
 if not BACKEND_URL.endswith("/"):
@@ -44,10 +44,11 @@ def _prefix_callable(bot, msg):
 
 class ThiccBot(commands.Bot):
     def __init__(self, config):
+        pm_help = False if IS_DEVELOPMENT else None
         super().__init__(
             command_prefix=_prefix_callable,
             description=description,
-            pm_help=None,
+            pm_help=pm_help,
             owner_id=BOT_ADMIN,
         )
         self.config = config

@@ -8,9 +8,9 @@ import os
 from pprint import pprint
 
 app = Flask(__name__)
-app.config["SEND_FILE_MAX_AGE_DEFAULT"] = os.environ.get(
-    "SEND_FILE_MAX_AGE_DEFAULT", 30
-)
+# app.config["SEND_FILE_MAX_AGE_DEFAULT"] = int(os.environ.get(
+#     "SEND_FILE_MAX_AGE_DEFAULT", 300
+# )
 
 if "SECRET_KEY" in os.environ:
     app.secret_key = os.environ["SECRET_KEY"]

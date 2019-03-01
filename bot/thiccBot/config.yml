@@ -7,3 +7,4 @@ initial_extensions:
     - 'cogs.keyWords'
     - 'cogs.quotes'
     - 'cogs.album'
+    - 'cogs.counter'

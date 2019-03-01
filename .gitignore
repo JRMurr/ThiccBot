@@ -5,6 +5,10 @@ test.py
 # Postgres
 postgres-data/*
 
+
+#old fatbot files
+FatBotFiles/*.json
+
 #sensitive info in .env
 .env
 # Vscode

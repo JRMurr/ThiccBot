@@ -42,6 +42,7 @@ services:
       - BACKEND_URL=http://ngix/api
       - BOT_API_TOKEN=${BOT_API_TOKEN}
       - BOT_ADMIN=${BOT_ADMIN}
+      - BOT_ENV=production
       volumes:
       - ./bot:/thiccbot:rw
       depends_on:

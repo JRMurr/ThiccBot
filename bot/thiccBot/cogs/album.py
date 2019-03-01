@@ -1,4 +1,5 @@
 from discord.ext import commands
+from discord.ext.commands import Cog
 import discord
 from thiccBot.cogs.utils import checks
 from thiccBot.cogs.utils.paginator import Pages
@@ -10,7 +11,7 @@ from pprint import pprint
 log = logging.getLogger(__name__)
 
 
-class Album(commands.Cog):
+class Album(Cog):
     def __init__(self, bot):
         self.bot = bot
 
