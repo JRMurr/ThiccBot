@@ -74,10 +74,10 @@ class CounterRoute(Resource):
     @ns.marshal_with(counterModel)
     def put(self, server_type, server_id, counter_name):
         counter = get_counter(server_type, server_id, counter_name)
-        if "count" in ns.payload:
-            counter.responses = ns.payload["count"]
+        if ns.payload is not None and "count" in ns.payload:
+            counter.count = ns.payload["count"]
         else:
-            counter.responses += 1
+            counter.count += 1
         db.session.commit()
         return counter
 

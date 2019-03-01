@@ -30,7 +30,7 @@ services:
       - SECRET_KEY=verysecurekey
       - FLASK_APP=src
       - FLASK_ENV=development
-      - SEND_FILE_MAX_AGE_DEFAULT=15
+      - SEND_FILE_MAX_AGE_DEFAULT=+15
       - OAUTHLIB_INSECURE_TRANSPORT=1 #needed for oauth to work locally
     ports:
       # - "8000:8000"
@@ -51,7 +51,7 @@ services:
       - BACKEND_URL=http://flask:5000/api
       - BOT_API_TOKEN=${BOT_API_TOKEN}
       - BOT_ADMIN=${BOT_ADMIN}
-
+      - BOT_ENV=development
       volumes:
       - ./bot:/thiccbot:rw
       depends_on:
