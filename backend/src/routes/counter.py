@@ -8,7 +8,10 @@ from sqlalchemy.sql import func
 
 ns = api.namespace("api/counter", description="Counter operations")
 
-counterModel = ns.model("Counter", {"name": fields.String, "count": fields.Integer})
+counterModel = ns.model(
+    "Counter",
+    {"name": fields.String, "count": fields.Integer, "response": fields.String},
+)
 
 
 @ns.route("/<server_type>/<int:server_id>")
@@ -37,10 +40,20 @@ class CounterList(Resource):
             is not None
         ):
             abort(400, f"Counter {form['name']} already exists")
+        response = None
+        if "response" in form:
+            response = form["response"]
+        if response is None:
+            # response could still be None from the post data
+            response = f"Counter {form['name']}" + " is now at {}"
+        print("-----")
+        print(response)
+        print("------")
         counter = Counter(
             server_group_id=server_group_id,
             name=form["name"],
             count=form.get("count", 0),
+            response=response,
         )
         db.session.add(counter)
         db.session.commit()

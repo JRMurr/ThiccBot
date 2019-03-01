@@ -15,7 +15,7 @@ class Counter(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.group()
+    @commands.group(name="counter")
     @commands.guild_only()
     async def counter(self, ctx):
         """Commands for creating and mangaging counters"""
@@ -43,11 +43,22 @@ class Counter(Cog):
 
     @counter.command(name="create", aliases=["add"])
     @checks.is_bot_admin()
-    async def counter_create(self, ctx, counter_name: str, start_count: int = 0):
+    async def counter_create(self, ctx, counter_name: str, *, response: str = None):
         """Creates an counter
 
-            ex: counter create "my count" """
+            ex: counter create "my count" count is {} 
+            
+            """
         server_id = ctx.guild.id
+
+        if response is not None:
+            index = response.find("{}")
+            if index == -1:
+                await ctx.send(
+                    "Invalid response template, include {} for where the count value should be"
+                )
+            elif response.find("{}", index + 1) != -1:
+                await ctx.send("More than one occurrence of {}, in the response")
 
         async def on_200(r):
             await ctx.send(f"Created Counter: {counter_name}")
@@ -56,7 +67,7 @@ class Counter(Cog):
             "post",
             f"/counter/discord/{server_id}",
             ctx,
-            json={"name": counter_name, "count": start_count},
+            json={"name": counter_name, "response": response},
             error_prefix="Error creating counter",
             success_function=on_200,
         )
@@ -70,7 +81,7 @@ class Counter(Cog):
 
         async def on_200(r):
             data = await r.json()
-            await ctx.send(f"Count of {counter_name} is now {data['count']}")
+            await ctx.send(data["response"].format(data["count"]))
 
         await self.bot.request_helper(
             "put",
@@ -90,7 +101,7 @@ class Counter(Cog):
 
         async def on_200(r):
             data = await r.json()
-            await ctx.send(f"Count of {counter_name} is now {data['count']}")
+            await ctx.send(data["response"].format(data["count"]))
 
         await self.bot.request_helper(
             "put",
