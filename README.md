@@ -65,3 +65,10 @@ pgcli postgresql://testusr:password@localhost:5432/thiccdb
 
 ## Python formatting
 Use the python formatter black, install it with `pip install black`.
+
+
+## porting Fatbot command
+This wont matter to anyone but, after starting up the bot once to init all the discord servers, run
+```sh
+docker-compose run bot sh -c "pip install requests && python FatBotFiles/portFatbot.py"
+```

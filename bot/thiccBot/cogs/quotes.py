@@ -11,7 +11,7 @@ log = logging.getLogger(__name__)
 
 
 def get_str(quote_str, author):
-    return f'"{quote_str}" - "{author}"'
+    return f'"{quote_str}" - {author}'
 
 
 class Quotes(commands.Cog):
@@ -39,7 +39,8 @@ class Quotes(commands.Cog):
     # @checks.is_bot_admin()
     async def quotes(self, ctx):
         """Commands for creating and mangaging quotes"""
-        self.get_rand_quote(ctx)
+        if ctx.invoked_subcommand is None:
+            await self.get_rand_quote(ctx)
 
     @quotes.command(name="search")
     async def quote_search(self, ctx, search: str):
@@ -50,6 +51,7 @@ class Quotes(commands.Cog):
             chosen = random.choice(data)
             await ctx.send(get_str(chosen["quote"], chosen["author"]))
 
+        # TODO: specific error when quote is not found
         await self.bot.request_helper(
             "get",
             f"/quotes/discord/{server_id}/{search}",
@@ -83,7 +85,7 @@ class Quotes(commands.Cog):
     @quotes.command(name="get")
     async def quote_get(self, ctx):
         """Get random quote from this server"""
-        self.get_rand_quote(ctx)
+        await self.get_rand_quote(ctx)
 
     @quotes.command(name="save", aliases=["create"])
     @checks.is_bot_admin()

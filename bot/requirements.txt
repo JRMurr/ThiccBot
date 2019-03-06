@@ -15,3 +15,7 @@ uvloop
 
 #meme stuff
 emoji
+
+# allow people to upload to imgur if they dont want
+# to use the link they passed when adding to an album
+imgurpython

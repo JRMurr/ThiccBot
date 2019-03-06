@@ -46,9 +46,6 @@ class CounterList(Resource):
         if response is None:
             # response could still be None from the post data
             response = f"Counter {form['name']}" + " is now at {}"
-        print("-----")
-        print(response)
-        print("------")
         counter = Counter(
             server_group_id=server_group_id,
             name=form["name"],
