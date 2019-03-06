@@ -7,7 +7,7 @@ postgres-data/*
 
 
 #old fatbot files
-FatBotFiles/*.json
+bot/FatBotFiles/*.json
 
 #sensitive info in .env
 .env

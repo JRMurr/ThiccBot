@@ -56,6 +56,9 @@ services:
       - ./bot:/thiccbot:rw
       depends_on:
       - flask
+      # port fatbot commands
+      # command: python FatBotFiles/portFatbot.py
+      # normal startup
       command: python thiccBot/main.py
   # web: 
   #   build: ./web

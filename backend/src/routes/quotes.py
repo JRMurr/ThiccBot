@@ -36,7 +36,6 @@ class QuoteList(Resource):
     def post(self, server_type, server_id):
         """Create a new Quote"""
         form = ns.payload
-        print(f"server_type: {server_type}, server_id: {server_id}")
         server_group_id = get_group_id(server_type, server_id)
 
         quote = Quotes(
