@@ -8,7 +8,6 @@ pyyaml
 #request stuff
 aiohttp
 cchardet
-aiodns
 
 #faster async loop
 uvloop
