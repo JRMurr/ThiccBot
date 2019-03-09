@@ -94,12 +94,17 @@ class ThiccBot(commands.Bot):
             elif error_prefix is not None:
                 return await log_and_send_error(log, r, ctx, error_prefix)
 
+    def update_prefixes(self, guild_id, data):
+        command = data["command_prefixes"] if data["command_prefixes"] else []
+        message_prefixes = data["message_prefixes"] if data["message_prefixes"] else []
+        self.prefixes[guild_id] = command
+        self.message_prefixes[guild_id] = message_prefixes
+
     async def get_guild(self, guild):
         async with self.backend_request("get", f"/discord/{guild.id}") as r:
             if r.status == 200:
                 data = await r.json()
-                self.prefixes[guild.id] = data["command_prefixes"]
-                self.message_prefixes[guild.id] = data["message_prefixes"]
+                self.update_prefixes(guild.id, data)
                 return data
             else:
                 return None
@@ -110,10 +115,13 @@ class ThiccBot(commands.Bot):
         ) as r:
             if r.status == 200:
                 data = await r.json()
-                self.prefixes[guild.id] = data["command_prefixes"]
-                self.message_prefixes[guild.id] = data["message_prefixes"]
+                self.update_prefixes(guild.id, data)
             else:
                 log.error(await get_error_str(r, "Error adding guild: "))
+
+    async def on_guild_join(self, guild):
+        if not await self.get_guild(guild):
+            await self.add_guild(guild)
 
     async def on_ready(self):
         for guild in self.guilds:

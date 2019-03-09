@@ -57,8 +57,7 @@ class Admin(commands.Cog):
 
         async def on_200(r):
             data = await r.json()
-            self.bot.prefixes[server_id] = data["command_prefixes"]
-            self.bot.message_prefixes[server_id] = data["command_prefixes"]
+            self.bot.update_prefixes(server_id, data)
             await ctx.send(
                 f"({prefix}) has been added to the list of possible {clean_prefix_type}es"
             )
@@ -80,8 +79,7 @@ class Admin(commands.Cog):
 
         async def on_200(r):
             data = await r.json()
-            self.bot.prefixes[server_id] = data["command_prefixes"]
-            self.bot.message_prefixes[server_id] = data["message_prefixes"]
+            self.bot.update_prefixes(server_id, data)
             await ctx.send(
                 f"({prefix}) has been removed from the list of possible {clean_prefix_type}es"
             )
@@ -137,7 +135,7 @@ class Admin(commands.Cog):
             await ctx.send(f"run {ctx.prefix}help command_prefix")
 
     @command_prefix.command(name="add")
-    async def add_command_prefix(self, ctx, prefix: str):
+    async def add_command_prefix(self, ctx, *, prefix: str):
         """Adds a command prefix to the list of possible command prefixes"""
         server_id = ctx.message.guild.id
 
@@ -148,7 +146,7 @@ class Admin(commands.Cog):
         await self.list_prefixes(ctx, "command_prefix")
 
     @command_prefix.command(name="delete")
-    async def delete_command_prefix(self, ctx, prefix: str):
+    async def delete_command_prefix(self, ctx, *, prefix: str):
         """Removes a prefix from list of command prefixes for this sever"""
         await self.delete_prefix(ctx, "command_prefix", prefix)
 
@@ -160,7 +158,7 @@ class Admin(commands.Cog):
             await ctx.send(f"run {ctx.prefix}help message_prefix")
 
     @message_prefix.command(name="add")
-    async def add_message_prefix(self, ctx, prefix: str):
+    async def add_message_prefix(self, ctx, *, prefix: str):
         """Adds a command prefix to the list of possible message prefixes"""
         server_id = ctx.message.guild.id
         await self.add_prefix(ctx, "message_prefix", prefix)
@@ -170,7 +168,7 @@ class Admin(commands.Cog):
         await self.list_prefixes(ctx, "message_prefix")
 
     @message_prefix.command(name="delete")
-    async def delete_message_prefix(self, ctx, prefix: str):
+    async def delete_message_prefix(self, ctx, *, prefix: str):
         """Removes a prefix from list of command message for this sever"""
         await self.delete_prefix(ctx, "message_prefix", prefix)
 

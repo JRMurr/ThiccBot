@@ -1,4 +1,4 @@
-command_prefix: "?" # this is the deafult prefix to be used, wont be used if prefixes are set in a server
+command_prefix: ">" # this is the deafult prefix to be used, wont be used if prefixes are set in a server
 initial_extensions:
     - 'cogs.alias'
     - 'cogs.basics'

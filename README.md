@@ -58,9 +58,9 @@ If the db has data and the migration thinks the db is not on the latest migratio
 
 
 ## connect to db
-With the default db user name and passwords you can use pgcli (or psql) to connect to the db
 ```sh
-pgcli postgresql://testusr:password@localhost:5432/thiccdb
+source .env
+docker exec -it thiccbot_postgres_1 psql -U $THICC_USER -w $THICC_PASSWORD -d $THICC_DB
 ```
 
 ## Python formatting
