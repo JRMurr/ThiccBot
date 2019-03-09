@@ -19,7 +19,6 @@ class Alias(Cog):
         return (x.name for x in self.bot.commands)
 
     @Cog.listener()
-    # @message_checks()
     async def on_message(self, message: discord.Message):
         if message.guild is None or message.author == self.bot.user:
             return

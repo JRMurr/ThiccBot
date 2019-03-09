@@ -33,6 +33,8 @@ def _prefix_callable(bot, msg):
     base = [f"<@!{user_id}> ", f"<@{user_id}> "]
     if msg.guild is None:
         base.append(config["command_prefix"])
+        if config["command_prefix"] != "!":
+            base.append("!")
     else:
         guild_prefixes = bot.prefixes.get(msg.guild.id, [])
         if guild_prefixes is None or len(guild_prefixes) == 0:
@@ -175,6 +177,8 @@ class ThiccBot(commands.Bot):
         # TODO: if performance becomes an issue have a `on_message` object that
         # calls the alias and keyword on_msg so this function is not called 3 times
         # binding of the cog class methods might be weird
+        if message.guild is None:
+            return message, False
         deleteMessage = False
         if message.content.lower().endswith("-del"):
             deleteMessage = True

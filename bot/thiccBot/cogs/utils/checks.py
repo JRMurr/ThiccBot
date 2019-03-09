@@ -19,7 +19,6 @@ def is_bot_admin():
     async def predicate(ctx: commands.Context):
         command_name = ctx.command.name
         if not ctx.message.guild:
-            log.info(f"attempted to run {command_name} outside of a server")
             return False
         bot = ctx.bot
         author = ctx.message.author
@@ -50,6 +49,8 @@ def is_server_owner():
     """Checks if the user is the owner of the server"""
 
     async def predicate(ctx: commands.Context):
+        if not ctx.message.guild:
+            return False
         owner = server_id = ctx.message.guild.owner
         author = ctx.message.author
         return bool_or_bot_owner(ctx, author == owner)
