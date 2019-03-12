@@ -24,6 +24,18 @@ from src.routes import (
     standingsNs,
 )
 
+# from src.routes import (
+#     alias as aRoute,
+#     discordServers as dsRoute,
+#     login as loginRoute,
+#     keyWords as keyRoute,
+#     quotes as quotesRoute,
+#     albums as albumsRoute,
+#     lastfm as lastFmRoute,
+#     counter as counterRoute,
+#     serverGroups as groupRote,
+# )
+# >>>>>>> update web
 namespaces = [
     aliasNs,
     discordNs,
@@ -93,9 +105,13 @@ def before_request():
         isDev and request.headers.get("Host", "") == "localhost:5000"
     )
     g.is_bot = api_key_passed == BOT_API_TOKEN
-    # if (api_key_passed == '') and (not is_user) and request.endpoint
-    # not in ('login', 'discord.login', 'discord.authorized'):
-    #     return redirect(url_for("login"))
-    if not allow_debug and not (is_user or g.is_bot):
-        return abort(403)  # a token was passed and it was bad
+    not_authorized = not (is_user or g.is_bot)
+    if not_authorized and request.endpoint not in (
+        "login",
+        "discord.login",
+        "discord.authorized",
+    ):
+        return redirect(url_for("login"))
+    # if not allow_debug and not_authorized:
+    #     return abort(403)
     g.is_bot = api_key_passed == BOT_API_TOKEN
