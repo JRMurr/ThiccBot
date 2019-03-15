@@ -77,7 +77,6 @@ class KeyWords(Cog):
 
     @commands.group(name="keyWord", aliases=["keyword", "keywords", "keyWords"])
     @commands.guild_only()
-    @checks.is_bot_admin()
     async def keyWord(self, ctx):
         """Commands for creating and mangaging key words"""
         if ctx.invoked_subcommand is None:  # or ctx.subcommand_passed == 'box':
@@ -86,6 +85,7 @@ class KeyWords(Cog):
             )
 
     @keyWord.command(name="create", aliases=["set", "make", "add", "save"])
+    @checks.is_bot_admin()
     async def key_create(self, ctx, name: str, *, response: str):
         """Creates a key word
 
@@ -93,6 +93,7 @@ class KeyWords(Cog):
         await self.create_or_update_key(ctx, name, response)
 
     @keyWord.command(name="update")
+    @checks.is_bot_admin()
     async def key_update(self, ctx, name: str, *, response: str):
         """Updates a key word
 
@@ -100,6 +101,7 @@ class KeyWords(Cog):
         await self.create_or_update_key(ctx, name, response, True)
 
     @keyWord.command(name="set_case_match")
+    @checks.is_bot_admin()
     async def key_set_case_match(self, ctx, key_name: str, match_case: bool):
         """Sets if the key should match case or not
 
@@ -153,6 +155,7 @@ class KeyWords(Cog):
         )
 
     @keyWord.command(name="delete")
+    @checks.is_bot_admin()
     async def key_delete(self, ctx, key_name):
         """Deletes the specified key word"""
         server_id = ctx.guild.id

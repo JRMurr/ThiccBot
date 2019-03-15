@@ -126,6 +126,7 @@ class Album(Cog):
         )
 
     @entries.command(name="delete")
+    @checks.is_bot_admin()
     async def album_entry_delete(self, ctx, entry_id: int):
         """Deletes the specified entry in the album
 
