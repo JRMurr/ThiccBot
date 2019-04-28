@@ -1,7 +1,7 @@
 import os
 import asyncio
 from thiccBot.bot import ThiccBot
-from yaml import load
+from yaml import full_load
 import logging
 from contextlib import contextmanager, asynccontextmanager
 
@@ -14,7 +14,7 @@ else:
 
 BOT_ID = os.environ["DISCORD_ID"]
 with open(f"{os.path.dirname(os.path.abspath(__file__))}/config.yml", "r") as stream:
-    config = load(stream)
+    config = full_load(stream)
 
 
 @contextmanager

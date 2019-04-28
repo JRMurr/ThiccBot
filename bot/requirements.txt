@@ -1,20 +1,19 @@
 # local package
 -e .
 
-# TODO: switch to pypy package when its available
-git+https://github.com/Rapptz/discord.py@rewrite
-pyyaml
+discord.py==1.0.1
+PyYAML==5.1
 
 #request stuff
-aiohttp
-cchardet
+aiohttp==3.5.4
+chardet==3.0.4
 
 #faster async loop
-uvloop
+uvloop==0.12.2
 
 #meme stuff
-emoji
+emoji==0.5.2
 
 # allow people to upload to imgur if they dont want
 # to use the link they passed when adding to an album
-imgurpython
+imgurpython==1.1.7
