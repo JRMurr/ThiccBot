@@ -23,7 +23,7 @@ async def get_error_message(r):
 async def log_and_send_error(log, r, ctx, prefix):
     error_message = await get_error_message(r)
     if error_message is None:
-        error_message = ""
+        error_message = "Unknown Error"
     await ctx.send(f"{prefix}: {error_message}")
     await log_with_ctx(log, r, ctx, prefix, error_message)
 

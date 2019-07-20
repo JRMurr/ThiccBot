@@ -8,3 +8,4 @@ initial_extensions:
     - 'cogs.quotes'
     - 'cogs.album'
     - 'cogs.counter'
+    - 'cogs.lastfm'
