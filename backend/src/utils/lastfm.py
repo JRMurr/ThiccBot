@@ -27,6 +27,7 @@ class LastFmHelper:
     def __init__(self):
         self.network = pylast.LastFMNetwork(api_key=API_KEY, api_secret=SECRET_KEY)
         self.font = ImageFont.truetype(FONT_PATH, FONT_SIZE)
+        self.user_cache = {}
 
     def get_image(self, url):
         if url is None or len(url) == 0:
@@ -50,6 +51,17 @@ class LastFmHelper:
         out = Image.alpha_composite(img.convert("RGBA"), txt)
         return out
 
+    def get_user(self, username):
+        if username in self.user_cache:
+            return self.user_cache[username]
+        user = self.network.get_user(username)
+        try:
+            user.get_country()
+            self.user_cache[username] = user
+            return user
+        except:
+            abort(400, f"username '{username}' not found")
+
     def grid(self, username, period=CONSTANTS.LAST_FM.PERIOD_7DAYS):
         """Returns a lastFM users 9 most played albums for the specified period in a grid image
         valid periods are overall, 7day, 1month, 3month, 6month, 12month
@@ -57,7 +69,7 @@ class LastFmHelper:
         if period not in PERIODS:
             abort(400, "invalid period, valid options are: " + PERIOD_STR)
 
-        user = self.network.get_user(username)
+        user = self.get_user(username)
 
         GRID_SIZE = 3
         NUM_IMAGES = GRID_SIZE ** 2
