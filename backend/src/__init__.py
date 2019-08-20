@@ -1,4 +1,4 @@
-from flask import Flask, request, abort, redirect, url_for, g
+from flask import Flask, request, abort, redirect, url_for, g, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_restplus import Api
@@ -63,7 +63,7 @@ from src.routes import (
 
 @app.route("/api/health")
 def healthRoute():
-    return "Ready"
+    return jsonify(CONSTANTS)
 
 
 @app.before_request

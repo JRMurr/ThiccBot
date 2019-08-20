@@ -21,21 +21,29 @@ class Lastfm(Cog):
             await ctx.send("run lastm grid 'lastfm_user_name'")
 
     @lastfm.command()
-    async def grid(self, ctx: commands.Context, lastfm_name: str):
+    async def grid(self, ctx: commands.Context, lastfm_name: str, period: str = None):
         message = await ctx.send("Making last fm grid, this will take a sec")
+
+        async def cleanUp():
+            await message.delete()
 
         async def on_200(r: ClientResponse):
             f = File(BytesIO(await r.read()), "image.jpeg")
             await ctx.send(file=f)
-            await message.delete()
+            await cleanUp()
+
+        path = f"/lastFM/grid/{lastfm_name}"
+        if period:
+            path += f"/{period}"
 
         async with ctx.typing():
             await self.bot.request_helper(
                 "get",
-                f"/lastFM/grid/{lastfm_name}",
+                path,
                 ctx,
                 error_prefix="Error getting last fm grid",
                 success_function=on_200,
+                error_cleanup=cleanUp,
             )
 
 

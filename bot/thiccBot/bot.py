@@ -11,6 +11,7 @@ import functools
 import copy
 import re
 import backoff
+from dotmap import DotMap
 from thiccBot.cogs.utils.logError import get_error_str, log_and_send_error
 
 BOT_ADMIN = int(os.environ["BOT_ADMIN"])
@@ -88,14 +89,18 @@ class ThiccBot(commands.Bot):
         error_prefix: str = None,
         json=None,
         error_handler={},
+        error_cleanup=None,
     ):
         async with self.backend_request(method, api_end_point, json=json) as r:
             if r.status == 200:
                 return await success_function(r)
-            elif r.status in error_handler:
-                return await error_handler[r.status](r)
-            elif error_prefix is not None:
-                return await log_and_send_error(log, r, ctx, error_prefix)
+            else:
+                if error_cleanup:
+                    await error_cleanup()
+                if r.status in error_handler:
+                    return await error_handler[r.status](r)
+                elif error_prefix is not None:
+                    return await log_and_send_error(log, r, ctx, error_prefix)
 
     def update_prefixes(self, guild_id, data):
         command = data["command_prefixes"] if data["command_prefixes"] else []
@@ -134,7 +139,8 @@ class ThiccBot(commands.Bot):
             if r.status != 200:
                 raise Exception()
             else:
-                return await r.text()
+                data = await r.json()
+                self.CONSTANTS = DotMap(data)
 
     async def on_ready(self):
         try:
