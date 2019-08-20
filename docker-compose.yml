@@ -39,6 +39,7 @@ services:
       - ./backend:/thiccflask:rw
     depends_on:
       - postgres
+    restart: always
     # run this command when you change db models, this does not detect all changes https://flask-migrate.readthedocs.io/en/latest/ 
     # command: sh -c "dockerize -wait tcp://postgres:5432 && flask db migrate"
     command: sh -c "dockerize -wait tcp://postgres:5432 && flask db upgrade && flask run --host=0.0.0.0" #&& flask db upgrade
@@ -46,6 +47,7 @@ services:
       build: ./bot
       tty: true
       image: thiccbot
+      restart: always
       environment:
       - DISCORD_ID=${DISCORD_ID}
       - BACKEND_URL=http://flask:5000/api
@@ -56,9 +58,6 @@ services:
       - ./bot:/thiccbot:rw
       depends_on:
       - flask
-      # port fatbot commands
-      # command: python FatBotFiles/portFatbot.py
-      # normal startup
       command: python thiccBot/main.py
   # web: 
   #   build: ./web

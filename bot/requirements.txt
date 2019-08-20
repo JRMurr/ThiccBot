@@ -3,6 +3,8 @@
 
 discord.py==1.0.1
 PyYAML==5.1
+backoff==1.8.0
+
 
 #request stuff
 aiohttp==3.5.4

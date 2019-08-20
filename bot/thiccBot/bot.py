@@ -10,6 +10,7 @@ import os
 import functools
 import copy
 import re
+import backoff
 from thiccBot.cogs.utils.logError import get_error_str, log_and_send_error
 
 BOT_ADMIN = int(os.environ["BOT_ADMIN"])
@@ -125,7 +126,25 @@ class ThiccBot(commands.Bot):
         if not await self.get_guild(guild):
             await self.add_guild(guild)
 
+    @backoff.on_exception(backoff.expo, Exception, max_tries=2, max_time=15, logger=log)
+    async def check_backend_health(self):
+        async with self.backend_request(
+            "get", "health", timeout=aiohttp.ClientTimeout(total=5)
+        ) as r:
+            if r.status != 200:
+                raise Exception()
+            else:
+                return await r.text()
+
     async def on_ready(self):
+        try:
+            print("Checking health")
+            await self.check_backend_health()
+        except Exception:
+            print("Server health check failed, quiting")
+            await self.logout()
+            await self.close_sessions()
+            return
         for guild in self.guilds:
             if not await self.get_guild(guild):
                 await self.add_guild(guild)

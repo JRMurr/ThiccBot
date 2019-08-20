@@ -61,6 +61,11 @@ from src.routes import (
 )
 
 
+@app.route("/api/health")
+def healthRoute():
+    return "Ready"
+
+
 @app.before_request
 def before_request():
     is_user = dAuth.authorized
