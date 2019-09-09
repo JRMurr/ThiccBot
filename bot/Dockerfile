@@ -5,7 +5,7 @@ RUN apk update && apk upgrade && \
     && apk add --virtual build-deps gcc python3-dev g++ make
 
 WORKDIR /thiccbot
-RUN pip install -U setuptools
+RUN pip install -U setuptools pip
 
 # Copy in requirements.txt first so changing the source
 # code doesn't require these steps to run again
