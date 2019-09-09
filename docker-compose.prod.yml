@@ -12,6 +12,25 @@ services:
       - POSTGRES_DB=${THICC_DB}
     volumes:
       - ./postgres-data/postgres:/var/lib/postgresql/data:rw
+  pgbackups:
+        image: prodrigestivill/postgres-backup-local
+        restart: always
+        volumes:
+            - ./pg-backups:/backups
+        links:
+            - postgres
+        depends_on:
+            - postgres
+        environment:
+            - POSTGRES_HOST=postgres
+            - POSTGRES_DB=${THICC_DB}
+            - POSTGRES_USER=${THICC_USER}
+            - POSTGRES_PASSWORD=${THICC_PASSWORD}
+            - SCHEDULE=@daily
+            - BACKUP_KEEP_DAYS=7
+            - BACKUP_KEEP_WEEKS=4
+            - BACKUP_KEEP_MONTHS=6
+            # - HEALTHCHECK_PORT=80
   flask:
     build: ./backend
     tty: true

@@ -4,7 +4,7 @@
 test.py
 # Postgres
 postgres-data/*
-
+pg-backups/*
 
 #old fatbot files
 bot/FatBotFiles/*.json
