@@ -2,8 +2,7 @@
 
 # Development stuff
 
-- Discord python api [Docs](http://discordpy.readthedocs.io/en/rewrite/)
-    - The rewrite branch is in active development and there will be breaking changes
+- Discord python api [Docs](http://discordpy.readthedocs.io/)
     - Join the discord [server](https://discord.gg/r3sSKJJ) to get notified of any breaking changes
 - The creator of the discord python library has decent example bot [here](https://github.com/Rapptz/RoboDanny)
 

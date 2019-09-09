@@ -18,7 +18,7 @@ class Lastfm(Cog):
     async def lastfm(self, ctx):
         """Commands for getting lastfm grids"""
         if ctx.invoked_subcommand is None:
-            await ctx.send("run lastm grid 'lastfm_user_name'")
+            await ctx.send("run lastfm grid 'lastfm_user_name'")
 
     @lastfm.command()
     async def grid(self, ctx: commands.Context, lastfm_name: str, period: str = None):

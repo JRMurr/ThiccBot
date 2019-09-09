@@ -32,7 +32,7 @@ class Basics(commands.Cog):
         print(res)
         await ctx.send(", ".join(res))
 
-    @commands.command()
+    @commands.command(name="do_multiple", aliases=["repeat"])
     async def do_multiple(self, ctx, numTimes: int, *, command: str):
         """does the passed command the specified number of times"""
         if command.startswith("do_multiple"):
@@ -40,13 +40,12 @@ class Basics(commands.Cog):
             return
         msg = copy.copy(ctx.message)
         msg.content = f"{ctx.prefix}{command}"
-
+        print(msg)
         if numTimes > 5:
             await ctx.send("thats too many times boi chill")
             return
-        new_ctx = await self.bot.get_context(msg)
         for i in range(numTimes):
-            await new_ctx.reinvoke()
+            await self.bot.on_message(msg)
 
     @commands.command()
     async def meme_text(self, ctx, *args):

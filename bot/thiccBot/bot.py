@@ -198,10 +198,6 @@ class ThiccBot(commands.Bot):
         )
 
     async def process_message(self, message: discord.Message):
-        """Used in any `on_message` function to do preprocessing on a message"""
-        # TODO: if performance becomes an issue have a `on_message` object that
-        # calls the alias and keyword on_msg so this function is not called 3 times
-        # binding of the cog class methods might be weird
         if message.guild is None:
             return message, False
         deleteMessage = False
@@ -219,10 +215,19 @@ class ThiccBot(commands.Bot):
                 break
         return message, deleteMessage
 
+    async def call_all_on_message(self, message: discord.Message):
+        """Goes through all cogs and will call the on_message function if it has one"""
+        for name in self.cogs:
+            cog = self.get_cog(name)
+            on_msg = getattr(cog, "on_message", None)
+            if callable(on_msg):
+                await on_msg(message)
+
     async def on_message(self, message: discord.Message):
         if message.author == self.user:
             return
         message, deleteMessage = await self.process_message(message)
         await self.process_commands(message)
+        await self.call_all_on_message(message)
         if deleteMessage:
             await message.delete()

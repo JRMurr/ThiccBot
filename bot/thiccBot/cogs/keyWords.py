@@ -31,11 +31,9 @@ class KeyWords(Cog):
             elif r.status == 403:
                 log.error(await get_error_str(r, "Error making key word get request: "))
 
-    @Cog.listener()
     async def on_message(self, message: discord.Message):
         if message.guild is None or message.author == self.bot.user:
             return
-        message, _ = await self.bot.process_message(message)
         responses = await self.get_key_word(message)
         if responses:
             ctx = await self.bot.get_context(message)

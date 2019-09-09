@@ -18,11 +18,9 @@ class Alias(Cog):
     def get_bot_command_names(self):
         return (x.name for x in self.bot.commands)
 
-    @Cog.listener()
     async def on_message(self, message: discord.Message):
         if message.guild is None or message.author == self.bot.user:
             return
-        message, _ = await self.bot.process_message(message)
         for prefix in self.bot.get_command_prefixes(message):
             if message.content.startswith(prefix):
                 alias_name = message.content[len(prefix) :].split(" ")[0]
