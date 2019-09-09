@@ -57,6 +57,11 @@ If the db has data and the migration thinks the db is not on the latest migratio
 `docker-compose run flask flask db stamp <last revision>` to get things working
 
 
+## Force DB backup
+```sh
+docker-compose run pgbackups /backup.sh
+```
+
 ## connect to db
 ```sh
 source .env
