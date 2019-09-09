@@ -59,7 +59,7 @@ If the db has data and the migration thinks the db is not on the latest migratio
 
 ## Force DB backup
 ```sh
-docker-compose run pgbackups /backup.sh
+docker-compose -f docker-compose.prod.yml run pgbackups /backup.sh
 ```
 
 ## connect to db
