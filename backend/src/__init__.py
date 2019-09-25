@@ -8,9 +8,6 @@ import os
 from pprint import pprint
 
 app = Flask(__name__)
-# app.config["SEND_FILE_MAX_AGE_DEFAULT"] = int(os.environ.get(
-#     "SEND_FILE_MAX_AGE_DEFAULT", 300
-# )
 
 if "SECRET_KEY" in os.environ:
     app.secret_key = os.environ["SECRET_KEY"]
@@ -19,7 +16,7 @@ else:
     app.secret_key = "supersekrit"
 
 api = Api(app)
-
+isDev = os.environ["FLASK_ENV"] == "development"
 DB_USER = os.environ["DB_USER"]
 DB_PASS = os.environ["DB_PASS"]
 DB_NAME = os.environ["DB_NAME"]
@@ -70,10 +67,7 @@ def healthRoute():
 def before_request():
     is_user = dAuth.authorized
     api_key_passed = request.headers.get("bot-token", "")
-    allow_debug = (
-        os.environ["FLASK_ENV"] == "development"
-        and request.headers.get("Host", "") == "localhost:5000"
-    )
+    allow_debug = isDev and request.headers.get("Host", "") == "localhost:5000"
     g.is_bot = api_key_passed == BOT_API_TOKEN
     # if (api_key_passed == '') and (not is_user) and request.endpoint not in ('login', 'discord.login', 'discord.authorized'):
     #     return redirect(url_for("login"))
