@@ -4,6 +4,7 @@ import requests
 from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
 from flask_restplus import abort
+from typing import List
 from src import CONSTANTS
 
 API_KEY = os.environ["LAST_FM_API_KEY"]
@@ -19,8 +20,9 @@ PERIODS = [
 ]
 PERIOD_STR = ", ".join(PERIODS)
 
-FONT_PATH = "fonts/Butler_ExtraBold.otf"
+FONT_PATH = "fonts/Montserrat-ExtraBoldItalic.ttf"
 FONT_SIZE = 14
+IMAGE_SIZE = 300
 
 
 class LastFmHelper:
@@ -29,15 +31,15 @@ class LastFmHelper:
         self.font = ImageFont.truetype(FONT_PATH, FONT_SIZE)
         self.user_cache = {}
 
-    def get_image(self, url):
+    def get_image(self, url) -> Image.Image:
         if url is None or len(url) == 0:
-            return Image.new("RGB", (300, 300))
+            return Image.new("RGB", (IMAGE_SIZE, IMAGE_SIZE))
         response = requests.get(url)
-        img = Image.open(BytesIO(response.content))
-        img.thumbnail((300, 300))
+        img: Image.Image = Image.open(BytesIO(response.content))
+        img.thumbnail((IMAGE_SIZE, IMAGE_SIZE))
         return img
 
-    def image_text(self, img, text, x_pos=0, y_pos=0):
+    def image_text(self, img: Image, text, x_pos=0, y_pos=0) -> Image.Image:
         """Adds text to the image at the specified location"""
         # Make blank image for text
         txt = Image.new("RGBA", img.size, (255, 255, 255, 0))
@@ -50,6 +52,12 @@ class LastFmHelper:
         d.text((x_pos, y_pos), text, font=self.font, fill=(255, 255, 255, 255))
         out = Image.alpha_composite(img.convert("RGBA"), txt)
         return out
+
+    def row_text(self, text: List[str]):
+        txt_img = Image.new("RGBA", (IMAGE_SIZE, IMAGE_SIZE))
+        d = ImageDraw.Draw(txt_img)
+        d.text((0, 0), "\n\n\n".join(text), font=self.font, fill=(255, 255, 255, 255))
+        return txt_img
 
     def get_user(self, username):
         if username in self.user_cache:
@@ -72,27 +80,48 @@ class LastFmHelper:
         user = self.get_user(username)
 
         GRID_SIZE = 3
+        IMG_SPACING = int(IMAGE_SIZE * 0.05)
         NUM_IMAGES = GRID_SIZE ** 2
         albums = user.get_top_albums(period, limit=NUM_IMAGES + 1)
         if len(albums) < NUM_IMAGES:
             abort(400, f"{username} does not have enough albums to make a grid")
-        new_im = Image.new("RGB", (GRID_SIZE * 300, GRID_SIZE * 300))
+        GRID_WIDTH = GRID_SIZE + 1
+        new_im = Image.new(
+            "RGB",
+            (
+                (GRID_WIDTH * IMAGE_SIZE) + (GRID_SIZE * IMG_SPACING),
+                (GRID_SIZE * IMAGE_SIZE) + ((GRID_SIZE - 1) * IMG_SPACING),
+            ),
+        )
         for y_idx in range(0, GRID_SIZE):
-            for x_idx in range(0, GRID_SIZE):
-                album_idx = y_idx * 3 + x_idx
-                album = albums[album_idx].item
-                try:
-                    imgUrl = album.get_cover_image(size=4)
-                except pylast.WSError as e:
-                    imgUrl = None
+            row_text = []
+            for x_idx in range(0, GRID_SIZE + 1):
+                grid_img = None
+                if x_idx == GRID_SIZE:
+                    # Make text image
+                    grid_img = self.row_text(row_text)
+                else:
+                    album_idx = y_idx * 3 + x_idx
+                    album = albums[album_idx].item
+                    try:
+                        imgUrl = album.get_cover_image(size=4)
+                    except pylast.WSError as e:
+                        imgUrl = None
 
-                alb_image = self.get_image(imgUrl)
-                text = "{}\n{}".format(album.get_artist().get_name(), album.get_title())
-                alb_image = self.image_text(alb_image, text)
-                new_im.paste(alb_image, (x_idx * 300, y_idx * 300))
-                alb_image.close()
+                    grid_img = self.get_image(imgUrl)
+                    text = "{}\n{}".format(
+                        album.get_artist().get_name(), album.get_title()
+                    )
+                    row_text.append(text)
+                x_offset = IMG_SPACING * x_idx
+                y_offset = IMG_SPACING * y_idx
+                new_im.paste(
+                    grid_img,
+                    ((x_idx * IMAGE_SIZE) + x_offset, (y_idx * IMAGE_SIZE) + y_offset),
+                )
+                grid_img.close()
         img_io = BytesIO()
-        new_im.save(img_io, format="JPEG")
+        new_im.save(img_io, format="PNG")
         img_io.seek(0)
         new_im.close()
         return img_io
