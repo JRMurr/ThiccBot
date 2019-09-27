@@ -32,7 +32,7 @@ services:
             - BACKUP_KEEP_MONTHS=6
             # - HEALTHCHECK_PORT=80
   flask:
-    build: ./backend
+    image: jrmurray/thiccbot-flask:latest
     tty: true
     environment:
       - DB_USER=${THICC_USER}
@@ -54,9 +54,8 @@ services:
     command: sh -c "dockerize -wait tcp://postgres:5432 && flask db upgrade && gunicorn -w 4 -b 0.0.0.0:8000 src:app" #&& flask db upgrade
     # command: sh -c "ls "
   bot:
-      build: ./bot
       tty: true
-      image: thiccbot
+      image: jrmurray/thiccbot-bot:latest
       restart: always
       environment:
       - DISCORD_ID=${DISCORD_ID}
@@ -70,7 +69,7 @@ services:
       - flask
       command: python thiccBot/main.py
   ngix:
-    build: ./prod
+    image: jrmurray/thiccbot-ngix:latest
     depends_on:
       - flask
     ports:
