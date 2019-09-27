@@ -1,0 +1,24 @@
+version: '3'
+
+services:
+  postgres:
+    image: postgres:10-alpine
+    environment:
+      - POSTGRES_USER=thiccbot
+      - POSTGRES_PASSWORD=thiccbot
+      - POSTGRES_DB=thiccbot
+  flask:
+    build: ./backend
+    image: jrmurray/thiccbot-flask:latest
+    depends_on:
+      - postgres
+  bot:
+      build: ./bot
+      image: jrmurray/thiccbot-bot:latest
+  ngix:
+    build: ./prod
+    image: jrmurray/thiccbot-ngix:latest
+    depends_on:
+      - flask
+    ports:
+      - "80:80"

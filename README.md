@@ -68,5 +68,16 @@ source .env
 docker exec -it thiccbot_postgres_1 psql -U $THICC_USER -w $THICC_PASSWORD -d $THICC_DB
 ```
 
+## Restore from backup
+if you need to restore a backup first wipe the folder `./postgres-data` then run
+```sh
+# run just pg so flask and bot don't start putting stuff in the db
+docker-compose -f docker-compose.prod.yml run -d postgres
+
+
+source .env
+cat <backup_dump.sql> | docker exec -i <pg_container_id> psql -U $THICC_USER -w $THICC_PASSWORD -d $THICC_DB
+```
+
 ## Python formatting
 Use the python formatter black, install it with `pip install black`.
