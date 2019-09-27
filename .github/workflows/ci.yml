@@ -3,34 +3,33 @@ name: Build Images
 on: [push]
 
 jobs:
-  build:
-    build-flask:
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@master
-        - name: Build & push flask image
-          if: github.ref == 'refs/heads/master'
-          run: |
-            docker login -u ${{ secrets.dockerHubUserName }} -p ${{ secrets.dockerHubToken }}
-            docker-compose -f docker-compose.ci.yml build flask
-            docker-compose -f docker-compose.ci.yml push flask
-    build-bot:
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@master
-        - name: Build & push bot image
-          if: github.ref == 'refs/heads/master'
-          run: |
-            docker login -u ${{ secrets.dockerHubUserName }} -p ${{ secrets.dockerHubToken }}
-            docker-compose -f docker-compose.ci.yml build bot
-            docker-compose -f docker-compose.ci.yml push bot
-    build-ngix:
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@master
-        - name: Build & push ngix image
-          if: github.ref == 'refs/heads/master'
-          run: |
-            docker login -u ${{ secrets.dockerHubUserName }} -p ${{ secrets.dockerHubToken }}
-            docker-compose -f docker-compose.ci.yml build ngix
-            docker-compose -f docker-compose.ci.yml push ngix
+  build-flask:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Build & push flask image
+        if: github.ref == 'refs/heads/master'
+        run: |
+          docker login -u ${{ secrets.dockerHubUserName }} -p ${{ secrets.dockerHubToken }}
+          docker-compose -f docker-compose.ci.yml build flask
+          docker-compose -f docker-compose.ci.yml push flask
+  build-bot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Build & push bot image
+        if: github.ref == 'refs/heads/master'
+        run: |
+          docker login -u ${{ secrets.dockerHubUserName }} -p ${{ secrets.dockerHubToken }}
+          docker-compose -f docker-compose.ci.yml build bot
+          docker-compose -f docker-compose.ci.yml push bot
+  build-ngix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Build & push ngix image
+        if: github.ref == 'refs/heads/master'
+        run: |
+          docker login -u ${{ secrets.dockerHubUserName }} -p ${{ secrets.dockerHubToken }}
+          docker-compose -f docker-compose.ci.yml build ngix
+          docker-compose -f docker-compose.ci.yml push ngix
