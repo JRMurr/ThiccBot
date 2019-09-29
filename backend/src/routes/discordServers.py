@@ -25,12 +25,12 @@ serverModel = ns.model(
 )
 
 
-def id_to_str(serverJson):
-    # The reason front end has issues with big int
-    # so if not the bot convert the id to a string
-    if not g.is_bot:
-        serverJson["id"] = str(serverJson["id"])
-    return serverJson
+# def id_to_str(serverJson):
+#     # The reason front end has issues with big int
+#     # so if not the bot convert the id to a string
+#     if not g.is_bot:
+#         serverJson["id"] = str(serverJson["id"])
+#     return serverJson
 
 
 @ns.route("")

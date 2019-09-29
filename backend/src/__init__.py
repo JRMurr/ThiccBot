@@ -2,38 +2,45 @@ from flask import Flask, request, abort, redirect, url_for, g, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_restplus import Api
-from flask_dance.contrib.discord import make_discord_blueprint, discord as dAuth
-from .constants import CONSTANTS
 import os
-from pprint import pprint
+from .config import Config
+from .constants import CONSTANTS
 
-app = Flask(__name__)
 
-if "SECRET_KEY" in os.environ:
-    app.secret_key = os.environ["SECRET_KEY"]
-else:
-    app.logger.warning("PLEASE SET A SECRET KEY, USING A DEFAULT KEY IS SAD TIMES")
-    app.secret_key = "supersekrit"
+# from flask_dance.contrib.discord import make_discord_blueprint, discord as dAuth
 
-api = Api(app)
+db = SQLAlchemy()
+migrate = Migrate()
+api = Api()
+
 isDev = os.environ["FLASK_ENV"] == "development"
-DB_USER = os.environ["DB_USER"]
-DB_PASS = os.environ["DB_PASS"]
-DB_NAME = os.environ["DB_NAME"]
-DISCORD_ID = os.environ["DISCORD_CLIENT_ID"]
-DISCORD_SECRET = os.environ["DISCORD_CLIENT_SECRET"]
 BOT_API_TOKEN = os.environ["BOT_API_TOKEN"]
+# DISCORD_ID = os.environ["DISCORD_CLIENT_ID"]
+# DISCORD_SECRET = os.environ["DISCORD_CLIENT_SECRET"]
 
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config[
-    "SQLALCHEMY_DATABASE_URI"
-] = f"postgresql://{DB_USER}:{DB_PASS}@postgres:5432/{DB_NAME}"
-blueprint = make_discord_blueprint(
-    client_id=DISCORD_ID, client_secret=DISCORD_SECRET, scope=["identify", "guilds"]
-)
-app.register_blueprint(blueprint, url_prefix="/login")
-db = SQLAlchemy(app)
-migrate = Migrate(app, db)
+
+def create_app(config_class=Config):
+    app = Flask(__name__)
+    app.config.from_object(config_class)
+    api.init_app(app)
+    db.init_app(app)
+    migrate.init_app(app, db)
+    if "SECRET_KEY" in os.environ:
+        app.secret_key = os.environ["SECRET_KEY"]
+    else:
+        app.logger.warning("PLEASE SET A SECRET KEY, USING A DEFAULT KEY IS SAD TIMES")
+        app.secret_key = "supersekrit"
+
+    # blueprint = make_discord_blueprint(
+    #     client_id=DISCORD_ID, client_secret=DISCORD_SECRET, scope=["identify", "guilds"]
+    # )
+    # app.register_blueprint(blueprint, url_prefix="/login")
+
+    return app
+
+
+app = create_app(Config)
+
 from src.models import (
     Alias,
     DiscordServer,
@@ -49,7 +56,7 @@ from src.models import (
 from src.routes import (
     alias as aRoute,
     discordServers as dsRoute,
-    login as loginRoute,
+    # login as loginRoute,
     keyWords as keyRoute,
     quotes as quotesRoute,
     albums as albumsRoute,
@@ -65,7 +72,7 @@ def healthRoute():
 
 @app.before_request
 def before_request():
-    is_user = dAuth.authorized
+    is_user = False  # dAuth.authorized
     api_key_passed = request.headers.get("bot-token", "")
     allow_debug = isDev and request.headers.get("Host", "") == "localhost:5000"
     g.is_bot = api_key_passed == BOT_API_TOKEN

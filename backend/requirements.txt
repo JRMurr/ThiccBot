@@ -20,3 +20,6 @@ Pillow==6.0.0
 
 #dev
 pylint-flask #handles pylint errors for models
+#testing
+pytest
+pytest-flask
