@@ -1,4 +1,4 @@
-from src import app, api
+from flask_restplus import Namespace
 from flask import request
 from src import db
 from src.models import Quotes, DiscordServer, ServerGroup
@@ -7,7 +7,7 @@ from sqlalchemy.sql import func
 from src.utils import server_group_join, get_group_id
 
 
-ns = api.namespace("api/quotes", description="Quoute operations")
+ns = Namespace("api/quotes", description="Quoute operations")
 
 quoteModel = ns.model(
     "quote",

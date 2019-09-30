@@ -1,10 +1,10 @@
-from src import app, api
+from flask_restplus import Namespace
 from src import db
 from src.models import Alias, DiscordServer, ServerGroup
 from flask_restplus import Resource, fields, abort
 from src.utils import server_group_join, get_group_id
 
-ns = api.namespace("api/alias", description="Alias operations")
+ns = Namespace("api/alias", description="Alias operations")
 
 
 aliasModel = ns.model("Alias", {"name": fields.String, "command": fields.String})

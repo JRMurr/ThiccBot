@@ -11,3 +11,8 @@ class Config:
     SQLALCHEMY_DATABASE_URI = (
         f"postgresql://{DB_USER}:{DB_PASS}@postgres:5432/{DB_NAME}"
     )
+
+
+class TestConfig(Config):
+    TESTING = True
+    pass
