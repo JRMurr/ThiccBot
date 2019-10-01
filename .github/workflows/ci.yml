@@ -1,6 +1,8 @@
-name: Build Images
+name: Run tests & push images
 
-on: [push]
+on:
+  pull_request:
+    types: [opened, reopened]
 
 jobs:
   build-flask:
