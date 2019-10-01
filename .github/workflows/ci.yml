@@ -1,8 +1,7 @@
 name: Run tests & push images
 
 on:
-  pull_request:
-    types: [opened, reopened]
+  pull_request
 
 jobs:
   build-flask:
