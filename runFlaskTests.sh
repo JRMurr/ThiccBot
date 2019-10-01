@@ -1,1 +1,0 @@
-docker-compose run flask sh -c "dockerize -wait tcp://postgres:5432 && py.test" 

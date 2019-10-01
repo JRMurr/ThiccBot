@@ -1,0 +1,23 @@
+source .env
+
+python/format:
+    black .
+
+docker/build:
+    docker-compose build
+
+docker/up:
+    docker-compose up --remove-orphans
+
+docker/fixPermission:
+    user=$(id -g)
+    sudo chown -R $user:$user .
+
+docker/psql:
+    docker exec -it thiccbot_postgres_1 psql -U $THICC_USER -w $THICC_PASSWORD -d $THICC_DB
+
+test/flask:
+    docker-compose run flask sh -c "dockerize -wait tcp://postgres:5432 && py.test"
+
+utils/wipePg: @confirm:secure
+    sudo rm -rf ./postgres-data

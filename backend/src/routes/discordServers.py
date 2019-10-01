@@ -135,4 +135,3 @@ class DiscordRoute(Resource):
             )
         db.session.commit()
         return server
-

@@ -125,4 +125,3 @@ class LastFmHelper:
         img_io.seek(0)
         new_im.close()
         return img_io
-

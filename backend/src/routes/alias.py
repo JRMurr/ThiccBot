@@ -82,4 +82,3 @@ class AliasRoute(Resource):
         db.session.delete(alias)
         db.session.commit()
         return ""
-

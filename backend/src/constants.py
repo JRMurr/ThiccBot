@@ -12,4 +12,3 @@ CONSTANTS = DotMap(
         }
     }
 )
-

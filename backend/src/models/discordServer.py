@@ -20,4 +20,3 @@ class DiscordServer(db.Model):
     admin_role = db.Column(BIGINT, nullable=True)
 
     server_group = db.relationship("ServerGroup")
-
