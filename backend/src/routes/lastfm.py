@@ -1,10 +1,10 @@
-from src import app, api
+from flask_restplus import Namespace
 from flask_restplus import Resource, abort
 from flask import send_file
 from src.utils import LastFmHelper
 from src import CONSTANTS
 
-ns = api.namespace("api/lastFM", description="LastFM operations")
+ns = Namespace("api/lastFM", description="LastFM operations")
 
 lastFmHelper = LastFmHelper()
 

@@ -1,4 +1,4 @@
-from src import app, api
+from flask_restplus import Namespace
 from flask import request
 from src import db
 from src.models import KeyWords, DiscordServer, ServerGroup
@@ -6,7 +6,7 @@ from flask_restplus import Resource, fields, abort
 from src.utils import server_group_join, get_group_id
 from sqlalchemy.sql import func
 
-ns = api.namespace("api/keyWords", description="Keyword operations")
+ns = Namespace("api/keyWords", description="Keyword operations")
 
 keyWordModel = ns.model(
     "KeyWord",

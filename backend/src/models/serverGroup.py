@@ -10,4 +10,3 @@ class ServerGroup(db.Model):
     __tablename__ = "servergroup"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
-

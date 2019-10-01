@@ -1,5 +1,5 @@
-from src import app, api
-from flask import request, g
+from flask_restplus import Namespace
+from flask import request, g, Blueprint, current_app as app
 from pprint import pformat
 from src import db
 from src.models import DiscordServer, ServerGroup
@@ -8,8 +8,7 @@ from flask_dance.contrib.discord import discord as dAuth
 from flask_restplus import Resource, fields, abort
 from pprint import pprint
 
-ns = api.namespace("api/discord", description="Discord Server operations")
-
+ns = Namespace("api/discord", description="Discord Server operations")
 # NOTE: discord bot assumes both command_prefixes and message_prefixes will always be returned
 # this only matters for commands that updates prefixes
 serverModel = ns.model(
@@ -25,18 +24,19 @@ serverModel = ns.model(
 )
 
 
-def id_to_str(serverJson):
-    # The reason front end has issues with big int
-    # so if not the bot convert the id to a string
-    if not g.is_bot:
-        serverJson["id"] = str(serverJson["id"])
-    return serverJson
+# def id_to_str(serverJson):
+#     # The reason front end has issues with big int
+#     # so if not the bot convert the id to a string
+#     if not g.is_bot:
+#         serverJson["id"] = str(serverJson["id"])
+#     return serverJson
 
 
 @ns.route("")
 class ServerList(Resource):
     """Shows all Servers and lets you post to add a new one"""
 
+    @ns.marshal_with(serverModel)
     def get(self):
         return DiscordServer.query.all()
 
@@ -136,4 +136,3 @@ class DiscordRoute(Resource):
             )
         db.session.commit()
         return server
-

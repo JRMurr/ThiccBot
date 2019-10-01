@@ -45,4 +45,3 @@ def context_info(ctx):
         "command_args": ctx.args,
         "command_kwargs": ctx.kwargs,
     }
-
