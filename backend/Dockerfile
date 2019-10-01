@@ -1,6 +1,5 @@
 FROM python:3.7-alpine
 #https://github.com/trstringer/python-flask-docker-compose-debugging
-WORKDIR /thiccflask
 RUN apk update \
   && apk add --virtual build-deps gcc python3-dev musl-dev \
   && apk add postgresql-dev
@@ -12,6 +11,8 @@ RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSI
 
 #these are for Pillow
 RUN apk --no-cache add build-base python-dev jpeg-dev zlib-dev freetype-dev
+WORKDIR /thiccflask
+
 RUN mkdir lastfm_images
 # Copy in requirements.txt first so changing the source
 # code doesn't require these steps to run again

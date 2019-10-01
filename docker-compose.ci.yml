@@ -4,9 +4,9 @@ services:
   postgres:
     image: postgres:10-alpine
     environment:
-      - POSTGRES_USER=thiccbot
-      - POSTGRES_PASSWORD=thiccbot
-      - POSTGRES_DB=thiccbot
+      - POSTGRES_USER=thicc
+      - POSTGRES_PASSWORD=thicc
+      - POSTGRES_DB=thicc
   flask:
     build: ./backend
     image: jrmurray/thiccbot-flask:latest

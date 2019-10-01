@@ -7,11 +7,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
-      - name: Build & push flask image
+      - name: Build API image
+        run: docker-compose -f docker-compose.ci.yml build flask
+      - name: Test API
+        run: docker-compose -f docker-compose.ci.yml run flask ./runTests.sh
+      - name: Push flask image
         if: github.ref == 'refs/heads/master'
         run: |
           docker login -u ${{ secrets.dockerHubUserName }} -p ${{ secrets.dockerHubToken }}
-          docker-compose -f docker-compose.ci.yml build flask
           docker-compose -f docker-compose.ci.yml push flask
   build-bot:
     runs-on: ubuntu-latest

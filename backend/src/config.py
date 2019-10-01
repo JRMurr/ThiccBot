@@ -1,8 +1,8 @@
 import os
 
-DB_USER = os.environ["DB_USER"]
-DB_PASS = os.environ["DB_PASS"]
-DB_NAME = os.environ["DB_NAME"]
+DB_USER = os.getenv("DB_USER", "thicc")
+DB_PASS = os.getenv("DB_PASS", "thicc")
+DB_NAME = os.getenv("DB_NAME", "thicc")
 
 
 class Config:
