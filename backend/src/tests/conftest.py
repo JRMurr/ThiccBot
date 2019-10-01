@@ -5,7 +5,7 @@ from sqlalchemy.orm import sessionmaker
 from src.config import TestConfig
 
 
-# DB setup taken from https://github.com/pytest-dev/pytest-flask/issues/70#issuecomment-361005780
+# DB modifed taken from https://github.com/pytest-dev/pytest-flask/issues/70#issuecomment-361005780
 @pytest.fixture(scope="session")
 def app():
     """
@@ -15,10 +15,10 @@ def app():
     return app
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def db(app, request):
     """
-    Returns session-wide initialized database.
+    Returns function initialized database so db is cleared after each test.
     """
     with app.app_context():
         _db.drop_all()
@@ -52,7 +52,6 @@ def session(app, db, request):
 
         _db.session = sess
         yield sess
-
         # Cleanup
         sess.remove()
         # This instruction rollsback any commit that were executed in the tests.

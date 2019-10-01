@@ -36,6 +36,7 @@ serverModel = ns.model(
 class ServerList(Resource):
     """Shows all Servers and lets you post to add a new one"""
 
+    @ns.marshal_with(serverModel)
     def get(self):
         return DiscordServer.query.all()
 
