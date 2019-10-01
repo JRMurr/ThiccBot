@@ -23,10 +23,10 @@ from src.routes import (
 )
 
 namespaces = [aliasNs, discordNs, keyNs, quotesNs, albumsNs, lastFmNs, counterNs]
-isDev = os.environ["FLASK_ENV"] == "development"
-BOT_API_TOKEN = os.environ["BOT_API_TOKEN"]
-# DISCORD_ID = os.environ["DISCORD_CLIENT_ID"]
-# DISCORD_SECRET = os.environ["DISCORD_CLIENT_SECRET"]
+isDev = os.getenv("FLASK_ENV", "PROD") == "development"
+BOT_API_TOKEN = os.getenv("BOT_API_TOKEN", "BOT_API_TOKEN")
+# DISCORD_ID = os.getenv("DISCORD_CLIENT_ID", "DISCORD_CLIENT_ID")
+# DISCORD_SECRET = os.getenv("DISCORD_CLIENT_SECRET", "DISCORD_CLIENT_SECRET")
 
 
 def create_app(config_class=Config):
@@ -37,7 +37,7 @@ def create_app(config_class=Config):
         api.add_namespace(ns)
     db.init_app(myApp)
     migrate.init_app(myApp, db)
-    if "SECRET_KEY" in os.environ:
+    if "SECRET_KEY" in os.environ and not app.config["TESTING"]:
         myApp.secret_key = os.environ["SECRET_KEY"]
     else:
         myApp.logger.warning(

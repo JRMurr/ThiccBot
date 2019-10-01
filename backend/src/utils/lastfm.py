@@ -7,8 +7,8 @@ from flask_restplus import abort
 from typing import List
 from src import CONSTANTS
 
-API_KEY = os.environ["LAST_FM_API_KEY"]
-SECRET_KEY = os.environ["LAST_FM_SECRET"]
+API_KEY = os.getenv("LAST_FM_API_KEY", "LAST_FM_API_KEY")
+SECRET_KEY = os.getenv("LAST_FM_SECRET", "LAST_FM_SECRET")
 
 PERIODS = [
     CONSTANTS.LAST_FM.PERIOD_OVERALL,
