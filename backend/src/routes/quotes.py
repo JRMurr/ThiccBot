@@ -6,7 +6,7 @@ from sqlalchemy.sql import func
 from src.utils import server_group_join, get_group_id
 
 
-ns = Namespace("api/quotes", description="Quoute operations")
+ns = Namespace("api/quotes", description="Quote operations")
 
 quoteModel = ns.model(
     "quote",
