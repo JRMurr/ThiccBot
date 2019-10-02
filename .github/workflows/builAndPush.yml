@@ -1,6 +1,9 @@
 name: Build and push images
 
-on: push
+on: 
+  push:
+    branches:
+      -master
 
 jobs:
   build-flask:
@@ -10,7 +13,6 @@ jobs:
       - name: Build API image
         run: docker-compose -f docker-compose.ci.yml build flask
       - name: Push flask image
-        if: github.ref == 'refs/heads/master'
         run: |
           docker login -u ${{ secrets.dockerHubUserName }} -p ${{ secrets.dockerHubToken }}
           docker-compose -f docker-compose.ci.yml push flask
@@ -19,7 +21,6 @@ jobs:
     steps:
       - uses: actions/checkout@master
       - name: Build & push bot image
-        if: github.ref == 'refs/heads/master'
         run: |
           docker login -u ${{ secrets.dockerHubUserName }} -p ${{ secrets.dockerHubToken }}
           docker-compose -f docker-compose.ci.yml build bot
@@ -29,7 +30,6 @@ jobs:
     steps:
       - uses: actions/checkout@master
       - name: Build & push nginx image
-        if: github.ref == 'refs/heads/master'
         run: |
           docker login -u ${{ secrets.dockerHubUserName }} -p ${{ secrets.dockerHubToken }}
           docker-compose -f docker-compose.ci.yml build nginx
