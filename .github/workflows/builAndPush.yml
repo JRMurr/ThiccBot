@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
+        with:
+          ref: master
       - name: Build API image
         run: docker-compose -f docker-compose.ci.yml build flask
       - name: Push flask image
@@ -21,6 +23,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
+        with:
+            ref: master
       - name: Build & push bot image
         run: |
           docker login -u ${{ secrets.dockerHubUserName }} -p ${{ secrets.dockerHubToken }}
@@ -31,6 +35,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
+        with:
+          ref: master
       - name: Build & push nginx image
         run: |
           docker login -u ${{ secrets.dockerHubUserName }} -p ${{ secrets.dockerHubToken }}
