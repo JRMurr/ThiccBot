@@ -1,0 +1,25 @@
+name: Run tests
+
+on: pull_request
+
+jobs:
+  build-flask:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Build API image
+        run: docker-compose -f docker-compose.ci.yml build flask
+      - name: Test API
+        run: docker-compose -f docker-compose.ci.yml run flask ./runTests.sh
+  build-bot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Build bot image
+        run: docker-compose -f docker-compose.ci.yml build bot
+  build-nginx:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Build bot image
+        run: docker-compose -f docker-compose.ci.yml build nginx

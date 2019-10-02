@@ -59,7 +59,7 @@ services:
       restart: always
       environment:
       - DISCORD_ID=${DISCORD_ID}
-      - BACKEND_URL=http://ngix/api
+      - BACKEND_URL=http://nginx/api
       - BOT_API_TOKEN=${BOT_API_TOKEN}
       - BOT_ADMIN=${BOT_ADMIN}
       - BOT_ENV=production
@@ -68,8 +68,8 @@ services:
       depends_on:
       - flask
       command: python thiccBot/main.py
-  ngix:
-    image: jrmurray/thiccbot-ngix:latest
+  nginx:
+    image: jrmurray/thiccbot-nginx:latest
     depends_on:
       - flask
     ports:

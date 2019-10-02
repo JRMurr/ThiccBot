@@ -39,7 +39,13 @@ class Pages:
     """
 
     def __init__(
-        self, ctx, *, entries, per_page=12, show_entry_count=True, show_index=True
+        self,
+        ctx,
+        *,
+        entries,
+        per_page=12,
+        show_entry_count=True,
+        show_index=True,
     ):
         self.bot = ctx.bot
         self.entries = entries
@@ -85,7 +91,9 @@ class Pages:
         if self.paginating:
             # verify we can actually use the pagination session
             if not self.permissions.add_reactions:
-                raise CannotPaginate("Bot does not have add reactions permission.")
+                raise CannotPaginate(
+                    "Bot does not have add reactions permission."
+                )
 
             if not self.permissions.read_message_history:
                 raise CannotPaginate(
@@ -98,7 +106,9 @@ class Pages:
 
     def prepare_embed(self, entries, page, *, first=False):
         p = []
-        for index, entry in enumerate(entries, 1 + ((page - 1) * self.per_page)):
+        for index, entry in enumerate(
+            entries, 1 + ((page - 1) * self.per_page)
+        ):
             if self.show_index:
                 p.append(f"{index}. {entry}")
             else:
@@ -114,7 +124,9 @@ class Pages:
 
         if self.paginating and first:
             p.append("")
-            p.append("Confused? React with \N{INFORMATION SOURCE} for more info.")
+            p.append(
+                "Confused? React with \N{INFORMATION SOURCE} for more info."
+            )
 
         self.embed.description = "\n".join(p)
 
@@ -167,7 +179,9 @@ class Pages:
     async def numbered_page(self):
         """lets you type a page number to go to"""
         to_delete = []
-        to_delete.append(await self.channel.send("What page do you want to go to?"))
+        to_delete.append(
+            await self.channel.send("What page do you want to go to?")
+        )
 
         def message_check(m):
             return (
@@ -177,7 +191,9 @@ class Pages:
             )
 
         try:
-            msg = await self.bot.wait_for("message", check=message_check, timeout=30.0)
+            msg = await self.bot.wait_for(
+                "message", check=message_check, timeout=30.0
+            )
         except asyncio.TimeoutError:
             to_delete.append(await self.channel.send("Took too long."))
             await asyncio.sleep(5)
@@ -368,11 +384,15 @@ class HelpPaginator(Pages):
         cog_name = cog.__class__.__name__
 
         # get the commands
-        entries = sorted(ctx.bot.get_cog_commands(cog_name), key=lambda c: c.name)
+        entries = sorted(
+            ctx.bot.get_cog_commands(cog_name), key=lambda c: c.name
+        )
 
         # remove the ones we can't run
         entries = [
-            cmd for cmd in entries if (await _can_run(cmd, ctx)) and not cmd.hidden
+            cmd
+            for cmd in entries
+            if (await _can_run(cmd, ctx)) and not cmd.hidden
         ]
 
         self = cls(ctx, entries)
@@ -393,7 +413,9 @@ class HelpPaginator(Pages):
             entries = []
         else:
             entries = [
-                cmd for cmd in entries if (await _can_run(cmd, ctx)) and not cmd.hidden
+                cmd
+                for cmd in entries
+                if (await _can_run(cmd, ctx)) and not cmd.hidden
             ]
 
         self = cls(ctx, entries)
@@ -423,7 +445,9 @@ class HelpPaginator(Pages):
 
         for cog, commands in itertools.groupby(entries, key=key):
             plausible = [
-                cmd for cmd in commands if (await _can_run(cmd, ctx)) and not cmd.hidden
+                cmd
+                for cmd in commands
+                if (await _can_run(cmd, ctx)) and not cmd.hidden
             ]
             if len(plausible) == 0:
                 continue
@@ -439,7 +463,9 @@ class HelpPaginator(Pages):
                 for i in range(0, len(plausible), per_page)
             )
 
-        self = cls(ctx, nested_pages, per_page=1)  # this forces the pagination session
+        self = cls(
+            ctx, nested_pages, per_page=1
+        )  # this forces the pagination session
         self.prefix = cleanup_prefix(ctx.bot, ctx.prefix)
         await ctx.release()
 
@@ -490,7 +516,9 @@ class HelpPaginator(Pages):
         self.embed.title = "Paginator help"
         self.embed.description = "Hello! Welcome to the help page."
 
-        messages = [f"{emoji} {func.__doc__}" for emoji, func in self.reaction_emojis]
+        messages = [
+            f"{emoji} {func.__doc__}" for emoji, func in self.reaction_emojis
+        ]
         self.embed.clear_fields()
         self.embed.add_field(
             name="What are these reactions for?",

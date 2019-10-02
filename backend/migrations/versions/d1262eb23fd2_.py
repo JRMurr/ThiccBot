@@ -1,7 +1,7 @@
 """empty message
 
 Revision ID: d1262eb23fd2
-Revises: 
+Revises:
 Create Date: 2019-02-28 03:25:53.757096
 
 """
@@ -46,8 +46,12 @@ def upgrade():
         sa.Column("id", sa.BIGINT(), autoincrement=False, nullable=False),
         sa.Column("server_group_id", sa.Integer(), nullable=True),
         sa.Column("name", sa.String(), nullable=False),
-        sa.Column("command_prefixes", postgresql.ARRAY(sa.String()), nullable=True),
-        sa.Column("message_prefixes", postgresql.ARRAY(sa.String()), nullable=True),
+        sa.Column(
+            "command_prefixes", postgresql.ARRAY(sa.String()), nullable=True
+        ),
+        sa.Column(
+            "message_prefixes", postgresql.ARRAY(sa.String()), nullable=True
+        ),
         sa.Column("admin_role", sa.BIGINT(), nullable=True),
         sa.ForeignKeyConstraint(["server_group_id"], ["servergroup.id"]),
         sa.PrimaryKeyConstraint("id"),

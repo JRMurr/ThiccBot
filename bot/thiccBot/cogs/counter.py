@@ -43,11 +43,12 @@ class Counter(Cog):
 
     @counter.command(name="create", aliases=["add"])
     @checks.is_bot_admin()
-    async def counter_create(self, ctx, counter_name: str, *, response: str = None):
+    async def counter_create(
+        self, ctx, counter_name: str, *, response: str = None
+    ):
         """Creates an counter
 
-            ex: counter create "my count" count is {} 
-            
+            ex: counter create "my count" count is {}
             """
         server_id = ctx.guild.id
 
@@ -55,10 +56,13 @@ class Counter(Cog):
             index = response.find("{}")
             if index == -1:
                 await ctx.send(
-                    "Invalid response template, include {} for where the count value should be"
+                    "Invalid response template, include {}"
+                    " for where the count value should be"
                 )
             elif response.find("{}", index + 1) != -1:
-                await ctx.send("More than one occurrence of {}, in the response")
+                await ctx.send(
+                    "More than one occurrence of {}, in the response"
+                )
 
         async def on_200(r):
             await ctx.send(f"Created Counter: {counter_name}")

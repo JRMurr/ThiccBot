@@ -128,8 +128,9 @@ class Album(Cog):
     @entries.command(name="delete")
     async def album_entry_delete(self, ctx, entry_id: int):
         """Deletes the specified entry in the album
-        
-        To get the id of the entry to delete run "album entries list <album name>"
+
+        To get the id of the entry to delete run
+        "album entries list <album name>"
         """
         server_id = ctx.guild.id
 

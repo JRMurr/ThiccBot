@@ -129,12 +129,15 @@ class BotAdmin(commands.Cog):
 
         if ctx.channel.id in self.sessions:
             await ctx.send(
-                "Already running a REPL session in this channel. Exit it with `quit`."
+                "Already running a REPL session in this channel."
+                "Exit it with `quit`."
             )
             return
 
         self.sessions.add(ctx.channel.id)
-        await ctx.send("Enter code to execute or evaluate. `exit()` or `quit` to exit.")
+        await ctx.send(
+            "Enter code to execute or evaluate. `exit()` or `quit` to exit."
+        )
 
         def check(m):
             return (

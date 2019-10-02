@@ -15,9 +15,9 @@ services:
   bot:
       build: ./bot
       image: jrmurray/thiccbot-bot:latest
-  ngix:
+  nginx:
     build: ./prod
-    image: jrmurray/thiccbot-ngix:latest
+    image: jrmurray/thiccbot-nginx:latest
     depends_on:
       - flask
     ports:

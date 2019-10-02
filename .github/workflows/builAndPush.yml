@@ -1,39 +1,44 @@
-name: Run tests & push images
+name: Build and push images
 
-on:
-  pull_request
+on: 
+  pull_request:
+    types: [closed]
 
 jobs:
   build-flask:
+    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'master'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
+        with:
+          ref: master
       - name: Build API image
         run: docker-compose -f docker-compose.ci.yml build flask
-      - name: Test API
-        run: docker-compose -f docker-compose.ci.yml run flask ./runTests.sh
       - name: Push flask image
-        if: github.ref == 'refs/heads/master'
         run: |
           docker login -u ${{ secrets.dockerHubUserName }} -p ${{ secrets.dockerHubToken }}
           docker-compose -f docker-compose.ci.yml push flask
   build-bot:
+    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'master'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
+        with:
+            ref: master
       - name: Build & push bot image
-        if: github.ref == 'refs/heads/master'
         run: |
           docker login -u ${{ secrets.dockerHubUserName }} -p ${{ secrets.dockerHubToken }}
           docker-compose -f docker-compose.ci.yml build bot
           docker-compose -f docker-compose.ci.yml push bot
-  build-ngix:
+  build-nginx:
+    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'master'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
-      - name: Build & push ngix image
-        if: github.ref == 'refs/heads/master'
+        with:
+          ref: master
+      - name: Build & push nginx image
         run: |
           docker login -u ${{ secrets.dockerHubUserName }} -p ${{ secrets.dockerHubToken }}
-          docker-compose -f docker-compose.ci.yml build ngix
-          docker-compose -f docker-compose.ci.yml push ngix
+          docker-compose -f docker-compose.ci.yml build nginx
+          docker-compose -f docker-compose.ci.yml push nginx

@@ -14,7 +14,9 @@ def bool_or_bot_owner(ctx, pred_bool):
 
 
 def is_bot_admin():
-    """Checks if the user has the server bot admin role. If it is not set checks if they have manage role permissions"""
+    """Checks if the user has the server bot admin role.
+
+    If it is not set checks if they have manage role permissions"""
 
     async def predicate(ctx: commands.Context):
         command_name = ctx.command.name

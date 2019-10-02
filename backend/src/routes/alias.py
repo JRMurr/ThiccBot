@@ -7,7 +7,9 @@ from src.utils import server_group_join, get_group_id
 ns = Namespace("api/alias", description="Alias operations")
 
 
-aliasModel = ns.model("Alias", {"name": fields.String, "command": fields.String})
+aliasModel = ns.model(
+    "Alias", {"name": fields.String, "command": fields.String}
+)
 
 
 @ns.route("/<server_type>/<int:server_id>")
@@ -37,7 +39,9 @@ class AliasList(Resource):
         ):
             abort(400, f"Alias {form['name']} already exists")
         alias = Alias(
-            server_group_id=server_group_id, name=form["name"], command=form["command"]
+            server_group_id=server_group_id,
+            name=form["name"],
+            command=form["command"],
         )
         db.session.add(alias)
         db.session.commit()

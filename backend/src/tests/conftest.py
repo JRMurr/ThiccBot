@@ -5,7 +5,8 @@ from sqlalchemy.orm import sessionmaker
 from src.config import TestConfig
 
 
-# DB modifed taken from https://github.com/pytest-dev/pytest-flask/issues/70#issuecomment-361005780
+# DB modifed taken from
+# https://github.com/pytest-dev/pytest-flask/issues/70#issuecomment-361005780
 @pytest.fixture(scope="session")
 def app():
     """
@@ -43,7 +44,7 @@ def session(app, db, request):
 
         @event.listens_for(sess(), "after_transaction_end")
         def restart_savepoint(sess2, trans):
-            # Detecting whether this is indeed the nested transaction of the test
+            # Detecting whether this is the nested transaction of the test
             if trans.nested and not trans._parent.nested:
                 # The test should have normally called session.commit(),
                 # but to be safe we explicitly expire the session

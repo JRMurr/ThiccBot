@@ -27,19 +27,25 @@ class Admin(commands.Cog):
     async def set_bot_admin(self, ctx, role_name: str):
         """Sets the bot admin role in this server
 
-        Users with this role can run commands to edit the bots config for this server"""
+        Users with this role can run commands to edit
+        the bots config for this server"""
         guild = ctx.message.guild
         server_roles = guild.roles
-        desired_role = next((x for x in server_roles if x.name == role_name), None)
+        desired_role = next(
+            (x for x in server_roles if x.name == role_name), None
+        )
         if desired_role is None:
             await ctx.send(
-                f"role with name ({role_name}) not found, make sure spelling and capitalization are the same"
+                f"role with name ({role_name}) not found, "
+                "make sure spelling and capitalization are the same"
             )
             return
 
         async def on_200(r):
             await ctx.send(
-                f"set the bot admin role to {desired_role.name}, any one who has this role or one above it can run any admin only command"
+                f"set the bot admin role to {desired_role.name}, "
+                "any one who has this role or one above it can run"
+                "any admin only command"
             )
 
         await self.bot.request_helper(
@@ -59,7 +65,8 @@ class Admin(commands.Cog):
             data = await r.json()
             self.bot.update_prefixes(server_id, data)
             await ctx.send(
-                f"({prefix}) has been added to the list of possible {clean_prefix_type}es"
+                f"({prefix}) has been added to the"
+                f"list of possible {clean_prefix_type}es"
             )
 
         jsonData = {}
@@ -81,7 +88,8 @@ class Admin(commands.Cog):
             data = await r.json()
             self.bot.update_prefixes(server_id, data)
             await ctx.send(
-                f"({prefix}) has been removed from the list of possible {clean_prefix_type}es"
+                f"({prefix}) has been removed from the "
+                f"list of possible {clean_prefix_type}es"
             )
 
         jsonData = {}
@@ -114,7 +122,8 @@ class Admin(commands.Cog):
                 await p.paginate()
             elif prefix_type == "command_prefix":
                 msg = "This server has no command_prefixes set, "
-                msg += f"currently using default prefix ({self.bot.config['command_prefix']})"
+                "currently using default prefix "
+                f"({self.bot.config['command_prefix']})"
                 ctx.send(msg)
             else:
                 ctx.send("This server has no message prefixes")
