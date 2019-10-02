@@ -10,7 +10,9 @@ class KeyWords(db.Model):
     )
     name = db.Column(db.String, doc="name of the keyword")
     match_case = db.Column(
-        db.Boolean, default=False, doc="If true then the key word must match on case"
+        db.Boolean,
+        default=False,
+        doc="If true then the key word must match on case",
     )
     responses = db.Column(ARRAY(db.String), doc="list of keyword responses")
 

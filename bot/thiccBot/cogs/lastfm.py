@@ -21,7 +21,9 @@ class Lastfm(Cog):
             await ctx.send("run lastfm grid 'lastfm_user_name'")
 
     @lastfm.command()
-    async def grid(self, ctx: commands.Context, lastfm_name: str, period: str = None):
+    async def grid(
+        self, ctx: commands.Context, lastfm_name: str, period: str = None
+    ):
         message = await ctx.send("Making last fm grid, this will take a sec")
 
         async def cleanUp():

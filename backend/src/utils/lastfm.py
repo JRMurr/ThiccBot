@@ -27,7 +27,9 @@ IMAGE_SIZE = 300
 
 class LastFmHelper:
     def __init__(self):
-        self.network = pylast.LastFMNetwork(api_key=API_KEY, api_secret=SECRET_KEY)
+        self.network = pylast.LastFMNetwork(
+            api_key=API_KEY, api_secret=SECRET_KEY
+        )
         self.font = ImageFont.truetype(FONT_PATH, FONT_SIZE)
         self.user_cache = {}
 
@@ -35,7 +37,7 @@ class LastFmHelper:
         if url is None or len(url) == 0:
             return Image.new("RGB", (IMAGE_SIZE, IMAGE_SIZE))
         response = requests.get(url)
-        img: Image.Image = Image.open(BytesIO(response.content))
+        img = Image.open(BytesIO(response.content))
         img.thumbnail((IMAGE_SIZE, IMAGE_SIZE))
         return img
 
@@ -45,7 +47,9 @@ class LastFmHelper:
         txt = Image.new("RGBA", img.size, (255, 255, 255, 0))
         d = ImageDraw.Draw(txt)
         # offset with black text to fake outline
-        d.text((x_pos + 1, y_pos + 1), text, font=self.font, fill=(0, 0, 0, 255))
+        d.text(
+            (x_pos + 1, y_pos + 1), text, font=self.font, fill=(0, 0, 0, 255)
+        )
         d.text((x_pos + 1, y_pos), text, font=self.font, fill=(0, 0, 0, 255))
         d.text((x_pos, y_pos + 1), text, font=self.font, fill=(0, 0, 0, 255))
         # text in white
@@ -56,7 +60,12 @@ class LastFmHelper:
     def row_text(self, text: List[str]):
         txt_img = Image.new("RGBA", (IMAGE_SIZE, IMAGE_SIZE))
         d = ImageDraw.Draw(txt_img)
-        d.text((0, 0), "\n\n\n".join(text), font=self.font, fill=(255, 255, 255, 255))
+        d.text(
+            (0, 0),
+            "\n\n\n".join(text),
+            font=self.font,
+            fill=(255, 255, 255, 255),
+        )
         return txt_img
 
     def get_user(self, username):
@@ -71,8 +80,9 @@ class LastFmHelper:
             abort(400, f"username '{username}' not found")
 
     def grid(self, username, period=CONSTANTS.LAST_FM.PERIOD_7DAYS):
-        """Returns a lastFM users 9 most played albums for the specified period in a grid image
-        valid periods are overall, 7day, 1month, 3month, 6month, 12month
+        """Returns a lastFM users 9 most played albums for the specified period
+            in a grid image valid periods are
+            overall, 7day, 1month, 3month, 6month, 12month
         """
         if period not in PERIODS:
             abort(400, "invalid period, valid options are: " + PERIOD_STR)
@@ -117,7 +127,10 @@ class LastFmHelper:
                 y_offset = IMG_SPACING * y_idx
                 new_im.paste(
                     grid_img,
-                    ((x_idx * IMAGE_SIZE) + x_offset, (y_idx * IMAGE_SIZE) + y_offset),
+                    (
+                        (x_idx * IMAGE_SIZE) + x_offset,
+                        (y_idx * IMAGE_SIZE) + y_offset,
+                    ),
                 )
                 grid_img.close()
         img_io = BytesIO()

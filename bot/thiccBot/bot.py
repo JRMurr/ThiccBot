@@ -26,9 +26,10 @@ description = """THICC BOI"""
 log = logging.getLogger(__name__)
 
 
-# TODO: when web ui is working see how bad it would be to query server to get prefixes
-# instead of keeping them in stored in mem
-# could possibly just have a cache of server info that would be used for admin and prefix info
+# TODO: when web ui is working see how bad it would
+# be to query server to get prefixes instead of keeping them in stored in mem
+# could possibly just have a cache of server info that would
+# be used for admin and prefix info
 def _prefix_callable(bot, msg):
     config = bot.config
     user_id = bot.user.id
@@ -104,7 +105,9 @@ class ThiccBot(commands.Bot):
 
     def update_prefixes(self, guild_id, data):
         command = data["command_prefixes"] if data["command_prefixes"] else []
-        message_prefixes = data["message_prefixes"] if data["message_prefixes"] else []
+        message_prefixes = (
+            data["message_prefixes"] if data["message_prefixes"] else []
+        )
         self.prefixes[guild_id] = command
         self.message_prefixes[guild_id] = message_prefixes
 
@@ -131,7 +134,9 @@ class ThiccBot(commands.Bot):
         if not await self.get_guild(guild):
             await self.add_guild(guild)
 
-    @backoff.on_exception(backoff.expo, Exception, max_tries=2, max_time=15, logger=log)
+    @backoff.on_exception(
+        backoff.expo, Exception, max_tries=2, max_time=15, logger=log
+    )
     async def check_backend_health(self):
         async with self.backend_request(
             "get", "health", timeout=aiohttp.ClientTimeout(total=5)
@@ -166,14 +171,16 @@ class ThiccBot(commands.Bot):
         ctx   : Context
         error : Exception"""
 
-        # This prevents any commands with local handlers being handled here in on_command_error.
+        # This prevents any commands with local handlers
+        # being handled here in on_command_error.
         if hasattr(ctx.command, "on_error"):
             return
 
         ignored = (commands.CommandNotFound, commands.UserInputError)
 
-        # Allows us to check for original exceptions raised and sent to CommandInvokeError.
-        # If nothing is found. We keep the exception passed to on_command_error.
+        # Allows us to check for original exceptions
+        # raised and sent to CommandInvokeError. If nothing is found
+        #  We keep the exception passed to on_command_error.
         error = getattr(error, "original", error)
 
         # Anything in ignored will return and prevent anything happening.
@@ -191,8 +198,12 @@ class ThiccBot(commands.Bot):
             except:
                 pass
 
-        # All other Errors not returned come here... And we can just print the default TraceBack.
-        print("Ignoring exception in command {}:".format(ctx.command), file=sys.stderr)
+        # All other Errors not returned come here..
+        # We can just print the default TraceBack.
+        print(
+            "Ignoring exception in command {}:".format(ctx.command),
+            file=sys.stderr,
+        )
         traceback.print_exception(
             type(error), error, error.__traceback__, file=sys.stderr
         )
@@ -216,7 +227,7 @@ class ThiccBot(commands.Bot):
         return message, deleteMessage
 
     async def call_all_on_message(self, message: discord.Message):
-        """Goes through all cogs and will call the on_message function if it has one"""
+        """Call the on_message function on all cogs with one"""
         for name in self.cogs:
             cog = self.get_cog(name)
             on_msg = getattr(cog, "on_message", None)

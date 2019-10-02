@@ -11,9 +11,11 @@ class DiscordServer(db.Model):
     command_prefixes = db.Column(
         MutableList.as_mutable(ARRAY(db.String)), nullable=True
     )
-    # a message prefix is a regex string that would be applied to the message before being processed
-    # the regex would just be the prefix to the message so whatever is matched would be removed
-    # its undefined what regex would be applied if two regexes match the same message
+    # a message prefix is a regex string that would be applied to the message
+    # before being processed. The regex would just be the prefix to the message
+    # so whatever is matched would be removed.
+    # its undefined what regex would be applied
+    # if two regexes match the same message
     message_prefixes = db.Column(
         MutableList.as_mutable(ARRAY(db.String)), nullable=True
     )

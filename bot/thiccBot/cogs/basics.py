@@ -20,7 +20,9 @@ class Basics(commands.Cog):
         """The bot says what you want it to"""
         await ctx.send(args)
 
-    @commands.command(description="For when you wanna settle the score some other way")
+    @commands.command(
+        description="For when you wanna settle the score some other way"
+    )
     async def choose(self, ctx, *choices: str):
         await ctx.send(random.choice(choices))
 
@@ -35,7 +37,7 @@ class Basics(commands.Cog):
     @commands.command(name="do_multiple", aliases=["repeat"])
     async def do_multiple(self, ctx, numTimes: int, *, command: str):
         """does the passed command the specified number of times"""
-        if command.startswith("do_multiple"):
+        if command.startswith(("do_multiple", "repeat")):
             await ctx.send("u fukin thot")
             return
         msg = copy.copy(ctx.message)
@@ -145,17 +147,18 @@ class Basics(commands.Cog):
         text = len(text_channels)
         voice = len(voice_channels)
 
+        members_str = f"{total_members} total\n{total_unique} "
+        members_str += f"unique\n{total_online}unique online"
+        embed.add_field(name="Members", value=members_str)
         embed.add_field(
-            name="Members",
-            value=f"{total_members} total\n{total_unique} unique\n{total_online} unique online",
-        )
-        embed.add_field(
-            name="Channels", value=f"{text + voice} total\n{text} text\n{voice} voice"
+            name="Channels",
+            value=f"{text + voice} total\n{text} text\n{voice} voice",
         )
 
         embed.add_field(name="Guilds", value=len(self.bot.guilds))
         embed.set_footer(
-            text="Made with discord.py", icon_url="http://i.imgur.com/5BFecvA.png"
+            text="Made with discord.py",
+            icon_url="http://i.imgur.com/5BFecvA.png",
         )
         await ctx.send(embed=embed)
 

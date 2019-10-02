@@ -29,7 +29,11 @@ class KeyWords(Cog):
                 data = await r.json()
                 return data["responses"]
             elif r.status == 403:
-                log.error(await get_error_str(r, "Error making key word get request: "))
+                log.error(
+                    await get_error_str(
+                        r, "Error making key word get request: "
+                    )
+                )
 
     async def on_message(self, message: discord.Message):
         if message.guild is None or message.author == self.bot.user:
@@ -48,18 +52,24 @@ class KeyWords(Cog):
             url += f"/{name}"
         else:
             jsonData["name"] = name
-        async with self.bot.backend_request(http_method, url, json=jsonData) as r:
+        async with self.bot.backend_request(
+            http_method, url, json=jsonData
+        ) as r:
             if r.status == 200:
                 verb = "Updated" if is_update else "Created"
                 await ctx.send(f"{verb} key word {name}")
-            elif (r.status == 400 and not is_update) or (is_update and r.status == 404):
+            elif (r.status == 400 and not is_update) or (
+                is_update and r.status == 404
+            ):
                 msg = f"Alias with name {name} "
                 if is_update:
                     msg += "does not exist."
-                    msg += f"\nIf you want to create the key word use '{ctx.prefix}keyWord create {name} {response}'"
+                    f"\nIf you want to create the key word use '"
+                    f"{ctx.prefix}keyWord create {name} {response}'"
                 else:
                     msg += "already exists."
-                    msg += f"\nIf you want to update the key word use '{ctx.prefix}keyWord update {name} {response}'"
+                    f"\nIf you want to update the key word use '"
+                    f"{ctx.prefix}keyWord update {name} {response}'"
                 await ctx.send(msg)
             else:
                 verb = "updating" if is_update else "creating"
@@ -92,8 +102,9 @@ class KeyWords(Cog):
     @keyWord.command(name="set_case_match")
     async def key_set_case_match(self, ctx, key_name: str, match_case: bool):
         """Sets if the key should match case or not
-        
-            ex: `keyWord set_case_match ayy true` or `keyWord set_case_match ayy false`
+
+            ex: `keyWord set_case_match ayy true` or
+            `keyWord set_case_match ayy false`
         """
         server_id = ctx.guild.id
 

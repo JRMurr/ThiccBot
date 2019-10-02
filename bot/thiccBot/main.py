@@ -13,7 +13,9 @@ else:
     asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 BOT_ID = os.environ["DISCORD_ID"]
-with open(f"{os.path.dirname(os.path.abspath(__file__))}/config.yml", "r") as stream:
+with open(
+    f"{os.path.dirname(os.path.abspath(__file__))}/config.yml", "r"
+) as stream:
     config = full_load(stream)
 
 
