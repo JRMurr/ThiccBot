@@ -7,7 +7,8 @@ from .config import Config
 from .constants import CONSTANTS
 
 
-# from flask_dance.contrib.discord import make_discord_blueprint, discord as dAuth
+# from flask_dance.contrib.discord
+# import make_discord_blueprint, discord as dAuth
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -53,7 +54,8 @@ def create_app(config_class=Config):
         )
         my_app.secret_key = "supersekrit"
     # blueprint = make_discord_blueprint(
-    #     client_id=DISCORD_ID, client_secret=DISCORD_SECRET, scope=["identify", "guilds"]
+    #     client_id=DISCORD_ID,
+    #     client_secret=DISCORD_SECRET, scope=["identify", "guilds"]
     # )
     # app.register_blueprint(blueprint, url_prefix="/login")
 
@@ -89,7 +91,8 @@ def before_request():
         isDev and request.headers.get("Host", "") == "localhost:5000"
     )
     g.is_bot = api_key_passed == BOT_API_TOKEN
-    # if (api_key_passed == '') and (not is_user) and request.endpoint not in ('login', 'discord.login', 'discord.authorized'):
+    # if (api_key_passed == '') and (not is_user) and request.endpoint
+    # not in ('login', 'discord.login', 'discord.authorized'):
     #     return redirect(url_for("login"))
     if not allow_debug and not (is_user or g.is_bot):
         return abort(403)  # a token was passed and it was bad

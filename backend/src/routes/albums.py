@@ -10,7 +10,9 @@ ns = Namespace("api/albums", description="Album operations")
 
 albumModel = ns.model("album", {"name": fields.String})
 
-albumEntry = ns.model("albumEntry", {"id": fields.Integer, "link": fields.String})
+albumEntry = ns.model(
+    "albumEntry", {"id": fields.Integer, "link": fields.String}
+)
 
 
 @ns.route("/<server_type>/<int:server_id>")
@@ -120,5 +122,6 @@ class AlbumEntryRoute(Resource):
         else:
             abort(
                 400,
-                f"Album entry {entry_id} is not part of an album in the specified server",
+                f"Album entry {entry_id} is not part "
+                "of an album in the specified server",
             )

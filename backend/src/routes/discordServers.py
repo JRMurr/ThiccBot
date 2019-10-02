@@ -9,8 +9,8 @@ from flask_restplus import Resource, fields, abort
 from pprint import pprint
 
 ns = Namespace("api/discord", description="Discord Server operations")
-# NOTE: discord bot assumes both command_prefixes and message_prefixes will always be returned
-# this only matters for commands that updates prefixes
+# NOTE: discord bot assumes both command_prefixes and message_prefixes
+# will always be returned his only matters for commands that updates prefixes
 serverModel = ns.model(
     "DiscordServer",
     {
@@ -76,9 +76,17 @@ def get_prefixes(server, prefix_type):
     if prefix_type not in POSSIBLE_PREFIXES:
         abort(500)
     if prefix_type == "command_prefixes":
-        return server.command_prefixes if server.command_prefixes is not None else []
+        return (
+            server.command_prefixes
+            if server.command_prefixes is not None
+            else []
+        )
     else:
-        return server.message_prefixes if server.message_prefixes is not None else []
+        return (
+            server.message_prefixes
+            if server.message_prefixes is not None
+            else []
+        )
 
 
 def add_prefix(server, prefix_type, new_prefix):
@@ -98,7 +106,10 @@ def remove_prefix(server, prefix_type, delete_prefix):
     if delete_prefix in prefixes:
         prefixes.remove(delete_prefix)
     else:
-        abort(400, f"({delete_prefix}) is not in the list of prefixes for this server")
+        abort(
+            400,
+            f"({delete_prefix}) is not in the list of prefixes for this server",
+        )
     if prefix_type == "command_prefixes":
         server.command_prefixes = prefixes
     else:

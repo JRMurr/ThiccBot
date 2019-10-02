@@ -8,6 +8,8 @@ class Alias(db.Model):
         db.Integer, db.ForeignKey("servergroup.id"), nullable=False
     )
     name = db.Column(db.String, doc="name of the alias")
-    command = db.Column(db.String, doc="the command with args that the alias maps to")
+    command = db.Column(
+        db.String, doc="the command with args that the alias maps to"
+    )
 
     server = db.relationship("ServerGroup")

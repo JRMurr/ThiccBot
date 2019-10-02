@@ -9,6 +9,8 @@ class Counter(db.Model):
     )
     name = db.Column(db.String, doc="the name of the counter")
     count = db.Column(db.Integer, doc="the author of the quote")
-    response = db.Column(db.String, doc="a custom response string for the count")
+    response = db.Column(
+        db.String, doc="a custom response string for the count"
+    )
 
     server = db.relationship("ServerGroup")

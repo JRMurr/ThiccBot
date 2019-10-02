@@ -63,7 +63,10 @@ def get_keyword(server_type, server_id, key_name, check_case=True):
     if keyWord is None:
         abort(404, f"Key word {key_name} does not exist")
     if check_case and keyWord.match_case and keyWord.name != key_name:
-        abort(400, f"Key word {key_name} does not match the casing of {keyWord.name}")
+        abort(
+            400,
+            f"Key word {key_name} does not match the casing of {keyWord.name}",
+        )
     else:
         return keyWord
 

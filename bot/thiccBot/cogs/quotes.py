@@ -114,7 +114,8 @@ class Quotes(commands.Cog):
     async def quote_delete(self, ctx, quote_id):
         """Deletes the specified quote
 
-            Pass the quote id to delete, you can get them by using \"quote list\"
+            Pass the quote id to delete, you can get them by using
+            \"quote list\"
         """
         server_id = ctx.guild.id
 

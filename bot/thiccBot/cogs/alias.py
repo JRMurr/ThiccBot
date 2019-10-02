@@ -38,7 +38,9 @@ class Alias(Cog):
                         await self.bot.process_commands(msg)
                     elif not r.status == 404:
                         log.error(
-                            await get_error_str(r, "error making alias get request: ")
+                            await get_error_str(
+                                r, "error making alias get request: "
+                            )
                         )
                 break
 
@@ -55,7 +57,9 @@ class Alias(Cog):
         if name in command_names or name is "help":
             await ctx.send(f"{name} is a built in bot command")
         else:
-            async with self.bot.backend_request(http_method, url, json=jsonData) as r:
+            async with self.bot.backend_request(
+                http_method, url, json=jsonData
+            ) as r:
                 if r.status == 200:
                     verb = "Updated" if is_update else "Created"
                     await ctx.send(f"{verb} alias {name}")
@@ -65,14 +69,18 @@ class Alias(Cog):
                     msg = f"Alias with name {name} "
                     if is_update:
                         msg += "does not exist."
-                        msg += f"\nIf you want to create the alias use '{ctx.prefix}alias create {name} {args}'"
+                        msg += f"\nIf you want to create the alias use '"
+                        msg += f"{ctx.prefix}alias create {name} {args}'"
                     else:
                         msg += "already exists."
-                        msg += f"\nIf you want to update the alias use '{ctx.prefix}alias update {name} {args}'"
+                        msg += f"\nIf you want to update the alias use "
+                        msg += f"'{ctx.prefix}alias update {name} {args}'"
                     await ctx.send(msg)
                 else:
                     verb = "updating" if is_update else "creating"
-                    await log_and_send_error(log, r, ctx, f"Error {verb} alias {name}")
+                    await log_and_send_error(
+                        log, r, ctx, f"Error {verb} alias {name}"
+                    )
 
     @commands.group()
     @commands.guild_only()
@@ -80,7 +88,8 @@ class Alias(Cog):
         """Commands for creating and mangaging aliases"""
         if ctx.invoked_subcommand is None:  # or ctx.subcommand_passed == 'box':
             await ctx.send(
-                "to create alias run 'alias create <alias_name> <command_to_run>'"
+                "to create alias run"
+                "'alias create <alias_name> <command_to_run>'"
             )
 
     @alias.command(name="create", aliases=["set", "make", "add", "save"])
