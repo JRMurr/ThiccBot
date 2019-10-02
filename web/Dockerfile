@@ -1,4 +1,4 @@
-# TODO: for PROD use web pack to build prod and deploy with ngix
+# TODO: for PROD use web pack to build prod and deploy with nginx
 FROM mhart/alpine-node:6
 
 RUN apk update && apk upgrade && \
