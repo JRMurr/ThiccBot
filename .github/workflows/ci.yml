@@ -1,10 +1,9 @@
 name: Run tests & push images
 
 on:
-  - push:
+  push:
     branches:
-      - master
-  - pull_request
+      - master    
 
 jobs:
   build-flask:
