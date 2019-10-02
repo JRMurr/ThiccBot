@@ -1,8 +1,7 @@
-from flask_restplus import Namespace
 from flask import request
+from flask_restplus import Namespace, Resource, fields, abort
 from src import db
-from src.models import Quotes, DiscordServer, ServerGroup
-from flask_restplus import Resource, fields, abort
+from src.models import Quotes
 from sqlalchemy.sql import func
 from src.utils import server_group_join, get_group_id
 
@@ -19,8 +18,22 @@ quoteModel = ns.model(
 )
 
 
+def apply_search_query(query, search):
+    """
+    Applies the given search string as a LIKE %% filter on the given query.
+    If the search string is None/empty, returns the original query
+    """
+    if search:
+        search_lower = search.lower()
+        return query.filter(
+            func.lower(Quotes.quote_str).like(f"%{search_lower}%")
+            | func.lower(Quotes.author).like(f"%{search_lower}%")
+        )
+    return query
+
+
 @ns.route("/<server_type>/<int:server_id>")
-@ns.param("server_type", "The sever type (discord, irc, etc)")
+@ns.param("server_type", "The server type (discord, irc, etc)")
 @ns.param("server_id", "The id of the server")
 class QuoteList(Resource):
     "Shows all Quotes and lets you post to add a new one"
@@ -28,6 +41,7 @@ class QuoteList(Resource):
     @ns.doc("list_quotes")
     @ns.marshal_with(quoteModel)
     def get(self, server_type, server_id):
+        # Could potentially add a ?search= param here too, to filter the list
         return server_group_join(Quotes, server_type, server_id).all()
 
     @ns.doc("create_quote")
@@ -50,7 +64,9 @@ class QuoteList(Resource):
 
 def get_quote(server_type, server_id, quote_id):
     quote = (
-        server_group_join(Quotes, server_type, server_id).filter(Quotes.id == quote_id)
+        server_group_join(Quotes, server_type, server_id).filter(
+            Quotes.id == quote_id
+        )
     ).first()
     if quote is None:
         abort(404, f"quote with id {quote_id} does not exist")
@@ -77,19 +93,23 @@ class QuoteIdRoute(Resource):
         return ""
 
 
-@ns.route("/<server_type>/<int:server_id>/<search_str>")
-class QuiteSearchRoute(Resource):
-    @ns.doc("get_search_quote")
+@ns.route("/<server_type>/<int:server_id>/random")
+@ns.param("server_type", "The server type (discord, irc, etc)")
+@ns.param("server_id", "The id of the server")
+class QuoteRandomRoute(Resource):
+    @ns.doc("get_random_quote")
     @ns.marshal_with(quoteModel)
-    def get(self, server_type, server_id, search_str):
-        search_str = search_str.lower()
-        searchOr = func.lower(Quotes.quote_str).like(f"%{search_str}%") | func.lower(
-            Quotes.author
-        ).like(f"%{search_str}%")
-        quotes = (
-            server_group_join(Quotes, server_type, server_id).filter(searchOr).all()
+    def get(self, server_type, server_id):
+        search = request.args.get("search")
+        quote = (
+            apply_search_query(
+                server_group_join(Quotes, server_type, server_id), search
+            )
+            .order_by(func.random())
+            .limit(1)
+            .first()
         )
-        if quotes is None or len(quotes) == 0:
-            abort(404, f"quote not found")
-        else:
-            return quotes
+
+        if quote:
+            return quote
+        abort(404, f"no quotes")

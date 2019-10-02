@@ -22,7 +22,15 @@ from src.routes import (
     counterNs,
 )
 
-namespaces = [aliasNs, discordNs, keyNs, quotesNs, albumsNs, lastFmNs, counterNs]
+namespaces = [
+    aliasNs,
+    discordNs,
+    keyNs,
+    quotesNs,
+    albumsNs,
+    lastFmNs,
+    counterNs,
+]
 isDev = os.getenv("FLASK_ENV", "PROD") == "development"
 BOT_API_TOKEN = os.getenv("BOT_API_TOKEN", "BOT_API_TOKEN")
 # DISCORD_ID = os.getenv("DISCORD_CLIENT_ID", "DISCORD_CLIENT_ID")
@@ -30,26 +38,26 @@ BOT_API_TOKEN = os.getenv("BOT_API_TOKEN", "BOT_API_TOKEN")
 
 
 def create_app(config_class=Config):
-    myApp = Flask(__name__)
-    myApp.config.from_object(config_class)
-    api.init_app(myApp)
+    my_app = Flask(__name__)
+    my_app.config.from_object(config_class)
+    api.init_app(my_app)
     for ns in namespaces:
         api.add_namespace(ns)
-    db.init_app(myApp)
-    migrate.init_app(myApp, db)
-    if "SECRET_KEY" in os.environ and not app.config["TESTING"]:
-        myApp.secret_key = os.environ["SECRET_KEY"]
+    db.init_app(my_app)
+    migrate.init_app(my_app, db)
+    if "SECRET_KEY" in os.environ and not my_app.config["TESTING"]:
+        my_app.secret_key = os.environ["SECRET_KEY"]
     else:
-        myApp.logger.warning(
+        my_app.logger.warning(
             "PLEASE SET A SECRET KEY, USING A DEFAULT KEY IS SAD TIMES"
         )
-        myApp.secret_key = "supersekrit"
+        my_app.secret_key = "supersekrit"
     # blueprint = make_discord_blueprint(
     #     client_id=DISCORD_ID, client_secret=DISCORD_SECRET, scope=["identify", "guilds"]
     # )
     # app.register_blueprint(blueprint, url_prefix="/login")
 
-    return myApp
+    return my_app
 
 
 app = create_app(Config)

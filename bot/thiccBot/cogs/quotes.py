@@ -1,17 +1,13 @@
 from discord.ext import commands
-import discord
 from thiccBot.cogs.utils import checks
 from thiccBot.cogs.utils.paginator import Pages
-from thiccBot.cogs.utils.logError import log_and_send_error
-import random
 import logging
-from pprint import pprint
 
 log = logging.getLogger(__name__)
 
 
-def get_str(quote_str, author):
-    return f'"{quote_str}" - {author}'
+def format_quote(quote):
+    return f'"{quote["quote"]}" - {quote["author"]}'
 
 
 class Quotes(commands.Cog):
@@ -22,16 +18,19 @@ class Quotes(commands.Cog):
         server_id = ctx.guild.id
 
         async def on_200(r):
-            data = await r.json()
-            quoute_info = random.choice(data)
-            await ctx.send(get_str(quoute_info["quote"], quoute_info["author"]))
+            quote = await r.json()
+            await ctx.send(format_quote(quote))
+
+        async def on_404(r):
+            await ctx.send("No quotes")
 
         await self.bot.request_helper(
             "get",
-            f"/quotes/discord/{server_id}",
+            f"/quotes/discord/{server_id}/random",
             ctx,
             error_prefix="Error getting quotes",
             success_function=on_200,
+            error_handler={404: on_404},
         )
 
     @commands.group(name="quotes", aliases=["quote"])
@@ -47,17 +46,19 @@ class Quotes(commands.Cog):
         server_id = ctx.guild.id
 
         async def on_200(r):
-            data = await r.json()
-            chosen = random.choice(data)
-            await ctx.send(get_str(chosen["quote"], chosen["author"]))
+            quote = await r.json()
+            await ctx.send(format_quote(quote))
 
-        # TODO: specific error when quote is not found
+        async def on_404(r):
+            await ctx.send("No quotes")
+
         await self.bot.request_helper(
             "get",
-            f"/quotes/discord/{server_id}/{search}",
+            f"/quotes/discord/{server_id}/random?search={search}",
             ctx,
             error_prefix="Error searching for quotes",
             success_function=on_200,
+            error_handler={404: on_404},
         )
 
     @quotes.command(name="list")
@@ -65,8 +66,8 @@ class Quotes(commands.Cog):
         """List all the quotes for this server"""
         server_id = ctx.guild.id
 
-        def quote_page_entry(quoute_info):
-            return f"{quoute_info['id']}: {get_str(quoute_info['quote'], quoute_info['author'])}"
+        def quote_page_entry(quote_info):
+            return f"{quote_info['id']}: {format_quote(quote_info)}"
 
         async def on_200(r):
             data = await r.json()
@@ -96,7 +97,8 @@ class Quotes(commands.Cog):
         server_id = ctx.guild.id
 
         async def on_200(r):
-            await ctx.send(f"Saved quote: {get_str(quote_str, author)}")
+            quote = await r.json()
+            await ctx.send(f"Saved quote: {format_quote(quote)}")
 
         await self.bot.request_helper(
             "post",
@@ -111,7 +113,7 @@ class Quotes(commands.Cog):
     @checks.is_bot_admin()
     async def quote_delete(self, ctx, quote_id):
         """Deletes the specified quote
-        
+
             Pass the quote id to delete, you can get them by using \"quote list\"
         """
         server_id = ctx.guild.id
