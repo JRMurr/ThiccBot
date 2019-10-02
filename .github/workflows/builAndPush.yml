@@ -1,8 +1,9 @@
-name: Run tests & push images
+name: Build and push images
 
-on:
-  pull_request:
-    types: [opened, closed, synchronize, reopened]
+on: 
+  push:
+    branches:
+      -master
 
 jobs:
   build-flask:
@@ -11,10 +12,7 @@ jobs:
       - uses: actions/checkout@master
       - name: Build API image
         run: docker-compose -f docker-compose.ci.yml build flask
-      - name: Test API
-        run: docker-compose -f docker-compose.ci.yml run flask ./runTests.sh
       - name: Push flask image
-        if: github.action == 'closed' && github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'master'
         run: |
           docker login -u ${{ secrets.dockerHubUserName }} -p ${{ secrets.dockerHubToken }}
           docker-compose -f docker-compose.ci.yml push flask
@@ -23,18 +21,16 @@ jobs:
     steps:
       - uses: actions/checkout@master
       - name: Build & push bot image
-        if: github.ref == 'refs/heads/master'
         run: |
           docker login -u ${{ secrets.dockerHubUserName }} -p ${{ secrets.dockerHubToken }}
           docker-compose -f docker-compose.ci.yml build bot
           docker-compose -f docker-compose.ci.yml push bot
-  build-ngix:
+  build-nginx:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
-      - name: Build & push ngix image
-        if: github.ref == 'refs/heads/master'
+      - name: Build & push nginx image
         run: |
           docker login -u ${{ secrets.dockerHubUserName }} -p ${{ secrets.dockerHubToken }}
-          docker-compose -f docker-compose.ci.yml build ngix
-          docker-compose -f docker-compose.ci.yml push ngix
+          docker-compose -f docker-compose.ci.yml build nginx
+          docker-compose -f docker-compose.ci.yml push nginx
