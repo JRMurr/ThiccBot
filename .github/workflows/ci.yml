@@ -3,7 +3,7 @@ name: Run tests & push images
 on:
   push:
     branches:
-      - master    
+      - master
 
 jobs:
   build-flask:
