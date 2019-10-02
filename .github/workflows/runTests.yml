@@ -3,6 +3,14 @@ name: Run tests
 on: pull_request
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Run PyLint
+        uses: cclauss/GitHub-Action-for-pylint@master
+        with:
+          args: pylint **/*.py
   build-flask:
     runs-on: ubuntu-latest
     steps:
