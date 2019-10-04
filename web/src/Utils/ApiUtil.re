@@ -3,7 +3,10 @@ let basePath = "http://localhost:4000";
 let join_route = route => {
   switch (route.[0]) {
   | '/' => basePath ++ route
-  | _ => String.concat("/", [basePath, route])
+  | _ =>
+    let x = String.concat("/", [basePath, route]);
+    Js.log(x);
+    x;
   };
 };
 

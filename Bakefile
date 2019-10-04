@@ -9,6 +9,9 @@ docker/build:
 docker/up:
     docker-compose up --remove-orphans
 
+docker/upB:
+    docker-compose up --remove-orphans --build
+
 docker/fixPermission:
     user=$(id -g)
     sudo chown -R $user:$user .

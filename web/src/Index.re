@@ -24,15 +24,8 @@ module App = {
     didMount: self => {
       let handle_url = (url: ReasonReact.Router.url) => {
         switch (url.path) {
-        | ["server", id] =>
-          /* switch (int_of_string_opt(id)) {
-             | Some(x) => self.send(UpdatePage(Sever(x)))
-             | None => self.send(UpdatePage(Error("Error parsing string id: (" ++ id ++ ")")))
-             }; */
-          self.send(UpdatePage(Sever(id)))
-        | _ =>
-          Js.log(url);
-          self.send(UpdatePage(ServerList));
+        | ["server", id] => self.send(UpdatePage(Sever(id)))
+        | _ => self.send(UpdatePage(ServerList))
         };
       };
       /* handle inistal url for reloads */

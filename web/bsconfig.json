@@ -4,19 +4,26 @@
     "react-jsx": 2
   },
   "sources": {
-    "dir" : "src",
-    "subdirs" : true
+    "dir": "src",
+    "subdirs": true
   },
-  "package-specs": [{
-    "module": "commonjs",
-    "in-source": true
-  }],
+  "package-specs": [
+    {
+      "module": "commonjs",
+      "in-source": true
+    }
+  ],
   "suffix": ".bs.js",
   "namespace": true,
   "bs-dependencies": [
     "reason-react",
     "bs-fetch",
-    "@glennsl/bs-json"
+    "@glennsl/bs-json",
+    "@ryb73/decco",
+    "bs-zarith"
+  ],
+  "ppx-flags": [
+    "@ryb73/decco/ppx/ppx_decco.sh"
   ],
   "refmt": 3
 }

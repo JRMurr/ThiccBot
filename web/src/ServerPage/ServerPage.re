@@ -42,9 +42,21 @@ let make = (~id: string, _children) => {
     switch (self.state) {
     | Error => <div> {ReasonReact.string("An error occurred!")} </div>
     | Loading => <div> {ReasonReact.string("Loading Sever...")} </div>
-    | Loaded(server) =>
+    | Loaded({
+        admin_role,
+        command_prefixes,
+        message_prefixes,
+        id,
+        server_group_id,
+        name,
+      }) =>
       <div className="container-fluid">
-        <h1> {ReasonReact.string("Server: " ++ server.name)} </h1>
+        <h1> {ReasonReact.string(name)} </h1>
+        {switch (admin_role) {
+         | Some(role) =>
+           <h3> {ReasonReact.string("admin role: " ++ role)} </h3>
+         | None => <h3> {ReasonReact.string("ass")} </h3>
+         }}
       </div>
     },
 };
