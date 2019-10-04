@@ -16,6 +16,12 @@ This is a discord bot written in [discord.py](https://github.com/Rapptz/discord.
     use the same process to set `FLASK_SECRET_KEY`
 3. Install docker and docker-compose https://docs.docker.com/compose/install/
 4. Run `docker-compose up`
+5. Add the bot to your server:
+    1. go to the discord application [page](https://discordapp.com/developers/applications/)
+    2. select your application and go to "OAuth2"
+    3. select the "bot" checkbox under "Scopes" and go to the link provided underneath
+    4. select the discord server to add the bot to
+    5. type "?help" into chat
 
 # Developing 
 
