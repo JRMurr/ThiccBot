@@ -9,3 +9,4 @@ initial_extensions:
     - 'cogs.album'
     - 'cogs.counter'
     - 'cogs.lastfm'
+    - 'cogs.playlist'
