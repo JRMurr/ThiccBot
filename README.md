@@ -25,7 +25,7 @@ This is a discord bot written in [discord.py](https://github.com/Rapptz/discord.
 
 # Developing 
 
-While this uses docker to run the bot and flask backend, you can make a conda environment so your ide (vsCode) can have autocomplete for the packages.
+While this uses docker to run the bot and flask backend, you can make a conda environment so your IDE (vsCode) can have autocomplete for the packages.
 ```bash
 conda create -n thiccBot python=3.7 pip
 source activate thiccBot
