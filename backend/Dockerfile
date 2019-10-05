@@ -7,7 +7,7 @@ RUN apk update \
 ENV DOCKERIZE_VERSION v0.6.1
 RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
   && tar -C /usr/local/bin -xzvf dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
-  && rm dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz
+&& rm dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz
 
 #these are for Pillow
 RUN apk --no-cache add build-base python-dev jpeg-dev zlib-dev freetype-dev
@@ -18,7 +18,7 @@ RUN mkdir lastfm_images
 # code doesn't require these steps to run again
 COPY requirements.txt .
 COPY setup.py .
-COPY initDB.py .
+COPY init_db.py .
 RUN pip install --upgrade pip && pip install --no-cache-dir  -U -r requirements.txt
 COPY fonts/ .
 

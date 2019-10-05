@@ -21,6 +21,7 @@ from src.routes import (
     albumsNs,
     lastFmNs,
     counterNs,
+    standingsNs,
 )
 
 namespaces = [
@@ -31,6 +32,7 @@ namespaces = [
     albumsNs,
     lastFmNs,
     counterNs,
+    standingsNs,
 ]
 isDev = os.getenv("FLASK_ENV", "PROD") == "development"
 BOT_API_TOKEN = os.getenv("BOT_API_TOKEN", "BOT_API_TOKEN")
