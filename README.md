@@ -7,7 +7,7 @@ This is a discord bot written in [discord.py](https://github.com/Rapptz/discord.
 1. Set up your `.env` file, this stores all credentials/tokens that should not be checked into git. You can look at `example.env` for reference
     1. Copy your Discord bot token into the `DISCORD_ID` field (you can find/make a bot [here](https://discordapp.com/developers/applications/))
     2. setup all other environment variables as needed
-    3. look at `bot/src/config.yml` and set any settings to what you want
+    3. look at `bot/thiccBot/config.yml` and set any settings to what you want
 2. Set `BOT_API_TOKEN` in `.env` to a random string, you can run the following to generate one 
     ```python
     import secrets
