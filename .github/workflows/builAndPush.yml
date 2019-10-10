@@ -1,12 +1,12 @@
 name: Build and push images
 
-on: 
-  pull_request:
-    types: [closed]
+on:
+  push:
+    branches:
+      - master
 
 jobs:
   build-flask:
-    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'master'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
@@ -19,7 +19,6 @@ jobs:
           docker login -u ${{ secrets.dockerHubUserName }} -p ${{ secrets.dockerHubToken }}
           docker-compose -f docker-compose.ci.yml push flask
   build-bot:
-    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'master'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
@@ -31,7 +30,6 @@ jobs:
           docker-compose -f docker-compose.ci.yml build bot
           docker-compose -f docker-compose.ci.yml push bot
   build-nginx:
-    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'master'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
