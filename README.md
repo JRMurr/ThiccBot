@@ -7,7 +7,7 @@ This is a discord bot written in [discord.py](https://github.com/Rapptz/discord.
 1. Set up your `.env` file, this stores all credentials/tokens that should not be checked into git. You can look at `example.env` for reference
     1. Copy your Discord bot token into the `DISCORD_ID` field (you can find/make a bot [here](https://discordapp.com/developers/applications/))
     2. setup all other environment variables as needed
-    3. look at `bot/src/config.yml` and set any settings to what you want
+    3. look at `bot/thiccBot/config.yml` and set any settings to what you want
 2. Set `BOT_API_TOKEN` in `.env` to a random string, you can run the following to generate one 
     ```python
     import secrets
@@ -16,10 +16,16 @@ This is a discord bot written in [discord.py](https://github.com/Rapptz/discord.
     use the same process to set `FLASK_SECRET_KEY`
 3. Install docker and docker-compose https://docs.docker.com/compose/install/
 4. Run `docker-compose up`
+5. Add the bot to your server:
+    1. go to the discord application [page](https://discordapp.com/developers/applications/)
+    2. select your application and go to "OAuth2"
+    3. select the "bot" checkbox under "Scopes" and go to the link provided underneath
+    4. select the discord server to add the bot to
+    5. type "?help" into chat
 
 # Developing 
 
-While this uses docker to run the bot and flask backend, you can make a conda environment so your ide (vsCode) can have autocomplete for the packages.
+While this uses docker to run the bot and flask backend, you can make a conda environment so your IDE (vsCode) can have autocomplete for the packages.
 ```bash
 conda create -n thiccBot python=3.7 pip
 source activate thiccBot
