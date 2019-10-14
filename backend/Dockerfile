@@ -18,7 +18,6 @@ RUN mkdir lastfm_images
 # code doesn't require these steps to run again
 COPY requirements.txt .
 COPY setup.py .
-COPY init_db.py .
 RUN pip install --upgrade pip && pip install --no-cache-dir  -U -r requirements.txt
 COPY fonts/ .
 
