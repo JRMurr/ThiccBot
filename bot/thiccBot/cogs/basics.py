@@ -125,7 +125,8 @@ class Basics(commands.Cog):
         embed.colour = discord.Colour.blurple()
 
         owner = self.bot.get_user(self.bot.owner_id)
-        embed.set_author(name=str(owner), icon_url=owner.avatar_url)
+        if owner is not None:
+            embed.set_author(name=str(owner), icon_url=owner.avatar_url)
 
         # statistics
         total_members = sum(1 for _ in self.bot.get_all_members())

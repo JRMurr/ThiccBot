@@ -2,7 +2,7 @@ FROM python:3.7-alpine
 
 RUN apk update && apk upgrade && \
     apk add --no-cache bash git \
-    && apk add --virtual build-deps gcc python3-dev g++ make libffi-dev opus
+    && apk add --virtual build-deps gcc python3-dev g++ make libffi-dev opus ffmpeg
 
 WORKDIR /thiccbot
 RUN pip install -U setuptools pip

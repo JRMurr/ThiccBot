@@ -8,7 +8,7 @@ import random
 import logging
 from pprint import pprint
 
-from thiccBot.cogs.player import Player
+from thiccBot.cogs.player import Player, YTDLSource
 
 log = logging.getLogger(__name__)
 
@@ -26,53 +26,95 @@ class Playlist(Cog):
         if ctx.invoked_subcommand is None:
             await ctx.send(f"run {ctx.prefix}help playlist")
 
-    @playlist.command(name="play")
-    async def playlist_play(self, ctx):
-        """Start or resume the music playlists for this server
 
-           ex: playlist play "Voice Channel" """
-        server_id = ctx.guild.id
-
+    async def get_player(self, ctx):
+        """"Get the guild's player (create it if needed)"""
+        gid = ctx.guild.id
         # create the guild's player if it doesn't exist
-        if server_id not in self.players:
+        if gid not in self.players:
             # auto join the users channel
             voice = ctx.author.voice
             if voice is None or voice.channel is None:
-                await ctx.send("user is not in a voice channel")
+                await ctx.send("Join a voice channel to begin playing music")
                 return
 
             await voice.channel.connect()
-            self.players[server_id] = Player(voice.channel)
-            await self.players[server_id].play(ctx)
+            self.players[gid] = Player(ctx)
+            await ctx.send(f"Playing music in {voice.channel.name}")
+        return self.players[gid]
 
-        await ctx.send("Playing music in {voice_channel}")
+    async def cleanup(self, guild):
+        """Get rid of the guilds player"""
+        try:
+            await guild.voice_client.disconnet()
+        except AttributeError:
+            pass
 
-    @playlist.command(name="list")
-    @checks.is_bot_admin()
-    async def playlist_list(self, ctx):
-        """List songs in the playlist"""
-        server_id = ctx.guild.id
+        if guild.id in self.players:
+            del self.players[guild.id]
 
-        if server_id not in self.playlists or len(self.playlists[server_id]) == 0:
-            await ctx.send(f"No songs are in the playlist")
-        else:
-            list = "\n".join(self.playlists[server_id])
-            pprint(f"listing on {server_id}")
-            await ctx.send(f"Songs in playlist:\n{list}")
+    @playlist.command(name="play")
+    async def playlist_play(self, ctx, search: str):
+        """Start or resume player for this server or queue another song
+
+           ex: playlist play https://www.youtube.com/watch?v=FTQbiNvZqaY """
+
+        player = await self.get_player(ctx)
+
+        if search:
+            source = await YTDLSource.create_source(ctx, search, loop=ctx.bot.loop, download=True)
+            await player.queue.put(source)
+
+    # @playlist.command(name="list")
+    # @checks.is_bot_admin()
+    # async def playlist_list(self, ctx):
+    #     """List songs in the playlist"""
+    #     server_id = ctx.guild.id
+
+    #     if server_id not in self.playlists or len(self.playlists[server_id]) == 0:
+    #         await ctx.send(f"No songs are in the playlist")
+    #     else:
+    #         queue = "\n".join(self.playlists[server_id])
+    #         pprint(f"listing on {server_id}")
+    #         await ctx.send(f"Songs in playlist:\n{queue}")
 
     @playlist.command(name="add")
     @checks.is_bot_admin()
-    async def playlist_add(self, ctx, link: str):
+    async def playlist_add(self, ctx, search: str):
         """Adds link to a playlist
 
             ex: playlist add https://www.youtube.com/watch?v=FTQbiNvZqaY """
-        server_id = ctx.guild.id
+        player = await self.get_player(ctx)
 
-        if server_id not in self.playlists:
-            self.playlists[server_id] = []
-        self.playlists[server_id].append(link)
+        source = await YTDLSource.create_source(ctx, search, loop=ctx.bot.loop, download=False)
+        await player.queue.put(source)
 
-        pprint(f"added {link} to {server_id} playlist")
+    @playlist.command(name="stop")
+    @checks.is_bot_admin()
+    async def playlist_stop(self, ctx):
+        """Stops the music and exits the voice channel
+
+            ex: playlist stop"""
+        await self.cleanup(ctx.guild)
+
+    # @entries.command(name="delete")
+    # async def playlist_entry_delete(self, ctx, entry_id: int):
+    #     """Deletes the specified entry in the playlist
+
+    #     To get the id of the entry to delete run "playlist entries list <playlist name>"
+    #     """
+    #     server_id = ctx.guild.id
+
+    #     async def on_200(r):
+    #         await ctx.send(f"Deleted entry: {entry_id}")
+
+    #     await self.bot.request_helper(
+    #         "delete",
+    #         f"/playlists/discord/{server_id}/entry/{entry_id}",
+    #         ctx,
+    #         error_prefix="Error deleting entry",
+    #         success_function=on_200,
+    #     )
 
 
 def setup(bot):
@@ -80,7 +122,6 @@ def setup(bot):
     for lib in OPUS_LIBS:
         try:
             discord.opus.load_opus(lib)
-            pprint(f"loaded opus: {lib}")
         except OSError:
             pass
 
