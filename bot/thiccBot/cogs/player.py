@@ -61,8 +61,6 @@ class YTDLSource(discord.PCMVolumeTransformer):
             # take first item from a playlist
             data = data['entries'][0]
 
-        await ctx.send(f'```ini\n[Added {data["title"]} to the Queue.]\n```', delete_after=15)
-
         if download:
             source = ytdl.prepare_filename(data)
         else:
@@ -109,7 +107,7 @@ class Player:
 
             if not isinstance(source, YTDLSource):
                 try:
-                    source = await YTDLSource.regather_stream(source, loop=self.bot.loop)
+                    source = await YTDLSource.create_source(self.ctx, source['webpage_url'], loop=self.bot.loop, download=True)
                 except Exception as e:
                     await self.ctx.channel.send(f'There was an error processing your song.\n'
                                              f'```css\n[{e}]\n```')
@@ -119,7 +117,7 @@ class Player:
             self.current_song = source
 
             self.ctx.voice_client.play(source, after=lambda _: self.bot.loop.call_soon_threadsafe(self.next.set))
-            await self.ctx.send(f"***Now Playing***: {source.title} requested by {source.requester}")
+            await self.ctx.send(f"**Now Playing:** {source.title} requested by {source.requester}")
 
             await self.next.wait()
 
@@ -129,4 +127,4 @@ class Player:
 
     def destroy(self):
         self.current_song.cleanup()
-        return self.bot.loop.create_task(self.cog.cleanup(self.ctx.guild))
+        return self.bot.loop.create_task(self.cog.cleanup(self.ctx))
