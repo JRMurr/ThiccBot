@@ -234,11 +234,17 @@ class ThiccBot(commands.Bot):
             if callable(on_msg):
                 await on_msg(message)
 
+    async def my_process_commands(self, message):
+        """deafult process commands ignores if the author is a bot, so make my own to not do that"""
+        ctx = await self.get_context(message)
+        await self.invoke(ctx)
+
+
     async def on_message(self, message: discord.Message):
         if message.author == self.user:
             return
         message, deleteMessage = await self.process_message(message)
-        await self.process_commands(message)
+        await self.my_process_commands(message)
         await self.call_all_on_message(message)
         if deleteMessage:
             await message.delete()
