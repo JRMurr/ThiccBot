@@ -10,7 +10,7 @@ from pprint import pprint
 from itertools import islice
 import asyncio
 
-from thiccBot.cogs.player import Player, YTDLSource
+from thiccBot.cogs.utils.player import Player, YTDLSource
 
 log = logging.getLogger(__name__)
 
