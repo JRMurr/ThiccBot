@@ -10,3 +10,6 @@ initial_extensions:
     - 'cogs.counter'
     - 'cogs.lastfm'
     - 'cogs.playlist'
+
+# adding whole playlist to the queue, off by default because it can be dangerous
+allow_adding_playlists: false

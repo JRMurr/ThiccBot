@@ -46,16 +46,23 @@ class Playlist(Cog):
         await player.ctx.guild.voice_client.disconnect()
         del self.players[ctx.guild.id]
 
-    async def add_source(self, ctx, search):
+    async def add_sources(self, ctx, searches):
         player = await self.get_player(ctx)
         if not player:
             return
-        source = await YTDLSource.create_source(ctx, search, loop=ctx.bot.loop, download=False)
-        await player.queue.put(source)
-        await ctx.send(f'```ini\n[Added {source["title"]} to the Queue.]\n```', delete_after=15)
+        for search in searches:
+            results = await YTDLSource.create_source(ctx, search, loop=ctx.bot.loop, download=True)
+            # handle playlists
+            if type(results) == dict and "sources" in results:
+                for source in results["sources"]:
+                    await player.queue.put(source)
+                await ctx.send(f'```ini\n[Added Playlist "{results["title"]}" to the Queue.]\n```', delete_after=15)
+            else:
+                await player.queue.put(results)
+                await ctx.send(f'```ini\n[Added {results["title"]} to the Queue.]\n```', delete_after=15)
 
     @playlist.command(name="play")
-    async def playlist_play(self, ctx, search: str):
+    async def playlist_play(self, ctx, *search: str):
         """Start or resume player for this server or queue another song
 
            ex: playlist play https://www.youtube.com/watch?v=FTQbiNvZqaY
@@ -64,7 +71,7 @@ class Playlist(Cog):
         player = await self.get_player(ctx)
 
         if player and search:
-            await self.add_source(ctx, search)
+            await self.add_sources(ctx, search)
 
     @playlist.command(name="list", aliases=["queue"])
     @checks.is_bot_admin()
@@ -77,7 +84,7 @@ class Playlist(Cog):
         else:
             queue = list(islice(self.players[server_id].queue._queue, 0, 10))
             names = "\n".join(map(lambda info: info["title"], queue))
-            await ctx.send(f"Next {min(10, len(queue))} songs in queue:\n```{names}```")
+            await ctx.send(f"Next {min(10, len(queue))} song{'' if len(queue) == 1 else 's'} in queue:\n```{names}```")
 
     @playlist.command(name="volume", aliases=["vol"])
     @checks.is_bot_admin()
@@ -100,11 +107,11 @@ class Playlist(Cog):
 
     @playlist.command(name="add")
     @checks.is_bot_admin()
-    async def playlist_add(self, ctx, search: str):
+    async def playlist_add(self, ctx, *search: str):
         """Adds link to a playlist
 
             ex: playlist add https://www.youtube.com/watch?v=FTQbiNvZqaY """
-        await self.add_source(ctx, search)
+        await self.add_sources(ctx, search)
 
     @playlist.command(name="pause")
     @checks.is_bot_admin()

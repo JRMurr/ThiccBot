@@ -57,9 +57,13 @@ class YTDLSource(discord.PCMVolumeTransformer):
         to_run = partial(ytdl.extract_info, url=search, download=download)
         data = await loop.run_in_executor(None, to_run)
 
-        if 'entries' in data:
-            # take first item from a playlist
-            data = data['entries'][0]
+        if "entries" in data:
+            # just a single video or only take first
+            if not ctx.bot.config["allow_adding_playlists"] or len(data["entries"]) == 1:
+                # take first item from a playlist
+                data = data['entries'][0]
+            else:
+                return YTDLSource.create_sources_from_playlist(ctx, data, download=download)
 
         if download:
             source = ytdl.prepare_filename(data)
@@ -67,6 +71,18 @@ class YTDLSource(discord.PCMVolumeTransformer):
             return {'webpage_url': data['webpage_url'], 'requester': ctx.author, 'title': data['title']}
 
         return cls(discord.FFmpegPCMAudio(source), data=data, requester=ctx.author)
+
+    @classmethod
+    def create_sources_from_playlist(cls, ctx, playlist_data, *, download=False):
+        results = {"title": playlist_data["title"], "sources": []}
+        for data in playlist_data["entries"]:
+            if download:
+                source = ytdl.prepare_filename(data)
+            else:
+                source = {'webpage_url': data['webpage_url'], 'requester': ctx.author, 'title': data['title']}
+
+            results["sources"].append(cls(discord.FFmpegPCMAudio(source), data=data, requester=ctx.author))
+        return results
 
     @classmethod
     async def regather_stream(cls, data, *, loop):
