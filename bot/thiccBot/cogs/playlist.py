@@ -51,8 +51,11 @@ class Playlist(Cog):
         if not player:
             return
         for search in searches:
-            results = await YTDLSource.create_source(ctx, search, loop=ctx.bot.loop, download=True)
+            results = await YTDLSource.create_source(ctx, search, loop=ctx.bot.loop, download=False)
             # handle playlists
+            if not results:
+                await ctx.send(f'```ini\n[Error adding song to playlist]\n```', delete_after=15)
+                return
             if type(results) == dict and "sources" in results:
                 for source in results["sources"]:
                     await player.queue.put(source)
