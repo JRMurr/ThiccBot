@@ -1,7 +1,7 @@
 # local package
 -e .
 
-git+https://github.com/Rapptz/discord.py.git@c6539bbc615e22a59455179b8526dc6ae264c2a4
+discord.py==1.2.4
 PyYAML==5.1
 backoff==1.8.0
 dotmap==1.3.8

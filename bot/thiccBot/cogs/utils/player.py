@@ -1,5 +1,6 @@
 import discord
 from enum import Enum
+import logging
 
 # YTDLSource from: https://gist.github.com/EvieePy/ab667b74e9758433b3eb806c53a19f34
 
@@ -7,8 +8,10 @@ import asyncio
 from  async_timeout import timeout
 from functools import partial
 from youtube_dl import YoutubeDL
+from youtube_dl.utils import ExtractorError
 
 
+log = logging.getLogger(__name__)
 
 
 ytdlopts = {
@@ -57,16 +60,44 @@ class YTDLSource(discord.PCMVolumeTransformer):
         to_run = partial(ytdl.extract_info, url=search, download=download)
         data = await loop.run_in_executor(None, to_run)
 
-        if 'entries' in data:
-            # take first item from a playlist
-            data = data['entries'][0]
+        if "entries" in data:
+            # just a single video or only take first
+            if not ctx.bot.config["allow_adding_playlists"] or len(data["entries"]) == 1:
+                # take first item from a playlist
+                data = data['entries'][0]
+            else:
+                return await YTDLSource.create_sources_from_playlist(ctx, data, download=download)
 
+        try:
+            source = YTDLSource._create_source(data, ctx, download=download)
+        except ExtractorError as e:
+            log.error(f"Failed to download source: {e}")
+            await ctx.send(f'```ini\nFailed to add {data["title"]} from playlist {playlist_data["title"]}\n```', delete_after=15)
+            return
+
+        return source
+
+    @staticmethod
+    async def create_sources_from_playlist(ctx, playlist_data, *, download=False):
+        results = {"title": playlist_data["title"], "sources": []}
+        for data in playlist_data["entries"]:
+            try:
+                results["sources"].append(YTDLSource._create_source(data, ctx, download=download))
+            except ExtractorError as e:
+                log.error(f"Failed to download source: {e}")
+                await ctx.send(f'```ini\nFailed to add {data["title"]} from playlist {playlist_data["title"]}\n```', delete_after=15)
+                return
+        return results
+
+    @classmethod
+    def _create_source(cls, data, ctx, *, download=False):
         if download:
             source = ytdl.prepare_filename(data)
+            source = cls(discord.FFmpegPCMAudio(source), data=data, requester=ctx.author)
         else:
-            return {'webpage_url': data['webpage_url'], 'requester': ctx.author, 'title': data['title']}
+            source = {'webpage_url': data['webpage_url'], 'requester': ctx.author, 'title': data['title']}
+        return source
 
-        return cls(discord.FFmpegPCMAudio(source), data=data, requester=ctx.author)
 
     @classmethod
     async def regather_stream(cls, data, *, loop):
