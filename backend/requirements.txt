@@ -16,7 +16,7 @@ python-twitter==3.5
 
 #######last fm#######
 pylast==3.1.0
-Pillow==6.0.0
+Pillow==6.2.0
 
 #dev
 pylint-flask #handles pylint errors for models
