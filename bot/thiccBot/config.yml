@@ -1,15 +1,16 @@
 command_prefix: "?" # this is the default prefix to be used, wont be used if prefixes are set in a server
 initial_extensions:
-    - 'cogs.alias'
-    - 'cogs.basics'
-    - 'cogs.admin'
-    - 'cogs.botAdmin'
-    - 'cogs.keyWords'
-    - 'cogs.quotes'
-    - 'cogs.album'
-    - 'cogs.counter'
-    - 'cogs.lastfm'
-    - 'cogs.playlist'
+  - "cogs.alias"
+  - "cogs.basics"
+  - "cogs.admin"
+  - "cogs.botAdmin"
+  - "cogs.keyWords"
+  - "cogs.quotes"
+  - "cogs.album"
+  - "cogs.counter"
+  - "cogs.lastfm"
+  - "cogs.playlist"
+  - "cogs.roles"
 
 # adding whole playlist to the queue, off by default because it can be dangerous
 allow_adding_playlists: false
