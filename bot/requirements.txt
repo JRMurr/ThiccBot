@@ -7,12 +7,15 @@ backoff==1.8.0
 dotmap==1.3.8
 texttable==1.6.2
 
+#discord-menu until its in discord py
+git+https://github.com/Rapptz/discord-ext-menus
+
 #music requirments
 pynacl==1.3.0
 youtube_dl==2019.9.28
 
 #request stuff
-aiohttp==3.5.4
+aiohttp==3.6.2
 chardet==3.0.4
 
 #faster async loop
