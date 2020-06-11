@@ -1,8 +1,8 @@
-from flask_restplus import Namespace
+from flask_restx import Namespace
 from flask import request, current_app as app
 from src import db
 from src.models import Counter, DiscordServer, ServerGroup
-from flask_restplus import Resource, fields, abort
+from flask_restx import Resource, fields, abort
 from src.utils import server_group_join, get_group_id
 from sqlalchemy.sql import func
 

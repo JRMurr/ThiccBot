@@ -1,7 +1,7 @@
 from flask import jsonify
 from src import db
 from src.models import DiscordServer, ServerGroup
-from flask_restplus import abort
+from flask_restx import abort
 
 
 def get_server_group(server_type, server_id):

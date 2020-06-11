@@ -1,7 +1,7 @@
 from flask import Flask, request, abort, redirect, url_for, g, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from flask_restplus import Api
+from flask_restx import Api
 import os
 from .config import Config
 from .constants import CONSTANTS
