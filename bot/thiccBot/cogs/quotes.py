@@ -1,6 +1,7 @@
 from discord.ext import commands
 from thiccBot.cogs.utils import checks
 from thiccBot.cogs.utils.paginator import Pages
+from thiccBot.bot import ThiccBot
 import logging
 
 log = logging.getLogger(__name__)
@@ -11,7 +12,7 @@ def format_quote(quote):
 
 
 class Quotes(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: ThiccBot):
         self.bot = bot
 
     async def get_rand_quote(self, ctx):

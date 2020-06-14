@@ -22,6 +22,7 @@ from src.routes import (
     lastFmNs,
     counterNs,
     standingsNs,
+    discordRoleNs,
 )
 
 namespaces = [
@@ -33,6 +34,7 @@ namespaces = [
     lastFmNs,
     counterNs,
     standingsNs,
+    discordRoleNs,
 ]
 isDev = os.getenv("FLASK_ENV", "PROD") == "development"
 BOT_API_TOKEN = os.getenv("BOT_API_TOKEN", "BOT_API_TOKEN")
@@ -75,6 +77,7 @@ from src.models import (
     Album,
     AlbumEntry,
     Counter,
+    DiscordRole,
 )
 
 # db.create_all(app=app)

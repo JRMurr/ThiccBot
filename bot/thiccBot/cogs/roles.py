@@ -1,11 +1,18 @@
-from discord.ext import commands
+from discord.ext import commands, menus
+from discord import Guild
 from thiccBot.cogs.utils import checks
-from discord.ext import menus
+from thiccBot.bot import ThiccBot
+from thiccBot.cogs.utils.logError import get_error_str, log_and_send_error
+import logging
+
+log = logging.getLogger(__name__)
 
 
 class MyMenu(menus.Menu):
     async def send_initial_message(self, ctx, channel):
-        return await channel.send(f"Hello {ctx.author}")
+        tmp = await channel.send(f"Hello {ctx.author}")
+        print(tmp)
+        return tmp
 
     @menus.button("\N{THUMBS UP SIGN}")
     async def on_thumbs_up(self, payload):
@@ -21,8 +28,36 @@ class MyMenu(menus.Menu):
 
 
 class Roles(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: ThiccBot):
+        # TODO: add on unload to stop menus
         self.bot = bot
+        self.initialized_guilds = set()
+        bot.loop.create_task(self.async_init())
+
+    async def async_init(self):
+        await self.bot.wait_until_ready()
+        for guild in self.bot.guilds:
+            await self.setup_message_listener(guild)
+
+    async def setup_message_listener(self, guild: Guild):
+        if guild in self.initialized_guilds:
+            return
+        async with self.bot.backend_request(
+            "get", f"/discord/roles/{guild.id}"
+        ) as r:
+            if r.status == 200:
+                data = await r.json()
+                for info in data:
+                    # get channel and message objects from ids (discord.util.find/get might work)
+                    pass
+                self.initialized_guilds.add(guild)
+            else:
+                log.error(
+                    await get_error_str(
+                        r,
+                        f"Error initializing message listeners for guild ({guild}): ",
+                    )
+                )
 
     @commands.group(name="roles", aliases=["role"])
     @commands.guild_only()
@@ -34,7 +69,20 @@ class Roles(commands.Cog):
     @roles.command(name="tmp")
     async def tmp(self, ctx):
         m = MyMenu()
-        await m.start(ctx)
+        data = {
+            "role_id": 1,  # TODO: get role id
+            "message_id": m.message.id,
+            "channel_id": ctx.channel.id,
+        }
+        async with self.bot.backend_request(
+            "POST", f"/discord/roles/{ctx.guild.id}", json=data
+        ) as r:
+            if r.status == 200:
+                await m.start(ctx)
+            else:
+                log_and_send_error(
+                    log, r, ctx, f"Error setting up role message: "
+                )
 
 
 def setup(bot):
