@@ -1,8 +1,8 @@
-from flask_restplus import Namespace
+from flask_restx import Namespace
 from flask import request
 from src import db
 from src.models import Album, AlbumEntry, DiscordServer, ServerGroup
-from flask_restplus import Resource, fields, abort
+from flask_restx import Resource, fields, abort
 from src.utils import server_group_join, get_group_id, get_server_group
 
 ns = Namespace("api/albums", description="Album operations")

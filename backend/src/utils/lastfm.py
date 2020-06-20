@@ -3,7 +3,7 @@ import os
 import requests
 from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
-from flask_restplus import abort
+from flask_restx import abort
 from typing import List
 from src import CONSTANTS
 

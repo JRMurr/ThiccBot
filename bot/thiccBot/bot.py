@@ -133,6 +133,7 @@ class ThiccBot(commands.Bot):
     async def on_guild_join(self, guild):
         if not await self.get_guild(guild):
             await self.add_guild(guild)
+        await self.call_cog_func("setup_message_listener", guild)
 
     @backoff.on_exception(
         backoff.expo, Exception, max_tries=2, max_time=15, logger=log
@@ -226,6 +227,13 @@ class ThiccBot(commands.Bot):
                 break
         return message, deleteMessage
 
+    async def call_cog_func(self, func_name, *args):
+        for name in self.cogs:
+            cog = self.get_cog(name)
+            func = getattr(cog, func_name, None)
+            if callable(func):
+                await func(*args)
+
     async def call_all_on_message(self, message: discord.Message):
         """Call the on_message function on all cogs with one"""
         for name in self.cogs:
@@ -238,7 +246,6 @@ class ThiccBot(commands.Bot):
         """deafult process commands ignores if the author is a bot, so make my own to not do that"""
         ctx = await self.get_context(message)
         await self.invoke(ctx)
-
 
     async def on_message(self, message: discord.Message):
         if message.author == self.user:

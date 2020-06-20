@@ -1,5 +1,5 @@
-from flask_restplus import Namespace
-from flask_restplus import Resource, abort
+from flask_restx import Namespace
+from flask_restx import Resource, abort
 from flask import send_file
 from src.utils import LastFmHelper
 from src import CONSTANTS

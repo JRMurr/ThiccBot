@@ -1,5 +1,5 @@
 from flask import request
-from flask_restplus import Namespace, Resource, fields, abort
+from flask_restx import Namespace, Resource, fields, abort
 from src import db
 from src.models import Quotes
 from sqlalchemy.sql import func

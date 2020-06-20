@@ -1,4 +1,4 @@
-FROM python:3.7-alpine
+FROM python:3.8-alpine
 #https://github.com/trstringer/python-flask-docker-compose-debugging
 RUN apk update \
   && apk add --virtual build-deps gcc python3-dev musl-dev \
@@ -7,10 +7,10 @@ RUN apk update \
 ENV DOCKERIZE_VERSION v0.6.1
 RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
   && tar -C /usr/local/bin -xzvf dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
-&& rm dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz
+  && rm dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz
 
 #these are for Pillow
-RUN apk --no-cache add build-base python-dev jpeg-dev zlib-dev freetype-dev
+RUN apk --no-cache add build-base python3-dev jpeg-dev zlib-dev freetype-dev
 WORKDIR /thiccflask
 
 RUN mkdir lastfm_images

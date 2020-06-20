@@ -6,3 +6,4 @@ from .quotes import Quotes
 from .album import Album
 from .albumEntry import AlbumEntry
 from .counter import Counter
+from .discordRole import DiscordRole

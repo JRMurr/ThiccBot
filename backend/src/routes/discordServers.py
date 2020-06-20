@@ -1,11 +1,11 @@
-from flask_restplus import Namespace
+from flask_restx import Namespace
 from flask import request, g, Blueprint, current_app as app
 from pprint import pformat
 from src import db
 from src.models import DiscordServer, ServerGroup
 from flask import url_for
 from flask_dance.contrib.discord import discord as dAuth
-from flask_restplus import Resource, fields, abort
+from flask_restx import Resource, fields, abort
 from pprint import pprint
 
 ns = Namespace("api/discord", description="Discord Server operations")

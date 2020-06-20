@@ -1,7 +1,7 @@
 import requests
 from collections import defaultdict
 from flask import request
-from flask_restplus import Namespace, Resource, abort
+from flask_restx import Namespace, Resource, abort
 
 ns = Namespace("api/standings", description="Sports standings")
 
