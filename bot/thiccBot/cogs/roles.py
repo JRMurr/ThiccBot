@@ -36,7 +36,6 @@ class RoleMenu(menus.Menu):
 
 class Roles(commands.Cog):
     def __init__(self, bot: ThiccBot):
-        # TODO: add on unload to stop menus
         self.bot = bot
         self.initialized_guilds = set()
         self.menus = []
