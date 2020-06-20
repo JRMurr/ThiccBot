@@ -38,7 +38,7 @@ class Roles(commands.Cog):
     def __init__(self, bot: ThiccBot):
         self.bot = bot
         self.initialized_guilds = set()
-        self.menus = []
+        self.menus = {}
         bot.loop.create_task(self.async_init())
 
     async def async_init(self):
@@ -47,7 +47,7 @@ class Roles(commands.Cog):
             await self.setup_message_listener(guild)
 
     def cog_unload(self):
-        for m in self.menus:
+        for m in self.menus.values():
             m.stop()
 
     async def setup_message_listener(self, guild: Guild):
@@ -78,7 +78,7 @@ class Roles(commands.Cog):
                         m = RoleMenu(role, message=message)
                         ctx = await self.bot.get_context(message)
                         await m.start(ctx)
-                        self.menus.append(m)
+                        self.menus[info["id"]] = m
                     except Exception as e:
                         log.error(f"Error setting up menu: {info}. {e}")
                         continue
@@ -125,7 +125,44 @@ class Roles(commands.Cog):
                 )
                 m.stop()
             else:
-                self.menus.append(m)
+                info = await r.json()
+                self.menus[info["id"]] = m
+
+    @roles.command(name="remove_message")
+    @checks.is_bot_admin()
+    async def remove_message(self, ctx, role_name: str):
+        # TODO: its kinda jank to get all the messages for the guild
+        # but this wont be used much so idc
+
+        role = await misc.get_role(ctx, role_name)
+        if not role:
+            return
+
+        async def on_200(r):
+            info = await r.json()
+            self.menus[info["id"]].stop()
+            del self.menus[info["id"]]
+            await ctx.send(f"deleted role message for {role.name}")
+
+        async with self.bot.backend_request(
+            "get", f"/discord/roles/{ctx.guild.id}"
+        ) as r:
+            if r.status == 200:
+                data = await r.json()
+                # its techincally possible there are multiple messages for a role so
+                # delete them all
+                filtered = [x for x in data if x["role_id"] == role.id]
+                if len(filtered) == 0:
+                    ctx.send(f"No messages found for {role.name}")
+                    return
+                for info in filtered:
+                    await self.bot.request_helper(
+                        "delete",
+                        f"/discord/roles/{info['id']}",
+                        ctx,
+                        error_prefix=f"Error removing role message",
+                        success_function=on_200,
+                    )
 
 
 def setup(bot):

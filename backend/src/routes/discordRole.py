@@ -47,3 +47,15 @@ class RoleList(Resource):
         db.session.add(role)
         db.session.commit()
         return role
+
+
+@ns.route("/<int:id>")
+@ns.param("id", "The id for the role object")
+class RoleIdRoute(Resource):
+    @ns.doc("delete_role")
+    @ns.marshal_with(roleModel, code=204)
+    def delete(self, id):
+        role = DiscordRole.query.filter(DiscordRole.id == id).first()
+        db.session.delete(role)
+        db.session.commit()
+        return role
