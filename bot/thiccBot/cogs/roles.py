@@ -17,6 +17,26 @@ class RoleMenu(menus.Menu):
         msg = f"React with :white_check_mark: to add/remove the role ({self.role.name})"
         return await channel.send(msg)
 
+    def reaction_check(self, payload):
+        """The function that is used to check whether the payload should be processed.
+        This is passed to :meth:`discord.ext.commands.Bot.wait_for <Bot.wait_for>`.
+        There should be no reason to override this function for most users.
+        Parameters
+        ------------
+        payload: :class:`discord.RawReactionActionEvent`
+            The payload to check.
+        Returns
+        ---------
+        :class:`bool`
+            Whether the payload should be processed.
+        """
+        if payload.message_id != self.message.id:
+            return False
+        # if payload.user_id not in (self.bot.owner_id, self._author_id):
+        #     return False
+
+        return payload.emoji in self.buttons
+
     @menus.button("\N{White Heavy Check Mark}")
     async def on_check(self, payload: RawReactionActionEvent):
         user_id = payload.user_id
@@ -30,8 +50,8 @@ class RoleMenu(menus.Menu):
                 await member.remove_roles(self.role)
                 await member.send(f"Removed role: ({self.role.name})")
         except Exception as e:
-            log.error(f"Error modifying role. {e}")
-            self.ctx.send(f"Error modifying role")
+            log.error(f"Error modifying role, {e}")
+            await member.send(f"Error modifying role. Yell at fat")
 
 
 class Roles(commands.Cog):
@@ -120,7 +140,7 @@ class Roles(commands.Cog):
             "POST", f"/discord/roles/{ctx.guild.id}", json=data
         ) as r:
             if r.status != 200:
-                log_and_send_error(
+                await log_and_send_error(
                     log, r, ctx, f"Error setting up role message: "
                 )
                 m.stop()

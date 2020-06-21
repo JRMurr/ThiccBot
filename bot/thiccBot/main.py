@@ -1,8 +1,9 @@
 import os
 import asyncio
+import sys
+import logging
 from thiccBot.bot import ThiccBot
 from yaml import full_load
-import logging
 from contextlib import contextmanager, asynccontextmanager
 
 try:
@@ -27,16 +28,19 @@ def setup_logging():
         logging.getLogger("discord.http").setLevel(logging.WARNING)
 
         log = logging.getLogger()
-        log.setLevel(logging.INFO)
+        log.setLevel(logging.ERROR)
         handler = logging.FileHandler(
             filename="thiccBot.log", encoding="utf-8", mode="w"
         )
+        out_hdlr = logging.StreamHandler(sys.stdout)
         dt_fmt = "%Y-%m-%d %H:%M:%S"
         fmt = logging.Formatter(
             "[{asctime}] [{levelname:<7}] {name}: {message}", dt_fmt, style="{"
         )
         handler.setFormatter(fmt)
+        out_hdlr.setFormatter(fmt)
         log.addHandler(handler)
+        log.addHandler(out_hdlr)
         yield
     finally:
         # __exit__
