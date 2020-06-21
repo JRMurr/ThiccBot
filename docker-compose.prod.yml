@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 volumes:
   node_modules:
 
@@ -13,24 +13,24 @@ services:
     volumes:
       - ./postgres-data/postgres:/var/lib/postgresql/data:rw
   pgbackups:
-        image: prodrigestivill/postgres-backup-local
-        restart: always
-        volumes:
-            - ./pg-backups:/backups
-        links:
-            - postgres
-        depends_on:
-            - postgres
-        environment:
-            - POSTGRES_HOST=postgres
-            - POSTGRES_DB=${THICC_DB}
-            - POSTGRES_USER=${THICC_USER}
-            - POSTGRES_PASSWORD=${THICC_PASSWORD}
-            - SCHEDULE=@daily
-            - BACKUP_KEEP_DAYS=7
-            - BACKUP_KEEP_WEEKS=4
-            - BACKUP_KEEP_MONTHS=6
-            # - HEALTHCHECK_PORT=80
+    image: prodrigestivill/postgres-backup-local
+    restart: always
+    volumes:
+      - ./pg-backups:/backups
+    links:
+      - postgres
+    depends_on:
+      - postgres
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_DB=${THICC_DB}
+      - POSTGRES_USER=${THICC_USER}
+      - POSTGRES_PASSWORD=${THICC_PASSWORD}
+      - SCHEDULE=@daily
+      - BACKUP_KEEP_DAYS=7
+      - BACKUP_KEEP_WEEKS=4
+      - BACKUP_KEEP_MONTHS=6
+      # - HEALTHCHECK_PORT=80
   flask:
     image: jrmurray/thiccbot-flask:latest
     tty: true
@@ -49,37 +49,35 @@ services:
     depends_on:
       - postgres
     restart: always
-    # run this command when you change db models, this does not detect all changes https://flask-migrate.readthedocs.io/en/latest/ 
+    # run this command when you change db models, this does not detect all changes https://flask-migrate.readthedocs.io/en/latest/
     # command: sh -c "dockerize -wait tcp://postgres:5432 && flask db migrate"
     command: sh -c "dockerize -wait tcp://postgres:5432 && flask db upgrade && gunicorn -w 4 -b 0.0.0.0:8000 src:app" #&& flask db upgrade
     # command: sh -c "ls "
   bot:
-      tty: true
-      image: jrmurray/thiccbot-bot:latest
-      restart: always
-      environment:
+    tty: true
+    image: jrmurray/thiccbot-bot:latest
+    restart: always
+    environment:
       - DISCORD_ID=${DISCORD_ID}
       - BACKEND_URL=http://nginx/api
       - BOT_API_TOKEN=${BOT_API_TOKEN}
       - BOT_ADMIN=${BOT_ADMIN}
       - BOT_ENV=production
-      volumes:
-      - ./bot:/thiccbot:rw
-      depends_on:
+    depends_on:
       - flask
-      command: python thiccBot/main.py
+    command: python thiccBot/main.py
   nginx:
     image: jrmurray/thiccbot-nginx:latest
     depends_on:
       - flask
     ports:
       - "80:80"
-  # web: 
+  # web:
   #   build: ./web
   #   tty: true
   #   environment:
   #     - PORT=4000
-  #   ports: 
+  #   ports:
   #     - "4000:4000"
   #   volumes:
   #     - ./web:/thiccweb:rw

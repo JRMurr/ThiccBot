@@ -10,7 +10,7 @@ log = logging.getLogger(__name__)
 
 class RoleMenu(menus.Menu):
     def __init__(self, role: Role, *args, **kwargs):
-        super(RoleMenu, self).__init__(*args, **kwargs)
+        super(RoleMenu, self).__init__(*args, timeout=None, **kwargs)
         self.role = role
 
     async def send_initial_message(self, ctx, channel):
