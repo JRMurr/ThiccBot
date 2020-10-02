@@ -50,11 +50,13 @@ def _prefix_callable(bot, msg):
 class ThiccBot(commands.Bot):
     def __init__(self, config):
         pm_help = False if IS_DEVELOPMENT else None
+        intents = discord.Intents.all()
         super().__init__(
             command_prefix=_prefix_callable,
             description=description,
             pm_help=pm_help,
             owner_id=BOT_ADMIN,
+            intents=intents
         )
         self.config = config
         self.prefixes = {}
