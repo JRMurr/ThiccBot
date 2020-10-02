@@ -13,6 +13,6 @@ COPY requirements.txt .
 COPY setup.py .
 RUN pip install -U -r requirements.txt
 
-COPY . ./src
+COPY . .
 
 # CMD python main.py
