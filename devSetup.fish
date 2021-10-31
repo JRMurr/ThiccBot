@@ -1,4 +1,4 @@
-source activate thiccBot
+. venv/bin/activate.fish
 cd bot
 pip install -r requirements.txt
 cd ..
