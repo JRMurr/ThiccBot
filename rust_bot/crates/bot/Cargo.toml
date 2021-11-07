@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 serenity = "0.10"
 tokio = { version = "1.13.0", features = ["full"] }
+client = {path = "../client"}
