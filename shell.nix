@@ -9,5 +9,8 @@ pkgs.mkShell {
     zlib
     pkgconfig
     postgresql_12
+    #python
+    python39
+    python39Packages.virtualenv
   ];
 }
