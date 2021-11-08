@@ -2,13 +2,12 @@
 
 pkgs.mkShell {
   buildInputs = with pkgs; [
-    # rust stuff
+    # rust stuff this might be overkill, copy pasted from elsewhere
     gcc
     cmake
     openssl
     zlib
     pkgconfig
-    postgresql_12
     #python
     python39
     python39Packages.virtualenv
