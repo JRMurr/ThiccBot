@@ -1,11 +1,15 @@
+mod handler;
+
+use crate::handler::Handler;
 use client::ThiccClient;
-use serenity::async_trait;
-use serenity::client::{Client, Context, EventHandler};
-use serenity::framework::standard::{
-    macros::{command, group},
-    CommandResult, StandardFramework,
+use serenity::{
+    client::{Client, Context, EventHandler},
+    framework::standard::{
+        macros::{command, group},
+        CommandResult, StandardFramework,
+    },
+    model::channel::Message,
 };
-use serenity::model::channel::Message;
 
 // use client::models::key_word::KeyWord;
 use std::env;
@@ -14,32 +18,10 @@ use std::env;
 #[commands(ping)]
 struct General;
 
-struct Handler {
-    client: ThiccClient,
-}
-
-#[async_trait]
-impl EventHandler for Handler {
-    async fn message(&self, _context: Context, msg: Message) {
-        match msg.guild_id {
-            Some(id) => {
-                let id = &id.0.to_string();
-                match self.client.get_key_words(id, &msg.content).await {
-                    Ok(key_words) => {
-                        println!("key_words {:?}", key_words);
-                    }
-                    Err(why) => {
-                        println!("error getting key_words: {:?}", why);
-                    }
-                }
-            }
-            None => return,
-        }
-    }
-}
-
 #[tokio::main]
 async fn main() {
+    // TODO: look into https://docs.rs/serenity/0.10.9/serenity/framework/standard/struct.Configuration.html#method.dynamic_prefix
+    // to be able to set the prefix per server
     let framework = StandardFramework::new()
         .configure(|c| c.prefix("?")) // set the bot's prefix to "?"
         .group(&GENERAL_GROUP);

@@ -20,7 +20,8 @@ impl ThiccClient {
         let base_url = Url::parse(base_url).expect("Error parsing base url");
 
         let mut headers = HeaderMap::new();
-        let mut auth_value = HeaderValue::from_str(api_key).expect("Error parsing api_key");
+        let mut auth_value =
+            HeaderValue::from_str(api_key).expect("Error parsing api_key");
         auth_value.set_sensitive(true);
         headers.insert(AUTHORIZATION, auth_value);
 

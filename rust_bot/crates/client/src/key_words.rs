@@ -11,7 +11,11 @@ pub struct KeyWord {
 }
 
 impl ThiccClient {
-    pub async fn get_key_words(&self, server_id: &str, search: &str) -> Result<Vec<KeyWord>> {
+    pub async fn get_key_words(
+        &self,
+        server_id: &str,
+        search: &str,
+    ) -> Result<Vec<KeyWord>> {
         let res = self
             .get(&format!("/keyWords/discord/{}/{}", server_id, search))?
             .send()
