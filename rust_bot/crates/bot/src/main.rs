@@ -3,7 +3,7 @@ mod handler;
 use crate::handler::Handler;
 use client::ThiccClient;
 use serenity::{
-    client::{Client, Context, EventHandler},
+    client::{Client, Context},
     framework::standard::{
         macros::{command, group},
         CommandResult, StandardFramework,
@@ -26,13 +26,10 @@ async fn main() {
         .configure(|c| c.prefix("?")) // set the bot's prefix to "?"
         .group(&GENERAL_GROUP);
 
-    let base_url = "http://localhost:5000"; // TODO: read from env var
+    let base_url = "http://localhost:5000/api/"; // TODO: read from env var
     let api_key = env::var("BOT_API_TOKEN").expect("BOT_API_TOKEN");
-    let thicc_client = ThiccClient::new(base_url, &api_key);
 
-    let handler = Handler {
-        client: thicc_client,
-    };
+    let handler = Handler::new(ThiccClient::new(base_url, &api_key));
 
     // Login with a bot token from the environment
     let token = env::var("DISCORD_ID").expect("DISCORD_ID");

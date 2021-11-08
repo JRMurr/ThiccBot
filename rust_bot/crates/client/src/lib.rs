@@ -34,6 +34,13 @@ impl ThiccClient {
     }
 
     fn join_with_base(&self, url: &str) -> Result<Url> {
+        if url.starts_with("/") {
+            anyhow::bail!(
+                "relative url: {} should not start with a slash",
+                url
+            );
+        }
+
         let url = self
             .base_url
             .join(url)

@@ -14,10 +14,8 @@ pub struct DiscordGuild {
 
     admin_role: Option<u64>,
 
-    // TODO: check if these need to be options, the server might send an empty
-    // array
-    command_prefixes: Vec<String>,
-    message_prefixes: Vec<String>,
+    command_prefixes: Option<Vec<String>>,
+    message_prefixes: Option<Vec<String>>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -33,7 +31,7 @@ impl ThiccClient {
         &self,
         guild_id: u64,
     ) -> Result<Option<DiscordGuild>> {
-        let res = self.get(&format!("/discord/{}", guild_id))?.send().await?;
+        let res = self.get(&format!("discord/{}", guild_id))?.send().await?;
         match res.error_for_status() {
             Ok(response) => Ok(Some(response.json::<DiscordGuild>().await?)),
             Err(e) => {
@@ -56,7 +54,7 @@ impl ThiccClient {
             name: name.to_string(),
         };
         let res = self
-            .post("/discord")?
+            .post("discord")?
             .json(&payload)
             .send()
             .await?

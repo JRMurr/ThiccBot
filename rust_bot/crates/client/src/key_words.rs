@@ -17,7 +17,7 @@ impl ThiccClient {
         search: &str,
     ) -> Result<Vec<KeyWord>> {
         let res = self
-            .get(&format!("/keyWords/discord/{}/{}", server_id, search))?
+            .get(&format!("keyWords/discord/{}/{}", server_id, search))?
             .send()
             .await?
             .error_for_status()? // TODO: instead of this match and don't throw error if 404
