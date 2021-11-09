@@ -29,7 +29,7 @@ impl KeyWordManager<'_> {
             .await
         {
             Ok(key_word) => Ok(Some(key_word)),
-            Err(e) => ThiccClient::handle_404(e),
+            Err(e) => ThiccClient::handle_404(e).map(|_| None),
         }
     }
 

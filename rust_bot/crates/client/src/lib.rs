@@ -95,14 +95,12 @@ impl ThiccClient {
     }
 
     /// given an [`anyhow::Error`], if its a 404 error from [`reqwest::Error`]
-    /// return [`None`], otherwise return the error
-    pub fn handle_404<T>(e: anyhow::Error) -> Result<Option<T>> {
-        // NOTE: would this generate a new def for each T this is called on even
-        // if T is not used in this?
+    /// return `()`, otherwise return the error
+    pub fn handle_404(e: anyhow::Error) -> Result<()> {
         match e.downcast_ref::<reqwest::Error>() {
             Some(http_error) => {
                 if http_error.status() == Some(reqwest::StatusCode::NOT_FOUND) {
-                    Ok(None)
+                    Ok(())
                 } else {
                     Err(e)
                 }
