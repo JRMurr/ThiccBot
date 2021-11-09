@@ -94,18 +94,20 @@ impl ThiccClient {
         Ok(res)
     }
 
-    /// given an [`anyhow::Error`], if its a 404 error from [`reqwest::Error`]
-    /// return `()`, otherwise return the error
-    pub fn handle_404(e: anyhow::Error) -> Result<()> {
-        match e.downcast_ref::<reqwest::Error>() {
-            Some(http_error) => {
-                if http_error.status() == Some(reqwest::StatusCode::NOT_FOUND) {
-                    Ok(())
-                } else {
-                    Err(e)
+    /// given an [`anyhow::Result`], if its a 404 error from [`reqwest::Error`]
+    /// return [`None`], otherwise return the passed result
+    pub fn swallow_404<T>(result: Result<T>) -> Result<Option<T>> {
+        match result {
+            Ok(value) => Ok(Some(value)),
+            Err(e) => match e.downcast_ref::<reqwest::Error>() {
+                Some(http_error)
+                    if http_error.status()
+                        == Some(reqwest::StatusCode::NOT_FOUND) =>
+                {
+                    Ok(None)
                 }
-            }
-            None => Err(e),
+                _ => Err(e),
+            },
         }
     }
 }

@@ -20,17 +20,14 @@ impl KeyWordManager<'_> {
         guild_id: u64,
         search: &str,
     ) -> Result<Option<KeyWord>> {
-        match self
-            .client
-            .get_json::<KeyWord>(&format!(
-                "keyWords/discord/{}/{}",
-                guild_id, search
-            ))
-            .await
-        {
-            Ok(key_word) => Ok(Some(key_word)),
-            Err(e) => ThiccClient::handle_404(e).map(|_| None),
-        }
+        ThiccClient::swallow_404(
+            self.client
+                .get_json::<KeyWord>(&format!(
+                    "keyWords/discord/{}/{}",
+                    guild_id, search
+                ))
+                .await,
+        )
     }
 
     pub async fn create(
