@@ -1,3 +1,7 @@
+#![feature(try_blocks)]
+#[macro_use]
+extern crate log;
+
 mod handler;
 
 use crate::handler::Handler;
@@ -11,7 +15,6 @@ use serenity::{
     model::channel::Message,
 };
 
-// use client::models::key_word::KeyWord;
 use std::env;
 
 #[group]
@@ -20,6 +23,8 @@ struct General;
 
 #[tokio::main]
 async fn main() {
+    env_logger::init();
+
     // TODO: look into https://docs.rs/serenity/0.10.9/serenity/framework/standard/struct.Configuration.html#method.dynamic_prefix
     // to be able to set the prefix per server
     let framework = StandardFramework::new()
@@ -39,9 +44,10 @@ async fn main() {
         .await
         .expect("Error creating client");
 
+    info!("Starting Bot");
     // start listening for events by starting a single shard
     if let Err(why) = client.start().await {
-        println!("An error occurred while running the client: {:?}", why);
+        error!("An error occurred while running the client: {:?}", why);
     }
 }
 

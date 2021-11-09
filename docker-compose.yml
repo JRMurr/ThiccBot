@@ -11,8 +11,8 @@ services:
       - POSTGRES_USER=${THICC_USER}
       - POSTGRES_PASSWORD=${THICC_PASSWORD}
       - POSTGRES_DB=${THICC_DB}
-    volumes:
-      # - ./postgres-data/postgres:/var/lib/postgresql/data
+    # volumes:
+    # - ./postgres-data/postgres:/var/lib/postgresql/data
     ports:
       - "5432:5432"
   flask:

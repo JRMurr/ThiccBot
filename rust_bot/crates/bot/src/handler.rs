@@ -1,3 +1,4 @@
+use anyhow::Result;
 use client::ThiccClient;
 use serenity::{
     async_trait,
@@ -15,22 +16,29 @@ impl Handler {
     }
 }
 
-#[async_trait]
-impl EventHandler for Handler {
-    async fn message(&self, _context: Context, msg: Message) {
+impl Handler {
+    async fn handle_key_words(
+        &self,
+        _context: &Context,
+        msg: &Message,
+    ) -> Result<()> {
         match msg.guild_id {
             Some(id) => {
-                let id = &id.0.to_string();
-                match self.client.get_key_words(id, &msg.content).await {
-                    Ok(key_words) => {
-                        println!("key_words {:?}", key_words);
-                    }
-                    Err(why) => {
-                        println!("error getting key_words: {:?}", why);
-                    }
-                }
+                let key_words =
+                    self.client.key_words().get(id.0, &msg.content).await?;
+                trace!("key_words: {:?}", key_words);
+                Ok(())
             }
-            None => return,
+            None => Ok(()),
+        }
+    }
+}
+
+#[async_trait]
+impl EventHandler for Handler {
+    async fn message(&self, context: Context, msg: Message) {
+        if let Err(why) = self.handle_key_words(&context, &msg).await {
+            error!("error handling key_words: {:?}", why);
         }
     }
 
@@ -46,11 +54,11 @@ impl EventHandler for Handler {
                 // create guild in backend
                 let res = self.client.create_guild(id, &guild.name).await;
                 if let Err(why) = res {
-                    println!("error making guild: {:?}", why);
+                    error!("error making guild: {:?}", why);
                 }
             }
             Err(why) => {
-                println!("error getting guild: {:?}", why);
+                error!("error getting guild: {:?}", why);
             }
             _ => return, // exists in backend already don't care
         }
