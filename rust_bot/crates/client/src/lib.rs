@@ -3,6 +3,7 @@ use reqwest::{
     header::{HeaderMap, HeaderValue, AUTHORIZATION},
     Client, RequestBuilder, Url,
 };
+use serde::{de::DeserializeOwned, Serialize};
 
 pub mod guilds;
 pub mod key_words;
@@ -61,5 +62,52 @@ impl ThiccClient {
     pub fn delete(&self, url: &str) -> Result<RequestBuilder> {
         let url = self.join_with_base(url)?;
         Ok(self.client.delete(url))
+    }
+
+    pub async fn get_json<T: DeserializeOwned>(&self, url: &str) -> Result<T> {
+        let res = self
+            .get(url)?
+            .send()
+            .await?
+            .error_for_status()?
+            .json::<T>()
+            .await?;
+        Ok(res)
+    }
+
+    pub async fn post_json<
+        Payload: Serialize + ?Sized,
+        Res: DeserializeOwned,
+    >(
+        &self,
+        url: &str,
+        payload: &Payload,
+    ) -> Result<Res> {
+        let res = self
+            .post(url)?
+            .json(payload)
+            .send()
+            .await?
+            .error_for_status()?
+            .json()
+            .await?;
+        Ok(res)
+    }
+
+    /// given an [`anyhow::Error`], if its a 404 error from [`reqwest::Error`]
+    /// return [`None`], otherwise return the error
+    pub fn handle_404<T>(e: anyhow::Error) -> Result<Option<T>> {
+        // NOTE: would this generate a new def for each T this is called on even
+        // if T is not used in this?
+        match e.downcast_ref::<reqwest::Error>() {
+            Some(http_error) => {
+                if http_error.status() == Some(reqwest::StatusCode::NOT_FOUND) {
+                    Ok(None)
+                } else {
+                    Err(e)
+                }
+            }
+            None => Err(e),
+        }
     }
 }
