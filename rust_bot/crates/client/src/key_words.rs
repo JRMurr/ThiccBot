@@ -10,20 +10,42 @@ pub struct KeyWord {
     match_case: bool,
 }
 
-impl ThiccClient {
-    pub async fn get_key_words(
-        &self,
-        server_id: &str,
-        search: &str,
-    ) -> Result<Vec<KeyWord>> {
-        let res = self
-            .get(&format!("keyWords/discord/{}/{}", server_id, search))?
-            .send()
-            .await?
-            .error_for_status()? // TODO: instead of this match and don't throw error if 404
-            .json()
-            .await?;
+pub struct KeyWordManager<'a> {
+    client: &'a ThiccClient,
+}
 
-        Ok(res)
+impl KeyWordManager<'_> {
+    pub async fn get(
+        &self,
+        guild_id: u64,
+        search: &str,
+    ) -> Result<Option<KeyWord>> {
+        match self
+            .client
+            .get_json::<KeyWord>(&format!(
+                "keyWords/discord/{}/{}",
+                guild_id, search
+            ))
+            .await
+        {
+            Ok(key_word) => Ok(Some(key_word)),
+            Err(e) => ThiccClient::handle_404(e),
+        }
+    }
+
+    pub async fn create(
+        &self,
+        guild_id: u64,
+        key_word: &KeyWord,
+    ) -> Result<KeyWord> {
+        self.client
+            .post_json(&format!("keywords/discord/{}", guild_id), key_word)
+            .await
+    }
+}
+
+impl ThiccClient {
+    pub fn key_words(&self) -> KeyWordManager {
+        KeyWordManager { client: &self }
     }
 }
