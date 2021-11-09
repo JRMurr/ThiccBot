@@ -1,5 +1,6 @@
 use anyhow::Result;
 use client::ThiccClient;
+use rand::seq::SliceRandom;
 use serenity::{
     async_trait,
     client::{Context, EventHandler},
@@ -19,15 +20,29 @@ impl Handler {
 impl Handler {
     async fn handle_key_words(
         &self,
-        _context: &Context,
+        ctx: &Context,
         msg: &Message,
     ) -> Result<()> {
         match msg.guild_id {
             Some(id) => {
-                let key_words =
+                let key_word =
                     self.client.key_words().get(id.0, &msg.content).await?;
-                trace!("key_words: {:?}", key_words);
-                Ok(())
+                match key_word {
+                    Some(key_word) => {
+                        let rand_response =
+                            key_word.responses.choose(&mut rand::thread_rng());
+                        match rand_response {
+                            Some(response) => {
+                                msg.channel_id.say(&ctx.http, response).await?;
+                                Ok(())
+                            }
+                            None => anyhow::bail!(
+                                "Key word does not have any responses"
+                            ),
+                        }
+                    }
+                    None => Ok(()),
+                }
             }
             None => Ok(()),
         }

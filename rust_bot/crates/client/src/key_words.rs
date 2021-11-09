@@ -6,7 +6,7 @@ use crate::ThiccClient;
 #[derive(Debug, Serialize, Deserialize)]
 pub struct KeyWord {
     name: String,
-    responses: Vec<String>,
+    pub responses: Vec<String>,
     match_case: bool,
 }
 
@@ -20,14 +20,14 @@ impl KeyWordManager<'_> {
         guild_id: u64,
         search: &str,
     ) -> Result<Option<KeyWord>> {
-        ThiccClient::swallow_404(
-            self.client
-                .get_json::<KeyWord>(&format!(
-                    "keyWords/discord/{}/{}",
-                    guild_id, search
-                ))
-                .await,
-        )
+        let res = self
+            .client
+            .get_json::<KeyWord>(&format!(
+                "keyWords/discord/{}/{}",
+                guild_id, search
+            ))
+            .await;
+        ThiccClient::swallow_404(res)
     }
 
     pub async fn create(
