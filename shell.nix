@@ -2,6 +2,7 @@
 
 pkgs.mkShell {
   buildInputs = with pkgs; [
+    cargo-watch
     # rust stuff this might be overkill, copy pasted from elsewhere
     gcc
     cmake

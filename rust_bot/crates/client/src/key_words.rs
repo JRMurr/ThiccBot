@@ -10,6 +10,23 @@ pub struct KeyWord {
     match_case: bool,
 }
 
+impl KeyWord {
+    pub fn new<NameStr, ResponseStr>(
+        name: NameStr,
+        responses: Vec<ResponseStr>,
+    ) -> Self
+    where
+        NameStr: Into<String>,
+        Vec<String>: From<Vec<ResponseStr>>,
+    {
+        Self {
+            name: name.into(),
+            responses: responses.into(),
+            match_case: false,
+        }
+    }
+}
+
 pub struct KeyWordManager<'a> {
     client: &'a ThiccClient,
 }

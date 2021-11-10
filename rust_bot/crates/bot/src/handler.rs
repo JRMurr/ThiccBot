@@ -51,6 +51,7 @@ impl Handler {
 
 #[async_trait]
 impl EventHandler for Handler {
+    // TODO: might be able to do this in a .normal_message(normal_message)
     async fn message(&self, context: Context, msg: Message) {
         if let Err(why) = self.handle_key_words(&context, &msg).await {
             error!("error handling key_words: {:?}", why);

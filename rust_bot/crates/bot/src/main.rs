@@ -1,21 +1,42 @@
-#![feature(try_blocks)]
 #[macro_use]
 extern crate log;
-
+mod commands;
 mod handler;
 
-use crate::handler::Handler;
 use client::ThiccClient;
+use commands::key_words::KEYWORDS_GROUP;
+use handler::Handler;
 use serenity::{
     client::{Client, Context},
     framework::standard::{
-        macros::{command, group},
-        CommandResult, StandardFramework,
+        macros::{command, group, help},
+        Args, CommandGroup, CommandResult, HelpOptions, StandardFramework,
     },
     model::channel::Message,
 };
 
-use std::env;
+use std::{collections::HashSet, env};
+
+#[help]
+async fn my_help(
+    context: &Context,
+    msg: &Message,
+    args: Args,
+    help_options: &'static HelpOptions,
+    groups: &[&'static CommandGroup],
+    owners: HashSet<serenity::model::id::UserId>,
+) -> CommandResult {
+    let _ = serenity::framework::standard::help_commands::with_embeds(
+        context,
+        msg,
+        args,
+        help_options,
+        groups,
+        owners,
+    )
+    .await;
+    Ok(())
+}
 
 #[group]
 #[commands(ping)]
@@ -27,9 +48,12 @@ async fn main() {
 
     // TODO: look into https://docs.rs/serenity/0.10.9/serenity/framework/standard/struct.Configuration.html#method.dynamic_prefix
     // to be able to set the prefix per server
+    // TODO: add error handler
     let framework = StandardFramework::new()
         .configure(|c| c.prefix("?")) // set the bot's prefix to "?"
-        .group(&GENERAL_GROUP);
+        .help(&MY_HELP)
+        .group(&GENERAL_GROUP)
+        .group(&KEYWORDS_GROUP);
 
     let base_url = "http://localhost:5000/api/"; // TODO: read from env var
     let api_key = env::var("BOT_API_TOKEN").expect("BOT_API_TOKEN");
