@@ -1,5 +1,4 @@
 use anyhow::Result;
-use client::ThiccClient;
 use rand::seq::SliceRandom;
 use serenity::{
     async_trait,
@@ -7,15 +6,9 @@ use serenity::{
     model::{channel::Message, guild::Guild},
 };
 
-pub struct Handler {
-    client: ThiccClient,
-}
+use crate::get_thicc_client;
 
-impl Handler {
-    pub fn new(client: ThiccClient) -> Handler {
-        Self { client }
-    }
-}
+pub struct Handler;
 
 impl Handler {
     async fn handle_key_words(
@@ -25,8 +18,9 @@ impl Handler {
     ) -> Result<()> {
         match msg.guild_id {
             Some(id) => {
+                let client = get_thicc_client(ctx).await?;
                 let key_word =
-                    self.client.key_words().get(id.0, &msg.content).await?;
+                    client.key_words().get(id.0, &msg.content).await?;
                 match key_word {
                     Some(key_word) => {
                         let rand_response =
@@ -47,6 +41,20 @@ impl Handler {
             None => Ok(()),
         }
     }
+
+    async fn handle_guild_create(
+        &self,
+        ctx: &Context,
+        guild: &Guild,
+    ) -> Result<()> {
+        let id = guild.id.0;
+        let client = get_thicc_client(&ctx).await?;
+        let existing_guild = client.get_guild(id).await?;
+        if existing_guild.is_none() {
+            client.create_guild(id, &guild.name).await?;
+        }
+        Ok(())
+    }
 }
 
 #[async_trait]
@@ -58,25 +66,9 @@ impl EventHandler for Handler {
         }
     }
 
-    async fn guild_create(
-        &self,
-        _context: Context,
-        guild: Guild,
-        _is_new: bool,
-    ) {
-        let id = guild.id.0;
-        match self.client.get_guild(id).await {
-            Ok(None) => {
-                // create guild in backend
-                let res = self.client.create_guild(id, &guild.name).await;
-                if let Err(why) = res {
-                    error!("error making guild: {:?}", why);
-                }
-            }
-            Err(why) => {
-                error!("error getting guild: {:?}", why);
-            }
-            _ => return, // exists in backend already don't care
+    async fn guild_create(&self, ctx: Context, guild: Guild, _is_new: bool) {
+        if let Err(why) = self.handle_guild_create(&ctx, &guild).await {
+            error!("error handling guild_create: {:?}", why);
         }
     }
 }

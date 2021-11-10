@@ -1,70 +1,48 @@
 #[macro_use]
 extern crate log;
 mod commands;
+mod framework;
 mod handler;
 
 use client::ThiccClient;
-use commands::key_words::KEYWORDS_GROUP;
 use handler::Handler;
-use serenity::{
-    client::{Client, Context},
-    framework::standard::{
-        macros::{command, group, help},
-        Args, CommandGroup, CommandResult, HelpOptions, StandardFramework,
-    },
-    model::channel::Message,
-};
+use serenity::client::{Client, Context};
 
-use std::{collections::HashSet, env};
+use std::env;
 
-#[help]
-async fn my_help(
-    context: &Context,
-    msg: &Message,
-    args: Args,
-    help_options: &'static HelpOptions,
-    groups: &[&'static CommandGroup],
-    owners: HashSet<serenity::model::id::UserId>,
-) -> CommandResult {
-    let _ = serenity::framework::standard::help_commands::with_embeds(
-        context,
-        msg,
-        args,
-        help_options,
-        groups,
-        owners,
-    )
-    .await;
-    Ok(())
+use crate::framework::create_framework;
+
+/// Wrapper around ThiccClient to be re used in each command/handler
+struct ClientHolder;
+
+impl serenity::prelude::TypeMapKey for ClientHolder {
+    type Value = ThiccClient;
 }
 
-#[group]
-#[commands(ping)]
-struct General;
+// TODO: should this be a func in ThiccClient? It would be nice but adding
+// serenity as a dep would be annoying
+pub async fn get_thicc_client(ctx: &Context) -> anyhow::Result<ThiccClient> {
+    let data = ctx.data.read().await;
+    match data.get::<ClientHolder>().cloned() {
+        Some(thicc_client) => Ok(thicc_client),
+        None => anyhow::bail!("Error getting thicc client"),
+    }
+}
 
 #[tokio::main]
 async fn main() {
     env_logger::init();
-
-    // TODO: look into https://docs.rs/serenity/0.10.9/serenity/framework/standard/struct.Configuration.html#method.dynamic_prefix
-    // to be able to set the prefix per server
-    // TODO: add error handler
-    let framework = StandardFramework::new()
-        .configure(|c| c.prefix("?")) // set the bot's prefix to "?"
-        .help(&MY_HELP)
-        .group(&GENERAL_GROUP)
-        .group(&KEYWORDS_GROUP);
+    let framework = create_framework();
 
     let base_url = "http://localhost:5000/api/"; // TODO: read from env var
     let api_key = env::var("BOT_API_TOKEN").expect("BOT_API_TOKEN");
 
-    let handler = Handler::new(ThiccClient::new(base_url, &api_key));
-
     // Login with a bot token from the environment
     let token = env::var("DISCORD_ID").expect("DISCORD_ID");
     let mut client = Client::builder(token)
-        .event_handler(handler)
+        .event_handler(Handler)
         .framework(framework)
+        .type_map_insert::<ClientHolder>(ThiccClient::new(base_url, &api_key))
         .await
         .expect("Error creating client");
 
@@ -73,11 +51,4 @@ async fn main() {
     if let Err(why) = client.start().await {
         error!("An error occurred while running the client: {:?}", why);
     }
-}
-
-#[command]
-async fn ping(ctx: &Context, msg: &Message) -> CommandResult {
-    msg.reply(ctx, "Pong!").await?;
-
-    Ok(())
 }

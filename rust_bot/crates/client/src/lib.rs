@@ -9,7 +9,7 @@ pub mod guilds;
 pub mod key_words;
 
 /// Wrapper around [`Client`] to support a `base_url`
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ThiccClient {
     client: Client,
     base_url: Url,

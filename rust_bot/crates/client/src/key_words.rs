@@ -3,11 +3,13 @@ use serde::{Deserialize, Serialize};
 
 use crate::ThiccClient;
 
+const KEY_WORDS_ROUTE: &str = "keyWords/discord";
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct KeyWord {
-    name: String,
+    pub name: String,
     pub responses: Vec<String>,
-    match_case: bool,
+    pub match_case: bool,
 }
 
 impl KeyWord {
@@ -40,8 +42,8 @@ impl KeyWordManager<'_> {
         let res = self
             .client
             .get_json::<KeyWord>(&format!(
-                "keyWords/discord/{}/{}",
-                guild_id, search
+                "{}/{}/{}",
+                KEY_WORDS_ROUTE, guild_id, search
             ))
             .await;
         ThiccClient::swallow_404(res)
@@ -53,7 +55,7 @@ impl KeyWordManager<'_> {
         key_word: &KeyWord,
     ) -> Result<KeyWord> {
         self.client
-            .post_json(&format!("keywords/discord/{}", guild_id), key_word)
+            .post_json(&format!("{}/{}", KEY_WORDS_ROUTE, guild_id), key_word)
             .await
     }
 }
