@@ -6,7 +6,7 @@ use serenity::{
     model::{channel::Message, guild::Guild},
 };
 
-use crate::get_thicc_client;
+use crate::utils::BotUtils;
 
 pub struct Handler;
 
@@ -16,9 +16,13 @@ impl Handler {
         ctx: &Context,
         msg: &Message,
     ) -> Result<()> {
+        let bot_user = ctx.cache.current_user_id().await;
+        if msg.author.id == bot_user {
+            return Ok(());
+        }
         match msg.guild_id {
             Some(id) => {
-                let client = get_thicc_client(ctx).await?;
+                let client = BotUtils::get_thicc_client(ctx).await?;
                 let key_word =
                     client.key_words().get(id.0, &msg.content).await?;
                 match key_word {
@@ -48,7 +52,7 @@ impl Handler {
         guild: &Guild,
     ) -> Result<()> {
         let id = guild.id.0;
-        let client = get_thicc_client(&ctx).await?;
+        let client = BotUtils::get_thicc_client(&ctx).await?;
         let existing_guild = client.get_guild(id).await?;
         if existing_guild.is_none() {
             client.create_guild(id, &guild.name).await?;

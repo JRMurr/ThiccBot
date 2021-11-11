@@ -49,6 +49,15 @@ impl KeyWordManager<'_> {
         ThiccClient::swallow_404(res)
     }
 
+    pub async fn list(&self, guild_id: u64) -> Result<Vec<KeyWord>> {
+        self.client
+            .get_json::<Vec<KeyWord>>(&format!(
+                "{}/{}",
+                KEY_WORDS_ROUTE, guild_id
+            ))
+            .await
+    }
+
     pub async fn create(
         &self,
         guild_id: u64,

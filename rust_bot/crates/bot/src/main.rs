@@ -3,30 +3,21 @@ extern crate log;
 mod commands;
 mod framework;
 mod handler;
+mod utils;
 
 use client::ThiccClient;
 use handler::Handler;
-use serenity::client::{Client, Context};
+use serenity::client::Client;
 
 use std::env;
 
 use crate::framework::create_framework;
 
 /// Wrapper around ThiccClient to be re used in each command/handler
-struct ClientHolder;
+pub struct ThiccHolder;
 
-impl serenity::prelude::TypeMapKey for ClientHolder {
+impl serenity::prelude::TypeMapKey for ThiccHolder {
     type Value = ThiccClient;
-}
-
-// TODO: should this be a func in ThiccClient? It would be nice but adding
-// serenity as a dep would be annoying
-pub async fn get_thicc_client(ctx: &Context) -> anyhow::Result<ThiccClient> {
-    let data = ctx.data.read().await;
-    match data.get::<ClientHolder>().cloned() {
-        Some(thicc_client) => Ok(thicc_client),
-        None => anyhow::bail!("Error getting thicc client"),
-    }
 }
 
 #[tokio::main]
@@ -42,7 +33,7 @@ async fn main() {
     let mut client = Client::builder(token)
         .event_handler(Handler)
         .framework(framework)
-        .type_map_insert::<ClientHolder>(ThiccClient::new(base_url, &api_key))
+        .type_map_insert::<ThiccHolder>(ThiccClient::new(base_url, &api_key))
         .await
         .expect("Error creating client");
 
