@@ -1,12 +1,17 @@
-use anyhow::{Context, Result};
+use anyhow::Context;
+use error::ThiccError;
 use reqwest::{
     header::{HeaderMap, HeaderValue, AUTHORIZATION},
     Client, RequestBuilder, Url,
 };
 use serde::{de::DeserializeOwned, Serialize};
+use std::collections::HashMap;
 
+pub mod error;
 pub mod guilds;
 pub mod key_words;
+
+type ErrorMap = HashMap<reqwest::StatusCode, ThiccError>;
 
 /// Wrapper around [`Client`] to support a `base_url`
 #[derive(Debug, Clone)]
@@ -34,7 +39,7 @@ impl ThiccClient {
         ThiccClient { client, base_url }
     }
 
-    fn join_with_base(&self, url: &str) -> Result<Url> {
+    fn join_with_base(&self, url: &str) -> anyhow::Result<Url> {
         if url.starts_with("/") {
             anyhow::bail!(
                 "relative url: {} should not start with a slash",
@@ -49,22 +54,25 @@ impl ThiccClient {
         Ok(url)
     }
 
-    pub fn post(&self, url: &str) -> Result<RequestBuilder> {
+    pub fn post(&self, url: &str) -> anyhow::Result<RequestBuilder> {
         let url = self.join_with_base(url)?;
         Ok(self.client.post(url))
     }
 
-    pub fn get(&self, url: &str) -> Result<RequestBuilder> {
+    pub fn get(&self, url: &str) -> anyhow::Result<RequestBuilder> {
         let url = self.join_with_base(url)?;
         Ok(self.client.get(url))
     }
 
-    pub fn delete(&self, url: &str) -> Result<RequestBuilder> {
+    pub fn delete(&self, url: &str) -> anyhow::Result<RequestBuilder> {
         let url = self.join_with_base(url)?;
         Ok(self.client.delete(url))
     }
 
-    pub async fn get_json<T: DeserializeOwned>(&self, url: &str) -> Result<T> {
+    pub async fn get_json<T: DeserializeOwned>(
+        &self,
+        url: &str,
+    ) -> anyhow::Result<T> {
         let res = self
             .get(url)?
             .send()
@@ -82,7 +90,7 @@ impl ThiccClient {
         &self,
         url: &str,
         payload: &Payload,
-    ) -> Result<Res> {
+    ) -> anyhow::Result<Res> {
         let res = self
             .post(url)?
             .json(payload)
@@ -96,7 +104,9 @@ impl ThiccClient {
 
     /// given an [`anyhow::Result`], if its a 404 error from [`reqwest::Error`]
     /// return [`None`], otherwise return the passed result
-    pub fn swallow_404<T>(result: Result<T>) -> Result<Option<T>> {
+    pub fn swallow_404<T>(
+        result: anyhow::Result<T>,
+    ) -> anyhow::Result<Option<T>> {
         match result {
             Ok(value) => Ok(Some(value)),
             Err(e) => match e.downcast_ref::<reqwest::Error>() {
@@ -106,6 +116,24 @@ impl ThiccClient {
                 {
                     Ok(None)
                 }
+                _ => Err(e),
+            },
+        }
+    }
+
+    pub fn handle_status<T>(
+        result: anyhow::Result<T>,
+        statuses: ErrorMap,
+    ) -> anyhow::Result<T> {
+        match result {
+            Ok(value) => Ok(value),
+            Err(e) => match e.downcast_ref::<reqwest::Error>() {
+                Some(http_error) => match http_error.status() {
+                    Some(status) if statuses.contains_key(&status) => {
+                        Err(statuses.get(&status).unwrap().clone().into())
+                    }
+                    _ => Err(e),
+                },
                 _ => Err(e),
             },
         }

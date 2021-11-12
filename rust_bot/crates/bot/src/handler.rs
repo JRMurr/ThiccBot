@@ -23,8 +23,7 @@ impl Handler {
         match msg.guild_id {
             Some(id) => {
                 let client = BotUtils::get_thicc_client(ctx).await?;
-                let key_word =
-                    client.key_words().get(id.0, &msg.content).await?;
+                let key_word = client.key_words(id.0).get(&msg.content).await?;
                 match key_word {
                     Some(key_word) => {
                         let rand_response =

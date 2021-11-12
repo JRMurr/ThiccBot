@@ -29,15 +29,14 @@ async fn create(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         .remains()
         .ok_or(anyhow!("No remaining args for response"))?;
 
-    let client = BotUtils::get_thicc_client(ctx).await?;
     // TODO: old thicc bot did not support this but the backend allows multiple
     // responses
     let key_word = KeyWord::new(name, vec![response.to_string()]);
 
-    let guild_id = BotUtils::get_guild_id(msg)?;
+    let (client, guild_id) = BotUtils::get_info(ctx, msg).await?;
 
     // TODO: handle already existing (400)
-    let res = client.key_words().create(guild_id, &key_word).await?;
+    let res = client.key_words(guild_id).create(&key_word).await?;
 
     msg.reply(ctx, format!("Created key word: {}", res.name))
         .await?;
@@ -47,7 +46,7 @@ async fn create(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 #[command]
 async fn list(ctx: &Context, msg: &Message) -> CommandResult {
     let (client, guild_id) = BotUtils::get_info(ctx, msg).await?;
-    let res = client.key_words().list(guild_id).await?;
+    let res = client.key_words(guild_id).list().await?;
     // TODO: add emoji based pagination like old bot
     // this lib might help https://github.com/AriusX7/serenity-utils
     msg.reply(ctx, format!("{:?}", res)).await?;

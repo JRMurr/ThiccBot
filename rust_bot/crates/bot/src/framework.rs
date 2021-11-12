@@ -1,3 +1,4 @@
+use client::error::ThiccError;
 use serenity::{
     client::Context,
     framework::standard::{
@@ -33,15 +34,32 @@ async fn my_help(
 
 #[hook]
 async fn after(
-    _ctx: &Context,
-    _msg: &Message,
+    ctx: &Context,
+    msg: &Message,
     command_name: &str,
     command_result: CommandResult,
 ) {
     match command_result {
         Ok(()) => trace!("Processed command '{}'", command_name),
         Err(why) => {
-            error!("Command '{}' returned error {:?}", command_name, why)
+            // Only use backtraces on nightly
+            #[cfg(nightly)]
+            {
+                // print a backtrace if available
+                use std::backtrace::BacktraceStatus;
+                let bt = err.backtrace();
+                if bt.status() == BacktraceStatus::Captured {
+                    eprintln!("{}", bt);
+                }
+            }
+            error!("Command '{}' returned error {:?}", command_name, why);
+            if let Some(thicc_err) = why.downcast_ref::<ThiccError>() {
+                // TODO: this is not getting hit
+                let msg_res = msg.reply(ctx, format!("{}", thicc_err)).await;
+                if let Err(msg_err) = msg_res {
+                    error!("error sending msg {:?}", msg_err);
+                }
+            }
         }
     }
 }
