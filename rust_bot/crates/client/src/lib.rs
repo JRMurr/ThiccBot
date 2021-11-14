@@ -123,15 +123,16 @@ impl ThiccClient {
 
     pub fn handle_status<T>(
         result: anyhow::Result<T>,
-        statuses: ErrorMap,
+        mut statuses: ErrorMap,
     ) -> anyhow::Result<T> {
         match result {
             Ok(value) => Ok(value),
             Err(e) => match e.downcast_ref::<reqwest::Error>() {
                 Some(http_error) => match http_error.status() {
-                    Some(status) if statuses.contains_key(&status) => {
-                        Err(statuses.get(&status).unwrap().clone().into())
-                    }
+                    Some(status) => match statuses.remove(&status) {
+                        Some(err) => Err(err.into()),
+                        None => Err(e),
+                    },
                     _ => Err(e),
                 },
                 _ => Err(e),
