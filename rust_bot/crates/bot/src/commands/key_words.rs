@@ -1,5 +1,5 @@
 use anyhow::anyhow;
-use client::key_words::KeyWord;
+use client::{error::ThiccError, key_words::KeyWord};
 use serenity::{
     client::Context,
     framework::standard::{
@@ -8,6 +8,27 @@ use serenity::{
     },
     model::channel::Message,
 };
+
+struct ErrorWrapper {
+    err: serenity::framework::standard::CommandError,
+}
+
+impl From<ErrorWrapper> for serenity::framework::standard::CommandError {
+    fn from(e: ErrorWrapper) -> Self {
+        e.err
+    }
+}
+
+impl From<anyhow::Error> for ErrorWrapper {
+    fn from(e: anyhow::Error) -> Self {
+        match e.downcast::<ThiccError>() {
+            Ok(thicc_err) => Self {
+                err: thicc_err.into(),
+            },
+            Err(err) => Self { err: err.into() },
+        }
+    }
+}
 
 use crate::utils::BotUtils;
 
@@ -36,11 +57,26 @@ async fn create(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let (client, guild_id) = BotUtils::get_info(ctx, msg).await?;
 
     // TODO: handle already existing (400)
-    let res = client.key_words(guild_id).create(&key_word).await?;
+    let res = client.key_words(guild_id).create(&key_word).await;
 
-    msg.reply(ctx, format!("Created key word: {}", res.name))
-        .await?;
-    Ok(())
+    match res {
+        Ok(result) => {
+            let _ = msg
+                .reply(ctx, format!("Created key word: {}", result.name))
+                .await;
+            Ok(())
+        }
+        Err(e) => {
+            // let tmp = e.is::<ThiccError>();
+            // trace!("tmp:{}", tmp);
+            // Err(e.into())
+            // Err(ThiccError::Test("off".to_string()).into())
+            Err(ErrorWrapper::from(e).into())
+        }
+    }
+
+    // msg.reply(ctx, format!("Created key word: {}", res.name))
+    //     .await?;
 }
 
 #[command]
