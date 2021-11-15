@@ -57,26 +57,12 @@ async fn create(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let (client, guild_id) = BotUtils::get_info(ctx, msg).await?;
 
     // TODO: handle already existing (400)
-    let res = client.key_words(guild_id).create(&key_word).await;
+    let res = client.key_words(guild_id).create(&key_word).await?;
 
-    match res {
-        Ok(result) => {
-            let _ = msg
-                .reply(ctx, format!("Created key word: {}", result.name))
-                .await;
-            Ok(())
-        }
-        Err(e) => {
-            // let tmp = e.is::<ThiccError>();
-            // trace!("tmp:{}", tmp);
-            // Err(e.into())
-            // Err(ThiccError::Test("off".to_string()).into())
-            Err(ErrorWrapper::from(e).into())
-        }
-    }
+    msg.reply(ctx, format!("Created key word: {}", res.name))
+        .await?;
 
-    // msg.reply(ctx, format!("Created key word: {}", res.name))
-    //     .await?;
+    Ok(())
 }
 
 #[command]

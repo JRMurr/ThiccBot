@@ -1,5 +1,5 @@
 use anyhow::Context;
-use error::ThiccError;
+use error::{ClientErrors, ThiccError};
 use reqwest::{
     header::{HeaderMap, HeaderValue, AUTHORIZATION},
     Client, RequestBuilder, Url,
@@ -12,6 +12,8 @@ pub mod guilds;
 pub mod key_words;
 
 type ErrorMap = HashMap<reqwest::StatusCode, ThiccError>;
+
+pub type ThiccResult<T> = std::result::Result<T, ClientErrors>;
 
 /// Wrapper around [`Client`] to support a `base_url`
 #[derive(Debug, Clone)]
@@ -39,12 +41,9 @@ impl ThiccClient {
         ThiccClient { client, base_url }
     }
 
-    fn join_with_base(&self, url: &str) -> anyhow::Result<Url> {
+    fn join_with_base(&self, url: &str) -> ThiccResult<Url> {
         if url.starts_with("/") {
-            anyhow::bail!(
-                "relative url: {} should not start with a slash",
-                url
-            );
+            return Err(ClientErrors::InvalidRelativeUrl(url.to_string()));
         }
 
         let url = self
@@ -54,17 +53,17 @@ impl ThiccClient {
         Ok(url)
     }
 
-    pub fn post(&self, url: &str) -> anyhow::Result<RequestBuilder> {
+    pub fn post(&self, url: &str) -> ThiccResult<RequestBuilder> {
         let url = self.join_with_base(url)?;
         Ok(self.client.post(url))
     }
 
-    pub fn get(&self, url: &str) -> anyhow::Result<RequestBuilder> {
+    pub fn get(&self, url: &str) -> ThiccResult<RequestBuilder> {
         let url = self.join_with_base(url)?;
         Ok(self.client.get(url))
     }
 
-    pub fn delete(&self, url: &str) -> anyhow::Result<RequestBuilder> {
+    pub fn delete(&self, url: &str) -> ThiccResult<RequestBuilder> {
         let url = self.join_with_base(url)?;
         Ok(self.client.delete(url))
     }
@@ -72,7 +71,7 @@ impl ThiccClient {
     pub async fn get_json<T: DeserializeOwned>(
         &self,
         url: &str,
-    ) -> anyhow::Result<T> {
+    ) -> ThiccResult<T> {
         let res = self
             .get(url)?
             .send()
@@ -90,7 +89,7 @@ impl ThiccClient {
         &self,
         url: &str,
         payload: &Payload,
-    ) -> anyhow::Result<Res> {
+    ) -> ThiccResult<Res> {
         let res = self
             .post(url)?
             .json(payload)
@@ -102,41 +101,41 @@ impl ThiccClient {
         Ok(res)
     }
 
-    /// given an [`anyhow::Result`], if its a 404 error from [`reqwest::Error`]
+    /// given an [`ThiccResult`], if its a 404 error from [`reqwest::Error`]
     /// return [`None`], otherwise return the passed result
-    pub fn swallow_404<T>(
-        result: anyhow::Result<T>,
-    ) -> anyhow::Result<Option<T>> {
+    pub fn swallow_404<T>(result: ThiccResult<T>) -> ThiccResult<Option<T>> {
         match result {
             Ok(value) => Ok(Some(value)),
-            Err(e) => match e.downcast_ref::<reqwest::Error>() {
-                Some(http_error)
-                    if http_error.status()
-                        == Some(reqwest::StatusCode::NOT_FOUND) =>
-                {
-                    Ok(None)
-                }
-                _ => Err(e),
+            Err(ClientErrors::Reqwest(req_error)) if req_error.status() == Some(reqwest::StatusCode::NOT_FOUND) => {
+                Ok(None)
             },
+            Err(e) => Err(e)
+            // Err(e) => match e.downcast_ref::<reqwest::Error>() {
+            //     Some(http_error)
+            //         if http_error.status()
+            //             == Some(reqwest::StatusCode::NOT_FOUND) =>
+            //     {
+            //         Ok(None)
+            //     }
+            //     _ => Err(e),
+            // },
         }
     }
 
     pub fn handle_status<T>(
-        result: anyhow::Result<T>,
+        result: ThiccResult<T>,
         mut statuses: ErrorMap,
-    ) -> anyhow::Result<T> {
+    ) -> ThiccResult<T> {
         match result {
             Ok(value) => Ok(value),
-            Err(e) => match e.downcast_ref::<reqwest::Error>() {
-                Some(http_error) => match http_error.status() {
-                    Some(status) => match statuses.remove(&status) {
-                        Some(err) => Err(err.into()),
-                        None => Err(e),
-                    },
-                    _ => Err(e),
+            Err(ClientErrors::Reqwest(req_error)) => match req_error.status() {
+                Some(status) => match statuses.remove(&status) {
+                    Some(err) => Err(err.into()),
+                    None => Err(req_error.into()),
                 },
-                _ => Err(e),
+                _ => Err(req_error.into()),
             },
+            Err(e) => Err(e),
         }
     }
 }

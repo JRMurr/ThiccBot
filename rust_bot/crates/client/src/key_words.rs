@@ -1,9 +1,8 @@
 use std::collections::HashMap;
 
-use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
-use crate::{error::ThiccError, ErrorMap, ThiccClient};
+use crate::{error::ThiccError, ErrorMap, ThiccClient, ThiccResult};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct KeyWord {
@@ -35,7 +34,7 @@ pub struct KeyWordManager<'a> {
 }
 
 impl KeyWordManager<'_> {
-    pub async fn get(&self, search: &str) -> Result<Option<KeyWord>> {
+    pub async fn get(&self, search: &str) -> ThiccResult<Option<KeyWord>> {
         let res = self
             .client
             .get_json::<KeyWord>(&format!("{}/{}", self.guild_route, search))
@@ -43,13 +42,13 @@ impl KeyWordManager<'_> {
         ThiccClient::swallow_404(res)
     }
 
-    pub async fn list(&self) -> Result<Vec<KeyWord>> {
+    pub async fn list(&self) -> ThiccResult<Vec<KeyWord>> {
         self.client
             .get_json::<Vec<KeyWord>>(&self.guild_route)
             .await
     }
 
-    pub async fn create(&self, key_word: &KeyWord) -> Result<KeyWord> {
+    pub async fn create(&self, key_word: &KeyWord) -> ThiccResult<KeyWord> {
         let errors: ErrorMap = HashMap::from([(
             reqwest::StatusCode::BAD_REQUEST,
             ThiccError::NameAlreadyExist {

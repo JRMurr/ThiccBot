@@ -1,4 +1,4 @@
-use client::error::ThiccError;
+use client::error::ClientErrors;
 use serenity::{
     client::Context,
     framework::standard::{
@@ -53,11 +53,15 @@ async fn after(
                 }
             }
             error!("Command '{}' returned error {:?}", command_name, why);
-            if let Some(thicc_err) = why.downcast_ref::<ThiccError>() {
-                let msg_res = msg.reply(ctx, format!("{}", thicc_err)).await;
-                if let Err(msg_err) = msg_res {
-                    error!("error sending msg {:?}", msg_err);
-                }
+            if let Some(client_error) = why.downcast_ref::<ClientErrors>() {
+                match client_error {
+                    ClientErrors::Thicc(thicc_error) => {
+                        let _ =
+                            msg.reply(ctx, format!("{}", thicc_error)).await;
+                        ()
+                    }
+                    _ => (),
+                };
             }
         }
     }
