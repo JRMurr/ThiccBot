@@ -104,6 +104,7 @@ dependencies = [
  "log",
  "rand 0.8.4",
  "serenity",
+ "serenity_utils",
  "tokio",
 ]
 
@@ -1191,6 +1192,16 @@ dependencies = [
  "typemap_rev",
  "url",
  "uwl",
+]
+
+[[package]]
+name = "serenity_utils"
+version = "0.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "19368e88b3d6183b52704a2fbc1e5788ad4100876eddaa7217e1c8e1d2d2535c"
+dependencies = [
+ "serenity",
+ "tokio",
 ]
 
 [[package]]

@@ -1,3 +1,4 @@
+use core::fmt;
 use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
@@ -25,6 +26,12 @@ impl KeyWord {
             responses: responses.into(),
             match_case: false,
         }
+    }
+}
+
+impl fmt::Display for KeyWord {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.name)
     }
 }
 

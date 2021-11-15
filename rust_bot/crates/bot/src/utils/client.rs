@@ -3,7 +3,7 @@ use serenity::{client::Context, model::channel::Message};
 
 use crate::ThiccHolder;
 
-pub struct BotUtils;
+use super::BotUtils;
 
 impl BotUtils {
     pub async fn get_thicc_client(

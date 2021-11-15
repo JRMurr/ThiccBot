@@ -1,3 +1,4 @@
+use crate::utils::BotUtils;
 use anyhow::anyhow;
 use client::key_words::KeyWord;
 use serenity::{
@@ -6,10 +7,8 @@ use serenity::{
         macros::{command, group},
         Args, CommandResult,
     },
-    model::channel::Message,
+    model::prelude::Message,
 };
-
-use crate::utils::BotUtils;
 
 #[group]
 #[prefixes(keyWord, keyword, keyword, keyWords, key_word)]
@@ -48,8 +47,11 @@ async fn create(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 async fn list(ctx: &Context, msg: &Message) -> CommandResult {
     let (client, guild_id) = BotUtils::get_info(ctx, msg).await?;
     let res = client.key_words(guild_id).list().await?;
-    // TODO: add emoji based pagination like old bot
-    // this lib might help https://github.com/AriusX7/serenity-utils
-    msg.reply(ctx, format!("{:?}", res)).await?;
+    // // TODO: add emoji based pagination like old bot
+    // // this lib might help https://github.com/AriusX7/serenity-utils
+    // msg.reply(ctx, format!("{:?}", res)).await?;
+
+    BotUtils::run_paged_menu(ctx, msg, res).await?;
+
     Ok(())
 }
