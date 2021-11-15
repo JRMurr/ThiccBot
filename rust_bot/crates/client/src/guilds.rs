@@ -1,5 +1,6 @@
-use crate::ThiccClient;
-use anyhow::Result;
+use std::collections::HashMap;
+
+use crate::{error::ThiccError, ErrorMap, ThiccClient, ThiccResult};
 use reqwest::StatusCode;
 use serde::{Deserialize, Serialize};
 
@@ -26,41 +27,51 @@ struct DiscordGuildCreate {
     id: u64,
 }
 
+pub struct GuildManager<'a> {
+    client: &'a ThiccClient,
+    route: String,
+}
+
+const GUILD_ROUTE: &str = "discord";
+
 impl ThiccClient {
-    pub async fn get_guild(
-        &self,
-        guild_id: u64,
-    ) -> Result<Option<DiscordGuild>> {
-        let res = self.get(&format!("discord/{}", guild_id))?.send().await?;
-        match res.error_for_status() {
-            Ok(response) => Ok(Some(response.json::<DiscordGuild>().await?)),
-            Err(e) => {
-                if e.status() == Some(StatusCode::NOT_FOUND) {
-                    Ok(None)
-                } else {
-                    Err(e.into())
-                }
-            }
+    pub fn guilds(&self) -> GuildManager {
+        GuildManager {
+            client: &self,
+            route: GUILD_ROUTE.to_string(),
         }
     }
+}
 
-    pub async fn create_guild(
+impl GuildManager<'_> {
+    pub async fn get(
+        &self,
+        guild_id: u64,
+    ) -> ThiccResult<Option<DiscordGuild>> {
+        let res = self
+            .client
+            .get_json::<DiscordGuild>(&format!("{}/{}", self.route, guild_id))
+            .await;
+        ThiccClient::swallow_404(res)
+    }
+
+    pub async fn create(
         &self,
         guild_id: u64,
         name: &str,
-    ) -> Result<DiscordGuild> {
+    ) -> ThiccResult<DiscordGuild> {
         let payload = DiscordGuildCreate {
             id: guild_id,
             name: name.to_string(),
         };
-        let res = self
-            .post("discord")?
-            .json(&payload)
-            .send()
-            .await?
-            .error_for_status()?
-            .json()
-            .await?;
-        Ok(res)
+        let errors: ErrorMap = HashMap::from([(
+            StatusCode::BAD_REQUEST,
+            ThiccError::NameAlreadyExist {
+                name: payload.name.clone(),
+                entity_type: "Guild".to_string(),
+            },
+        )]);
+        let res = self.client.post_json(&self.route, &payload).await;
+        ThiccClient::handle_status(res, errors)
     }
 }

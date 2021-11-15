@@ -3,7 +3,7 @@ use thiserror::Error;
 #[derive(Debug, Error)]
 /// Global Error for anything in this crate
 pub enum ClientErrors {
-    #[error("Invalid Relative url, needs to start with a '/': {0}")]
+    #[error("Invalid Relative url, should not start with a '/': {0}")]
     InvalidRelativeUrl(String),
 
     #[error(transparent)]
