@@ -19,6 +19,6 @@ pub enum ClientErrors {
 /// Errors that we should show the user
 #[derive(Debug, Error)]
 pub enum ThiccError {
-    #[error("{entity_type} with name {name} already exists")]
-    NameAlreadyExist { entity_type: String, name: String },
+    #[error("{resource_type} with name {name} already exists")]
+    ResourceAlreadyExist { resource_type: String, name: String },
 }

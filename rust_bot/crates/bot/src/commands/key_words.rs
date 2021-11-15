@@ -1,5 +1,5 @@
 use anyhow::anyhow;
-use client::{error::ThiccError, key_words::KeyWord};
+use client::key_words::KeyWord;
 use serenity::{
     client::Context,
     framework::standard::{
@@ -8,27 +8,6 @@ use serenity::{
     },
     model::channel::Message,
 };
-
-struct ErrorWrapper {
-    err: serenity::framework::standard::CommandError,
-}
-
-impl From<ErrorWrapper> for serenity::framework::standard::CommandError {
-    fn from(e: ErrorWrapper) -> Self {
-        e.err
-    }
-}
-
-impl From<anyhow::Error> for ErrorWrapper {
-    fn from(e: anyhow::Error) -> Self {
-        match e.downcast::<ThiccError>() {
-            Ok(thicc_err) => Self {
-                err: thicc_err.into(),
-            },
-            Err(err) => Self { err: err.into() },
-        }
-    }
-}
 
 use crate::utils::BotUtils;
 

@@ -51,9 +51,9 @@ impl KeyWordManager<'_> {
     pub async fn create(&self, key_word: &KeyWord) -> ThiccResult<KeyWord> {
         let errors: ErrorMap = HashMap::from([(
             reqwest::StatusCode::BAD_REQUEST,
-            ThiccError::NameAlreadyExist {
+            ThiccError::ResourceAlreadyExist {
                 name: key_word.name.clone(),
-                entity_type: "Key Word".to_string(),
+                resource_type: "Key Word".to_string(),
             },
         )]);
         let res = self.client.post_json(&self.guild_route, key_word).await;

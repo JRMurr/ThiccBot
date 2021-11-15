@@ -66,9 +66,9 @@ impl GuildManager<'_> {
         };
         let errors: ErrorMap = HashMap::from([(
             StatusCode::BAD_REQUEST,
-            ThiccError::NameAlreadyExist {
+            ThiccError::ResourceAlreadyExist {
                 name: payload.name.clone(),
-                entity_type: "Guild".to_string(),
+                resource_type: "Guild".to_string(),
             },
         )]);
         let res = self.client.post_json(&self.route, &payload).await;
