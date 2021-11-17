@@ -22,6 +22,7 @@ impl Handler {
         }
         match msg.guild_id {
             Some(id) => {
+                // TODO: maybe move this to on normal message
                 let client = BotUtils::get_thicc_client(ctx).await?;
                 let key_word = client.key_words(id.0).get(&msg.content).await?;
                 match key_word {
