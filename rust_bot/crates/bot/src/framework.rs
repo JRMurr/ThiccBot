@@ -1,18 +1,23 @@
-use client::error::ClientErrors;
+use client::{error::ClientErrors, ThiccResult};
+
 use serenity::{
     async_trait,
     client::Context,
     framework::{
         standard::{
             macros::{help, hook},
-            Args, CommandGroup, CommandResult, HelpOptions, StandardFramework,
+            Args, CommandGroup, CommandResult, DispatchError, HelpOptions,
+            StandardFramework,
         },
         Framework,
     },
     model::channel::Message,
 };
 
-use crate::commands::{alias::ALIASES_GROUP, key_words::KEYWORDS_GROUP};
+use crate::{
+    commands::{alias::ALIASES_GROUP, key_words::KEYWORDS_GROUP},
+    utils::BotUtils,
+};
 
 use std::collections::HashSet;
 
@@ -20,12 +25,39 @@ pub struct ThiccFramework {
     standard: StandardFramework,
 }
 
+impl ThiccFramework {
+    async fn my_dispatch(&self, ctx: Context, msg: Message) -> ThiccResult<()> {
+        let (client, guild_id) = BotUtils::get_info(&ctx, &msg).await?;
+        // TODO: the parse struct is not public need to remake
+        // https://github.com/serenity-rs/serenity/blob/current/src/framework/standard/parse/mod.rs#L218
+
+        let prefix = "?";
+        if msg.content.starts_with(prefix) {
+            if let Some(alias_name) = msg.content.strip_prefix(prefix) {
+                // TODO: check alias_name not a built in command
+                if let Some(alias) =
+                    client.alias(guild_id).get(alias_name).await?
+                {
+                    let mut cloned_msg = msg.clone();
+                    cloned_msg.content =
+                        format!("{}{}", prefix, alias.command.trim());
+                    self.standard.dispatch(ctx, cloned_msg).await;
+                    return Ok(());
+                }
+            }
+        }
+        self.standard.dispatch(ctx, msg).await;
+        Ok(())
+    }
+}
+
 #[async_trait]
 impl Framework for ThiccFramework {
     async fn dispatch(&self, ctx: Context, msg: Message) {
-        // TODO: ctx and msg can be mut
-        // might be able to modify msg to change the command run on alias
-        self.standard.dispatch(ctx, msg).await
+        let res = self.my_dispatch(ctx, msg).await;
+        if let Err(e) = res {
+            error!("my dispatch returned error {:?}", e);
+        }
     }
 }
 
@@ -85,6 +117,37 @@ async fn after(
     }
 }
 
+#[hook]
+async fn dispatch_error_hook(
+    _context: &Context,
+    msg: &Message,
+    error: DispatchError,
+) {
+    // TODO: probably only do this in dev
+    error!("Dispatch Error for msg: {:?}, error: {:?}", msg, error);
+}
+
+#[hook]
+async fn unrecognised_command_hook(
+    _: &Context,
+    msg: &Message,
+    unrecognised_command_name: &str,
+) {
+    // TODO: probably only do this in dev
+    debug!(
+        "A user named {:?} tried to run an unknown command: {}",
+        msg.author.name, unrecognised_command_name
+    );
+}
+
+#[hook]
+async fn normal_message(_ctx: &Context, msg: &Message) {
+    // TODO: probably only do this in dev
+    // TODO: could also just do the manual call to dispatch here instead of
+    // making my own framework
+    println!("Message is not a command '{}'", msg.content);
+}
+
 pub fn create_framework() -> ThiccFramework {
     // TODO: look into https://docs.rs/serenity/0.10.9/serenity/framework/standard/struct.Configuration.html#method.dynamic_prefix
     // to be able to set the prefix per server
@@ -92,6 +155,9 @@ pub fn create_framework() -> ThiccFramework {
         .configure(|c| c.prefix("?"))
         .after(after) // set the bot's prefix to "?"
         .help(&MY_HELP)
+        .unrecognised_command(unrecognised_command_hook)
+        .on_dispatch_error(dispatch_error_hook)
+        .normal_message(normal_message)
         .group(&KEYWORDS_GROUP)
         .group(&ALIASES_GROUP);
     ThiccFramework { standard }
