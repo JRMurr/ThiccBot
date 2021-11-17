@@ -1,15 +1,33 @@
 use client::error::ClientErrors;
 use serenity::{
+    async_trait,
     client::Context,
-    framework::standard::{
-        macros::{help, hook},
-        Args, CommandGroup, CommandResult, HelpOptions, StandardFramework,
+    framework::{
+        standard::{
+            macros::{help, hook},
+            Args, CommandGroup, CommandResult, HelpOptions, StandardFramework,
+        },
+        Framework,
     },
     model::channel::Message,
 };
 
-use crate::commands::key_words::KEYWORDS_GROUP;
+use crate::commands::{alias::ALIASES_GROUP, key_words::KEYWORDS_GROUP};
+
 use std::collections::HashSet;
+
+pub struct ThiccFramework {
+    standard: StandardFramework,
+}
+
+#[async_trait]
+impl Framework for ThiccFramework {
+    async fn dispatch(&self, ctx: Context, msg: Message) {
+        // TODO: ctx and msg can be mut
+        // might be able to modify msg to change the command run on alias
+        self.standard.dispatch(ctx, msg).await
+    }
+}
 
 #[help]
 async fn my_help(
@@ -67,12 +85,14 @@ async fn after(
     }
 }
 
-pub fn create_framework() -> StandardFramework {
+pub fn create_framework() -> ThiccFramework {
     // TODO: look into https://docs.rs/serenity/0.10.9/serenity/framework/standard/struct.Configuration.html#method.dynamic_prefix
     // to be able to set the prefix per server
-    StandardFramework::new()
+    let standard = StandardFramework::new()
         .configure(|c| c.prefix("?"))
         .after(after) // set the bot's prefix to "?"
         .help(&MY_HELP)
         .group(&KEYWORDS_GROUP)
+        .group(&ALIASES_GROUP);
+    ThiccFramework { standard }
 }

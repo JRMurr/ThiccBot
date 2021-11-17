@@ -7,6 +7,7 @@ use reqwest::{
 use serde::{de::DeserializeOwned, Serialize};
 use std::collections::HashMap;
 
+pub mod alias;
 pub mod error;
 pub mod guilds;
 pub mod key_words;
