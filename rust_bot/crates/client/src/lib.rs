@@ -69,6 +69,11 @@ impl ThiccClient {
         Ok(self.client.delete(url))
     }
 
+    pub async fn delete_helper(&self, url: &str) -> ThiccResult<()> {
+        let _ = self.delete(url)?.send().await?.error_for_status();
+        Ok(())
+    }
+
     pub async fn get_json<T: DeserializeOwned>(
         &self,
         url: &str,

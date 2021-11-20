@@ -1,5 +1,4 @@
-use crate::utils::BotUtils;
-use anyhow::anyhow;
+use crate::utils::{ArgParser, BotUtils};
 use client::key_words::KeyWord;
 use serenity::{
     client::Context,
@@ -19,18 +18,12 @@ pub struct KeyWords; // TODO: add bot admin checks
 
 #[command]
 #[aliases("set", "make", "add", "save")]
-async fn create(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
-    let name = args.single_quoted::<String>()?;
-
+async fn create(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     // TODO: add some arg validation to reduce the risk of an error
     // https://docs.rs/serenity/0.10.9/serenity/framework/standard/macros/attr.command.html
-    let response = args
-        .remains()
-        .ok_or(anyhow!("No remaining args for response"))?;
 
-    // TODO: old thicc bot did not support this but the backend allows multiple
-    // responses
-    let key_word = KeyWord::new(name, vec![response.to_string()]);
+    // TODO: this will only do one response, maybe allow multiple responses?
+    let key_word: KeyWord = ArgParser::key_value_pair(args)?.into();
 
     let (client, guild_id) = BotUtils::get_info(ctx, msg).await?;
 
@@ -46,9 +39,6 @@ async fn create(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 async fn list(ctx: &Context, msg: &Message) -> CommandResult {
     let (client, guild_id) = BotUtils::get_info(ctx, msg).await?;
     let res = client.key_words(guild_id).list().await?;
-    // // TODO: add emoji based pagination like old bot
-    // // this lib might help https://github.com/AriusX7/serenity-utils
-    // msg.reply(ctx, format!("{:?}", res)).await?;
 
     BotUtils::run_paged_menu(ctx, msg, res).await?;
 

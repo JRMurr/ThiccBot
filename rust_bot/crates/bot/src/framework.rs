@@ -127,26 +127,13 @@ async fn dispatch_error_hook(
     error!("Dispatch Error for msg: {:?}, error: {:?}", msg, error);
 }
 
-#[hook]
-async fn unrecognised_command_hook(
-    _: &Context,
-    msg: &Message,
-    unrecognised_command_name: &str,
-) {
-    // TODO: probably only do this in dev
-    debug!(
-        "A user named {:?} tried to run an unknown command: {}",
-        msg.author.name, unrecognised_command_name
-    );
-}
-
-#[hook]
-async fn normal_message(_ctx: &Context, msg: &Message) {
-    // TODO: probably only do this in dev
-    // TODO: could also just do the manual call to dispatch here instead of
-    // making my own framework
-    println!("Message is not a command '{}'", msg.content);
-}
+// #[hook]
+// async fn normal_message(_ctx: &Context, msg: &Message) {
+//     // TODO: probably only do this in dev
+//     // TODO: could also just do the manual call to dispatch here instead of
+//     // making my own framework
+//     // println!("Message is not a command '{}'", msg.content);
+// }
 
 pub fn create_framework() -> ThiccFramework {
     // TODO: look into https://docs.rs/serenity/0.10.9/serenity/framework/standard/struct.Configuration.html#method.dynamic_prefix
@@ -155,9 +142,8 @@ pub fn create_framework() -> ThiccFramework {
         .configure(|c| c.prefix("?"))
         .after(after) // set the bot's prefix to "?"
         .help(&MY_HELP)
-        .unrecognised_command(unrecognised_command_hook)
         .on_dispatch_error(dispatch_error_hook)
-        .normal_message(normal_message)
+        // .normal_message(normal_message)
         .group(&KEYWORDS_GROUP)
         .group(&ALIASES_GROUP);
     ThiccFramework { standard }

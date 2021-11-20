@@ -9,6 +9,12 @@ pub struct Alias {
     pub command: String,
 }
 
+impl From<(String, String)> for Alias {
+    fn from((name, command): (String, String)) -> Self {
+        Self { name, command }
+    }
+}
+
 impl fmt::Display for Alias {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.name)
@@ -43,6 +49,12 @@ impl AliasManager<'_> {
         )]);
         let res = self.client.post_json(&self.guild_route, alias).await;
         ThiccClient::handle_status(res, errors)
+    }
+
+    pub async fn delete(&self, alias_name: &str) -> ThiccResult<()> {
+        self.client
+            .delete_helper(&format!("{}/{}", self.guild_route, alias_name))
+            .await
     }
 }
 

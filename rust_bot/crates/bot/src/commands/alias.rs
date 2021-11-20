@@ -1,4 +1,3 @@
-use anyhow::anyhow;
 use client::alias::Alias;
 use serenity::{
     client::Context,
@@ -9,7 +8,7 @@ use serenity::{
     model::prelude::Message,
 };
 
-use crate::utils::BotUtils;
+use crate::utils::{ArgParser, BotUtils};
 
 #[group]
 #[prefixes(alias)]
@@ -20,20 +19,10 @@ pub struct Aliases; // TODO: add bot admin checks
 
 #[command]
 #[aliases("set", "make", "add", "save")]
-async fn create(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
-    // TODO: make macro or generic func since this is the same as keyword
-    let name = args.single_quoted::<String>()?;
-
+async fn create(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     // TODO: add some arg validation to reduce the risk of an error
     // https://docs.rs/serenity/0.10.9/serenity/framework/standard/macros/attr.command.html
-    let command = args
-        .remains()
-        .ok_or(anyhow!("No remaining args for command"))?;
-
-    let alias = Alias {
-        name,
-        command: command.to_string(),
-    };
+    let alias: Alias = ArgParser::key_value_pair(args)?.into();
 
     let (client, guild_id) = BotUtils::get_info(ctx, msg).await?;
 
@@ -54,6 +43,17 @@ async fn list(ctx: &Context, msg: &Message) -> CommandResult {
     // msg.reply(ctx, format!("{:?}", res)).await?;
 
     BotUtils::run_paged_menu(ctx, msg, res).await?;
+
+    Ok(())
+}
+
+#[command]
+async fn delete(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
+    let (client, guild_id) = BotUtils::get_info(ctx, msg).await?;
+    let name = args.single_quoted::<String>()?;
+    client.alias(guild_id).delete(&name).await?;
+
+    msg.reply(ctx, format!("Deleted alias: {}", name)).await?;
 
     Ok(())
 }

@@ -12,6 +12,16 @@ pub struct KeyWord {
     pub match_case: bool,
 }
 
+impl From<(String, String)> for KeyWord {
+    fn from((name, response): (String, String)) -> Self {
+        Self {
+            name,
+            responses: vec![response],
+            match_case: false,
+        }
+    }
+}
+
 impl KeyWord {
     pub fn new<NameStr, ResponseStr>(
         name: NameStr,
