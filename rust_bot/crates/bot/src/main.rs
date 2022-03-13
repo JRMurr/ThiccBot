@@ -30,7 +30,7 @@ async fn main() {
 
     // Login with a bot token from the environment
     let token = env::var("DISCORD_ID").expect("DISCORD_ID");
-    let mut client = Client::builder(token)
+    let mut client = Client::builder(token.trim())
         .event_handler(Handler)
         .framework(framework)
         .type_map_insert::<ThiccHolder>(ThiccClient::new(base_url, &api_key))

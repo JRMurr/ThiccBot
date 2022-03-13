@@ -15,7 +15,9 @@ use serenity::{
 };
 
 use crate::{
-    commands::{alias::ALIASES_GROUP, key_words::KEYWORDS_GROUP},
+    commands::{
+        alias::ALIASES_GROUP, key_words::KEYWORDS_GROUP, misc::MISC_GROUP,
+    },
     utils::BotUtils,
 };
 
@@ -145,6 +147,7 @@ pub fn create_framework() -> ThiccFramework {
         .on_dispatch_error(dispatch_error_hook)
         // .normal_message(normal_message)
         .group(&KEYWORDS_GROUP)
-        .group(&ALIASES_GROUP);
+        .group(&ALIASES_GROUP)
+        .group(&MISC_GROUP);
     ThiccFramework { standard }
 }
