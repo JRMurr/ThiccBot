@@ -56,7 +56,10 @@ impl BotUtils {
         entries: Vec<T>,
     ) -> Result<Option<Message>, anyhow::Error> {
         // let stop_reaction = ReactionType::try_from("⏹️")?;
-
+        if entries.len() == 0 {
+            let msg = msg.reply(ctx, "No entries to list").await?;
+            return Ok(Some(msg));
+        }
         let controls = vec![
             Control::new(
                 ReactionType::from('⏪'),

@@ -12,7 +12,7 @@ use crate::utils::{ArgParser, BotUtils};
 
 #[group]
 #[prefixes(alias)]
-#[commands(create, list)]
+#[commands(create, list, delete)]
 #[summary = "Commands for creating and managing key words"]
 #[only_in(guilds)]
 pub struct Aliases; // TODO: add bot admin checks

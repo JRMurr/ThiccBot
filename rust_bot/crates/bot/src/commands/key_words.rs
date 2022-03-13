@@ -11,7 +11,7 @@ use serenity::{
 
 #[group]
 #[prefixes(keyWord, keyword, keyword, keyWords, key_word)]
-#[commands(create, list)]
+#[commands(create, list, delete)]
 #[summary = "Commands for creating and managing key words"]
 #[only_in(guilds)]
 pub struct KeyWords; // TODO: add bot admin checks
@@ -41,6 +41,18 @@ async fn list(ctx: &Context, msg: &Message) -> CommandResult {
     let res = client.key_words(guild_id).list().await?;
 
     BotUtils::run_paged_menu(ctx, msg, res).await?;
+
+    Ok(())
+}
+
+#[command]
+async fn delete(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
+    let (client, guild_id) = BotUtils::get_info(ctx, msg).await?;
+    let name = args.single_quoted::<String>()?;
+    client.key_words(guild_id).delete(&name).await?;
+
+    msg.reply(ctx, format!("Deleted key_word: {}", name))
+        .await?;
 
     Ok(())
 }
