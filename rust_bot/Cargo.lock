@@ -100,6 +100,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "client",
+ "emojis",
  "env_logger",
  "log",
  "rand 0.8.4",
@@ -222,6 +223,12 @@ checksum = "d3dd60d1080a57a05ab032377049e0591415d2b31afd7028356dbf3cc6dcb066"
 dependencies = [
  "generic-array",
 ]
+
+[[package]]
+name = "emojis"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2ac4fbb37eb4475f3d4dc48750c6864a330a6fa413bbe48fb5359db1fa71672c"
 
 [[package]]
 name = "encoding_rs"
