@@ -19,9 +19,8 @@ pub struct Aliases; // TODO: add bot admin checks
 
 #[command]
 #[aliases("set", "make", "add", "save")]
+#[min_args(2)]
 async fn create(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
-    // TODO: add some arg validation to reduce the risk of an error
-    // https://docs.rs/serenity/0.10.9/serenity/framework/standard/macros/attr.command.html
     let alias: Alias = ArgParser::key_value_pair(args)?.into();
 
     let (client, guild_id) = BotUtils::get_info(ctx, msg).await?;
@@ -48,6 +47,7 @@ async fn list(ctx: &Context, msg: &Message) -> CommandResult {
 }
 
 #[command]
+#[num_args(1)]
 async fn delete(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let (client, guild_id) = BotUtils::get_info(ctx, msg).await?;
     let name = args.single_quoted::<String>()?;

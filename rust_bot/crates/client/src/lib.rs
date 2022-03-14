@@ -1,8 +1,9 @@
 use anyhow::Context;
+use bytes::Bytes;
 use error::{ClientErrors, ThiccError};
 use reqwest::{
     header::{HeaderMap, HeaderValue, AUTHORIZATION},
-    Client, RequestBuilder, Url,
+    Client, IntoUrl, RequestBuilder, Url,
 };
 use serde::{de::DeserializeOwned, Serialize};
 use std::collections::HashMap;
@@ -11,6 +12,7 @@ pub mod alias;
 pub mod error;
 pub mod guilds;
 pub mod key_words;
+pub mod last_fm;
 
 type ErrorMap = HashMap<reqwest::StatusCode, ThiccError>;
 
@@ -42,7 +44,8 @@ impl ThiccClient {
         ThiccClient { client, base_url }
     }
 
-    fn join_with_base(&self, url: &str) -> ThiccResult<Url> {
+    fn join_with_base<U: IntoUrl>(&self, url: U) -> ThiccResult<Url> {
+        let url = url.as_str();
         if url.starts_with('/') {
             return Err(ClientErrors::InvalidRelativeUrl(url.to_string()));
         }
@@ -54,29 +57,29 @@ impl ThiccClient {
         Ok(url)
     }
 
-    pub fn post(&self, url: &str) -> ThiccResult<RequestBuilder> {
+    pub fn post<U: IntoUrl>(&self, url: U) -> ThiccResult<RequestBuilder> {
         let url = self.join_with_base(url)?;
         Ok(self.client.post(url))
     }
 
-    pub fn get(&self, url: &str) -> ThiccResult<RequestBuilder> {
+    pub fn get<U: IntoUrl>(&self, url: U) -> ThiccResult<RequestBuilder> {
         let url = self.join_with_base(url)?;
         Ok(self.client.get(url))
     }
 
-    pub fn delete(&self, url: &str) -> ThiccResult<RequestBuilder> {
+    pub fn delete<U: IntoUrl>(&self, url: U) -> ThiccResult<RequestBuilder> {
         let url = self.join_with_base(url)?;
         Ok(self.client.delete(url))
     }
 
-    pub async fn delete_helper(&self, url: &str) -> ThiccResult<()> {
+    pub async fn delete_helper<U: IntoUrl>(&self, url: U) -> ThiccResult<()> {
         let _ = self.delete(url)?.send().await?.error_for_status();
         Ok(())
     }
 
-    pub async fn get_json<T: DeserializeOwned>(
+    pub async fn get_json<T: DeserializeOwned, U: IntoUrl>(
         &self,
-        url: &str,
+        url: U,
     ) -> ThiccResult<T> {
         let res = self
             .get(url)?
@@ -88,12 +91,24 @@ impl ThiccClient {
         Ok(res)
     }
 
+    pub async fn get_bytes<U: IntoUrl>(&self, url: U) -> ThiccResult<Bytes> {
+        let res = self
+            .get(url)?
+            .send()
+            .await?
+            .error_for_status()?
+            .bytes()
+            .await?;
+        Ok(res)
+    }
+
     pub async fn post_json<
         Payload: Serialize + ?Sized,
         Res: DeserializeOwned,
+        U: IntoUrl,
     >(
         &self,
-        url: &str,
+        url: U,
         payload: &Payload,
     ) -> ThiccResult<Res> {
         let res = self

@@ -54,14 +54,14 @@ impl KeyWordManager<'_> {
     pub async fn get(&self, search: &str) -> ThiccResult<Option<KeyWord>> {
         let res = self
             .client
-            .get_json::<KeyWord>(&format!("{}/{}", self.guild_route, search))
+            .get_json::<KeyWord, _>(format!("{}/{}", self.guild_route, search))
             .await;
         ThiccClient::swallow_404(res)
     }
 
     pub async fn list(&self) -> ThiccResult<Vec<KeyWord>> {
         self.client
-            .get_json::<Vec<KeyWord>>(&self.guild_route)
+            .get_json::<Vec<KeyWord>, _>(&self.guild_route)
             .await
     }
 

@@ -16,7 +16,8 @@ use serenity::{
 
 use crate::{
     commands::{
-        alias::ALIASES_GROUP, key_words::KEYWORDS_GROUP, misc::MISC_GROUP,
+        alias::ALIASES_GROUP, key_words::KEYWORDS_GROUP, last_fm::LASTFM_GROUP,
+        misc::MISC_GROUP,
     },
     utils::BotUtils,
 };
@@ -120,7 +121,7 @@ async fn dispatch_error_hook(
     msg: &Message,
     error: DispatchError,
 ) {
-    // TODO: probably only do this in dev
+    // TODO: arg parse errors here
     error!("Dispatch Error for msg: {:?}, error: {:?}", msg, error);
 }
 
@@ -143,6 +144,7 @@ pub fn create_framework() -> ThiccFramework {
         // .normal_message(normal_message)
         .group(&KEYWORDS_GROUP)
         .group(&ALIASES_GROUP)
-        .group(&MISC_GROUP);
+        .group(&MISC_GROUP)
+        .group(&LASTFM_GROUP);
     ThiccFramework { standard }
 }

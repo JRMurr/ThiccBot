@@ -50,7 +50,10 @@ impl GuildManager<'_> {
     ) -> ThiccResult<Option<DiscordGuild>> {
         let res = self
             .client
-            .get_json::<DiscordGuild>(&format!("{}/{}", self.route, guild_id))
+            .get_json::<DiscordGuild, _>(&format!(
+                "{}/{}",
+                self.route, guild_id
+            ))
             .await;
         ThiccClient::swallow_404(res)
     }

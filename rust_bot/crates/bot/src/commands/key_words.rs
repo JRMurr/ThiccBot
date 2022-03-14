@@ -18,10 +18,8 @@ pub struct KeyWords; // TODO: add bot admin checks
 
 #[command]
 #[aliases("set", "make", "add", "save")]
+#[min_args(2)]
 async fn create(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
-    // TODO: add some arg validation to reduce the risk of an error
-    // https://docs.rs/serenity/0.10.9/serenity/framework/standard/macros/attr.command.html
-
     // TODO: this will only do one response, maybe allow multiple responses?
     let key_word: KeyWord = ArgParser::key_value_pair(args)?.into();
 
@@ -36,6 +34,7 @@ async fn create(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
 }
 
 #[command]
+#[num_args(0)]
 async fn list(ctx: &Context, msg: &Message) -> CommandResult {
     let (client, guild_id) = BotUtils::get_info(ctx, msg).await?;
     let res = client.key_words(guild_id).list().await?;
@@ -46,6 +45,7 @@ async fn list(ctx: &Context, msg: &Message) -> CommandResult {
 }
 
 #[command]
+#[num_args(1)]
 async fn delete(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let (client, guild_id) = BotUtils::get_info(ctx, msg).await?;
     let name = args.single_quoted::<String>()?;

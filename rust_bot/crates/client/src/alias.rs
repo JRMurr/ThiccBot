@@ -30,13 +30,15 @@ impl AliasManager<'_> {
     pub async fn get(&self, search: &str) -> ThiccResult<Option<Alias>> {
         let res = self
             .client
-            .get_json::<Alias>(&format!("{}/{}", self.guild_route, search))
+            .get_json::<Alias, _>(format!("{}/{}", self.guild_route, search))
             .await;
         ThiccClient::swallow_404(res)
     }
 
     pub async fn list(&self) -> ThiccResult<Vec<Alias>> {
-        self.client.get_json::<Vec<Alias>>(&self.guild_route).await
+        self.client
+            .get_json::<Vec<Alias>, _>(&self.guild_route)
+            .await
     }
 
     pub async fn create(&self, alias: &Alias) -> ThiccResult<Alias> {

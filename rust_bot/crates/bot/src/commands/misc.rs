@@ -13,6 +13,7 @@ use serenity::{
 pub struct Misc;
 
 #[command]
+#[min_args(1)]
 async fn say(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     msg.channel_id.say(&ctx.http, args.rest()).await?;
 
@@ -20,6 +21,7 @@ async fn say(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
 }
 
 #[command]
+#[min_args(1)]
 async fn choose(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let answer = args
         .raw_quoted()
@@ -31,6 +33,7 @@ async fn choose(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
 }
 
 #[command]
+#[min_args(1)]
 async fn choose_list(
     ctx: &Context,
     msg: &Message,
@@ -68,6 +71,7 @@ fn join_iter<I: IntoIterator<Item = String>>(iterable: I) -> String {
 }
 
 #[command]
+#[min_args(1)]
 async fn meme_text(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let words = args.raw_quoted();
     let meme_words: String =
@@ -96,6 +100,7 @@ fn char_to_emoji(char: char) -> String {
 }
 
 #[command]
+#[min_args(1)]
 async fn emoji_text(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let words = args.raw_quoted();
     let emoji_words =
