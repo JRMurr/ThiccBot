@@ -43,7 +43,7 @@ impl ThiccClient {
     }
 
     fn join_with_base(&self, url: &str) -> ThiccResult<Url> {
-        if url.starts_with("/") {
+        if url.starts_with('/') {
             return Err(ClientErrors::InvalidRelativeUrl(url.to_string()));
         }
 

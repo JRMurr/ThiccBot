@@ -37,7 +37,7 @@ const GUILD_ROUTE: &str = "discord";
 impl ThiccClient {
     pub fn guilds(&self) -> GuildManager {
         GuildManager {
-            client: &self,
+            client: self,
             route: GUILD_ROUTE.to_string(),
         }
     }

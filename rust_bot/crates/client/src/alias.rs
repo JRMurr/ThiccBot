@@ -64,7 +64,7 @@ impl ThiccClient {
     pub fn alias(&self, guild_id: u64) -> AliasManager {
         let guild_route = format!("{}/{}", ALIAS_ROUTE, guild_id);
         AliasManager {
-            client: &self,
+            client: self,
             guild_route,
         }
     }

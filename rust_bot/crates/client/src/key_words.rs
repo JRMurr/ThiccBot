@@ -90,7 +90,7 @@ impl ThiccClient {
     pub fn key_words(&self, guild_id: u64) -> KeyWordManager {
         let guild_route = format!("{}/{}", KEY_WORDS_ROUTE, guild_id);
         KeyWordManager {
-            client: &self,
+            client: self,
             guild_route,
         }
     }

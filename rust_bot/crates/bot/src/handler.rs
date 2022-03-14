@@ -52,7 +52,7 @@ impl Handler {
         guild: &Guild,
     ) -> Result<()> {
         let id = guild.id.0;
-        let client = BotUtils::get_thicc_client(&ctx).await?;
+        let client = BotUtils::get_thicc_client(ctx).await?;
         let existing_guild = client.guilds().get(id).await?;
         if existing_guild.is_none() {
             client.guilds().create(id, &guild.name).await?;

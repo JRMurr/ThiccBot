@@ -105,15 +105,10 @@ async fn after(
                 }
             }
             error!("Command '{}' returned error {:?}", command_name, why);
-            if let Some(client_error) = why.downcast_ref::<ClientErrors>() {
-                match client_error {
-                    ClientErrors::Thicc(thicc_error) => {
-                        let _ =
-                            msg.reply(ctx, format!("{}", thicc_error)).await;
-                        ()
-                    }
-                    _ => (),
-                };
+            if let Some(ClientErrors::Thicc(thicc_error)) =
+                why.downcast_ref::<ClientErrors>()
+            {
+                let _ = msg.reply(ctx, format!("{}", thicc_error)).await;
             }
         }
     }

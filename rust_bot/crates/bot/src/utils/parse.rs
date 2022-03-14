@@ -8,7 +8,8 @@ impl ArgParser {
     /// value
     pub fn key_value_pair(mut args: Args) -> anyhow::Result<(String, String)> {
         let name = args.single_quoted::<String>()?;
-        let value = args.remains().ok_or(anyhow!("No remaining args"))?;
+        let value =
+            args.remains().ok_or_else(|| anyhow!("No remaining args"))?;
         Ok((name, value.to_string()))
     }
 }
