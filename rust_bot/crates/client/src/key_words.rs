@@ -1,9 +1,9 @@
 use core::fmt;
-use std::collections::HashMap;
+
 
 use serde::{Deserialize, Serialize};
 
-use crate::{error::ThiccError, ErrorMap, ThiccClient, ThiccResult};
+use crate::{error::ThiccError, ThiccClient, ThiccResult};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct KeyWord {
@@ -66,15 +66,17 @@ impl KeyWordManager<'_> {
     }
 
     pub async fn create(&self, key_word: &KeyWord) -> ThiccResult<KeyWord> {
-        let errors: ErrorMap = HashMap::from([(
-            reqwest::StatusCode::BAD_REQUEST,
-            ThiccError::ResourceAlreadyExist {
-                name: key_word.name.clone(),
-                resource_type: "Key Word".to_string(),
-            },
-        )]);
         let res = self.client.post_json(&self.guild_route, key_word).await;
-        ThiccClient::handle_status(res, errors)
+        ThiccClient::handle_status(res, |status| {
+            if status == reqwest::StatusCode::BAD_REQUEST {
+                Some(ThiccError::ResourceAlreadyExist {
+                    name: key_word.name.clone(),
+                    resource_type: "Key Word".to_string(),
+                })
+            } else {
+                None
+            }
+        })
     }
 
     pub async fn delete(&self, key_word: &str) -> ThiccResult<()> {

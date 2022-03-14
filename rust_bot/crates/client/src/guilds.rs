@@ -1,7 +1,5 @@
-use std::collections::HashMap;
+use crate::{error::ThiccError, ThiccClient, ThiccResult};
 
-use crate::{error::ThiccError, ErrorMap, ThiccClient, ThiccResult};
-use reqwest::StatusCode;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -64,14 +62,16 @@ impl GuildManager<'_> {
             id: guild_id,
             name: name.to_string(),
         };
-        let errors: ErrorMap = HashMap::from([(
-            StatusCode::BAD_REQUEST,
-            ThiccError::ResourceAlreadyExist {
-                name: payload.name.clone(),
-                resource_type: "Guild".to_string(),
-            },
-        )]);
         let res = self.client.post_json(&self.route, &payload).await;
-        ThiccClient::handle_status(res, errors)
+        ThiccClient::handle_status(res, |status| {
+            if status == reqwest::StatusCode::BAD_REQUEST {
+                Some(ThiccError::ResourceAlreadyExist {
+                    name: payload.name.clone(),
+                    resource_type: "Guild".to_string(),
+                })
+            } else {
+                None
+            }
+        })
     }
 }

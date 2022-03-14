@@ -6,15 +6,12 @@ use reqwest::{
     Client, IntoUrl, RequestBuilder, Url,
 };
 use serde::{de::DeserializeOwned, Serialize};
-use std::collections::HashMap;
 
 pub mod alias;
 pub mod error;
 pub mod guilds;
 pub mod key_words;
 pub mod last_fm;
-
-type ErrorMap = HashMap<reqwest::StatusCode, ThiccError>;
 
 pub type ThiccResult<T> = std::result::Result<T, ClientErrors>;
 
@@ -143,15 +140,17 @@ impl ThiccClient {
         }
     }
 
-    pub fn handle_status<T>(
+    pub fn handle_status<
+        T,
+        F: FnOnce(reqwest::StatusCode) -> Option<ThiccError>,
+    >(
         result: ThiccResult<T>,
-        mut statuses: ErrorMap, /* TODO: make this a func called on error to
-                                 * map it if needed */
+        err_map: F,
     ) -> ThiccResult<T> {
         match result {
             Ok(value) => Ok(value),
             Err(ClientErrors::Reqwest(req_error)) => match req_error.status() {
-                Some(status) => match statuses.remove(&status) {
+                Some(status) => match err_map(status) {
                     Some(err) => Err(err.into()),
                     None => Err(req_error.into()),
                 },

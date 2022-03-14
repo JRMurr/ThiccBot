@@ -1,5 +1,4 @@
-use crate::{error::ThiccError, ErrorMap, ThiccClient, ThiccResult};
-use std::collections::HashMap;
+use crate::{error::ThiccError, ThiccClient, ThiccResult};
 
 use core::fmt;
 
@@ -42,15 +41,17 @@ impl AliasManager<'_> {
     }
 
     pub async fn create(&self, alias: &Alias) -> ThiccResult<Alias> {
-        let errors: ErrorMap = HashMap::from([(
-            reqwest::StatusCode::BAD_REQUEST,
-            ThiccError::ResourceAlreadyExist {
-                name: alias.name.clone(),
-                resource_type: "Alias".to_string(),
-            },
-        )]);
         let res = self.client.post_json(&self.guild_route, alias).await;
-        ThiccClient::handle_status(res, errors)
+        ThiccClient::handle_status(res, |status| {
+            if status == reqwest::StatusCode::BAD_REQUEST {
+                Some(ThiccError::ResourceAlreadyExist {
+                    name: alias.name.clone(),
+                    resource_type: "Alias".to_string(),
+                })
+            } else {
+                None
+            }
+        })
     }
 
     pub async fn delete(&self, alias_name: &str) -> ThiccResult<()> {

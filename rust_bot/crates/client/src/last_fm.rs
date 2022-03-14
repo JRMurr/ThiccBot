@@ -1,4 +1,4 @@
-use crate::{error::ThiccError, ThiccClient, ThiccResult};
+use crate::{ThiccClient, ThiccResult};
 use bytes::Buf;
 use std::{borrow::Cow, io::Read};
 use strum::{Display, EnumString};
