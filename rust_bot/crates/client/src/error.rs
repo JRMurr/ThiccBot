@@ -13,7 +13,13 @@ pub enum ClientErrors {
     Reqwest(#[from] reqwest::Error),
 
     #[error(transparent)]
+    IoError(#[from] std::io::Error),
+
+    #[error(transparent)]
     Other(#[from] anyhow::Error),
+
+    #[error("Error parsing: {0}")]
+    StrumParseError(#[from] strum::ParseError),
 }
 
 /// Errors that we should show the user

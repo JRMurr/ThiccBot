@@ -4,6 +4,7 @@ use serenity::{
         macros::{command, group},
         Args, CommandResult,
     },
+    http::AttachmentType,
     model::prelude::Message,
 };
 
@@ -15,7 +16,8 @@ use crate::utils::BotUtils;
 pub struct LastFm;
 
 #[command]
-#[num_args(2)]
+#[min_args(1)]
+#[max_args(2)]
 async fn grid(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let http = &ctx.http;
     let channel_id = msg.channel_id;
@@ -24,7 +26,18 @@ async fn grid(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let thicc_client = BotUtils::get_thicc_client(ctx).await?;
 
     let user_name = args.single_quoted::<String>()?;
-    let period = args.single_quoted::<String>()?;
+    let period = args.single_quoted::<String>().ok();
+
+    let image = thicc_client.last_fm().get_grid(user_name, period).await?;
+    let attachment = AttachmentType::Bytes {
+        data: image,
+        filename: "image.jpeg".to_string(),
+    };
+
+    channel_id
+        .send_files(http, vec![attachment], |m| m.reference_message(msg))
+        .await?;
+
     typing.stop();
     Ok(())
 }

@@ -145,7 +145,8 @@ impl ThiccClient {
 
     pub fn handle_status<T>(
         result: ThiccResult<T>,
-        mut statuses: ErrorMap,
+        mut statuses: ErrorMap, /* TODO: make this a func called on error to
+                                 * map it if needed */
     ) -> ThiccResult<T> {
         match result {
             Ok(value) => Ok(value),
