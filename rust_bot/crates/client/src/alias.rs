@@ -55,7 +55,7 @@ impl AliasManager<'_> {
 
     pub async fn delete(&self, alias_name: &str) -> ThiccResult<()> {
         self.client
-            .delete_helper(&format!("{}/{}", self.guild_route, alias_name))
+            .delete_helper(format!("{}/{}", self.guild_route, alias_name))
             .await
     }
 }

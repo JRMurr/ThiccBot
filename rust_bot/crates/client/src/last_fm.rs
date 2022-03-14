@@ -14,6 +14,6 @@ impl LastFmManager<'_> {
         period: &str,
     ) -> ThiccResult<Cow<'a, [u8]>> {
         todo!()
-        // let res = self.client.get_bytes(&format(""))
+        // let res = self.client.get_bytes(format(""))
     }
 }

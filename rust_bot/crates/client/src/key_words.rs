@@ -79,7 +79,7 @@ impl KeyWordManager<'_> {
 
     pub async fn delete(&self, key_word: &str) -> ThiccResult<()> {
         self.client
-            .delete_helper(&format!("{}/{}", self.guild_route, key_word))
+            .delete_helper(format!("{}/{}", self.guild_route, key_word))
             .await
     }
 }
