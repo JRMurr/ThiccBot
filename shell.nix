@@ -11,6 +11,7 @@ pkgs.mkShell {
     ((rust-bin.fromRustupToolchainFile ./rust-toolchain.toml).override {
       extensions = [ "rust-src" ];
     })
+    cargo-expand
     gcc
     cmake
     openssl

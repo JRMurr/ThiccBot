@@ -1,3 +1,4 @@
+use client::last_fm::Period;
 use serenity::{
     client::Context,
     framework::standard::{
@@ -8,7 +9,7 @@ use serenity::{
     model::prelude::Message,
 };
 
-use crate::utils::BotUtils;
+use crate::utils::{ArgParser, BotUtils};
 
 #[group]
 #[prefixes(lastfm, last_fm, lastFm)]
@@ -26,7 +27,7 @@ async fn grid(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let thicc_client = BotUtils::get_thicc_client(ctx).await?;
 
     let user_name = args.single_quoted::<String>()?;
-    let period = args.single_quoted::<String>().ok();
+    let period = ArgParser::parse_with_default::<Period>(args)?;
 
     let image = thicc_client.last_fm().get_grid(user_name, period).await?;
     let attachment = AttachmentType::Bytes {

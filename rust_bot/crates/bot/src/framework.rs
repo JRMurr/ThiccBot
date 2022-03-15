@@ -1,4 +1,7 @@
-use client::{error::ClientErrors, ThiccResult};
+use client::{
+    error::{ClientErrors, ThiccError},
+    ThiccResult,
+};
 
 use serenity::{
     async_trait,
@@ -109,6 +112,10 @@ async fn after(
             if let Some(ClientErrors::Thicc(thicc_error)) =
                 why.downcast_ref::<ClientErrors>()
             {
+                // show thicc errors wrapped in clientErrors
+                let _ = msg.reply(ctx, format!("{}", thicc_error)).await;
+            } else if let Some(thicc_error) = why.downcast_ref::<ThiccError>() {
+                // show unwrapped thicc errors
                 let _ = msg.reply(ctx, format!("{}", thicc_error)).await;
             }
         }

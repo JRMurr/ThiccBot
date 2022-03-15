@@ -1,14 +1,13 @@
-use crate::{ThiccClient, ThiccResult};
+use crate::{error::ThiccError, ThiccClient, ThiccResult};
 use bytes::Buf;
-use std::{borrow::Cow, io::Read};
-use strum::{Display, EnumString};
+use std::{borrow::Cow, io::Read, str::FromStr};
+use strum::{Display, EnumVariantNames, VariantNames};
 
 pub struct LastFmManager<'a> {
     client: &'a ThiccClient,
 }
 
-// TODO: strum errors are lacking, do it myself
-#[derive(Display, Debug, PartialEq, EnumString)]
+#[derive(Display, Debug, PartialEq, EnumVariantNames)]
 pub enum Period {
     #[strum(to_string = "overall")]
     Overall,
@@ -24,21 +23,40 @@ pub enum Period {
     TwelveMonths,
 }
 
+impl Default for Period {
+    fn default() -> Self {
+        Self::SevenDays
+    }
+}
+
+// Would use strum EnumString but want a better error message
+impl FromStr for Period {
+    type Err = ThiccError;
+    fn from_str(s: &str) -> Result<Period, ThiccError> {
+        match s.trim() {
+            "" => Ok(Period::default()),
+            "overall" | "all time" => Ok(Period::Overall),
+            "7day" | "7 days" => Ok(Period::SevenDays),
+            "1month" | "1 month" => Ok(Period::OneMonth),
+            "3month" | "3 months" => Ok(Period::ThreeMonths),
+            "6month" | "6 months" => Ok(Period::SixMonths),
+            "12month" | "12 months" => Ok(Period::TwelveMonths),
+            _ => Err(ThiccError::ParseError {
+                allowed: Period::VARIANTS,
+                got: s.to_string(),
+            }),
+        }
+    }
+}
+
 impl LastFmManager<'_> {
     // TODO: make period an enum
     pub async fn get_grid<'a>(
         &self,
         user: String,
-        period: Option<String>,
+        period: Period,
     ) -> ThiccResult<Cow<'a, [u8]>> {
-        let prefix = "lastFM/grid";
-        let path = match period {
-            Some(period) => {
-                let period = period.parse::<Period>()?;
-                format!("{prefix}/{user}/{period}")
-            }
-            None => format!("{prefix}/{user}"),
-        };
+        let path = format!("lastFM/grid/{user}/{period}");
         let res = self.client.get_bytes(path).await?;
         let mut reader = res.reader();
         let mut buf: Vec<u8> = Vec::new();
