@@ -50,6 +50,8 @@ fn get_pages<'a, T: Display>(
 }
 
 impl BotUtils {
+    // TODO: add trait or something to show id if available
+    // maybe diff trait instead of display
     pub async fn run_paged_menu<T: Display>(
         ctx: &Context,
         msg: &Message,

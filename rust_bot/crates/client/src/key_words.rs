@@ -1,6 +1,5 @@
 use core::fmt;
 
-
 use serde::{Deserialize, Serialize};
 
 use crate::{error::ThiccError, ThiccClient, ThiccResult};
@@ -54,15 +53,13 @@ impl KeyWordManager<'_> {
     pub async fn get(&self, search: &str) -> ThiccResult<Option<KeyWord>> {
         let res = self
             .client
-            .get_json::<KeyWord, _>(format!("{}/{}", self.guild_route, search))
+            .get_json(format!("{}/{}", self.guild_route, search))
             .await;
         ThiccClient::swallow_404(res)
     }
 
     pub async fn list(&self) -> ThiccResult<Vec<KeyWord>> {
-        self.client
-            .get_json::<Vec<KeyWord>, _>(&self.guild_route)
-            .await
+        self.client.get_json(&self.guild_route).await
     }
 
     pub async fn create(&self, key_word: &KeyWord) -> ThiccResult<KeyWord> {

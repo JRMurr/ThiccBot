@@ -12,6 +12,7 @@ pub mod error;
 pub mod guilds;
 pub mod key_words;
 pub mod last_fm;
+pub mod quotes;
 
 pub type ThiccResult<T> = std::result::Result<T, ClientErrors>;
 
@@ -124,19 +125,13 @@ impl ThiccClient {
     pub fn swallow_404<T>(result: ThiccResult<T>) -> ThiccResult<Option<T>> {
         match result {
             Ok(value) => Ok(Some(value)),
-            Err(ClientErrors::Reqwest(req_error)) if req_error.status() == Some(reqwest::StatusCode::NOT_FOUND) => {
+            Err(ClientErrors::Reqwest(req_error))
+                if req_error.status()
+                    == Some(reqwest::StatusCode::NOT_FOUND) =>
+            {
                 Ok(None)
-            },
-            Err(e) => Err(e)
-            // Err(e) => match e.downcast_ref::<reqwest::Error>() {
-            //     Some(http_error)
-            //         if http_error.status()
-            //             == Some(reqwest::StatusCode::NOT_FOUND) =>
-            //     {
-            //         Ok(None)
-            //     }
-            //     _ => Err(e),
-            // },
+            }
+            Err(e) => Err(e),
         }
     }
 
