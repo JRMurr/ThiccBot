@@ -25,8 +25,9 @@ pub struct ThiccClient {
 
 impl ThiccClient {
     /// Makes a new [`ThiccClient`] with the provided `base_url` and `api_key`
-    pub fn new(base_url: &str, api_key: &str) -> ThiccClient {
-        let base_url = Url::parse(base_url).expect("Error parsing base url");
+    pub fn new<U: IntoUrl>(base_url: U, api_key: &str) -> ThiccClient {
+        let base_url: Url =
+            base_url.into_url().expect("Error parsing base_url");
 
         let mut headers = HeaderMap::new();
         let mut auth_value =

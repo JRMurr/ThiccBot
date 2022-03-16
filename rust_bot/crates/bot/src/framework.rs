@@ -37,6 +37,7 @@ impl ThiccFramework {
         // TODO: the parse struct is not public need to remake
         // https://github.com/serenity-rs/serenity/blob/current/src/framework/standard/parse/mod.rs#L218
 
+        // TODO: check all command prefixes for guild
         let prefix = "?";
         if msg.content.starts_with(prefix) {
             if let Some(alias_name) = msg.content.strip_prefix(prefix) {

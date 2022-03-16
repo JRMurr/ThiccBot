@@ -5,13 +5,16 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Serialize, Deserialize)]
 pub struct DiscordGuild {
     /// the name of the server/guild
-    name: String,
+    pub name: String,
     /// the guild id
-    id: u64,
-    /// The id of the guild in the backend
-    server_group_id: u64,
+    pub id: u64,
+    /// the id of the guild in the backend
+    pub server_group_id: u64,
 
-    admin_role: Option<u64>,
+    /// the role users must have to be allowed to create/update/delete
+    /// resources in thicc bot this is based on the priority so if a user
+    /// has a role above this role they are still an admin
+    pub admin_role: Option<u64>,
 
     command_prefixes: Option<Vec<String>>,
     message_prefixes: Option<Vec<String>>,

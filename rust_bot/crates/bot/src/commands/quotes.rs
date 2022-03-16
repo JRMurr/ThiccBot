@@ -1,5 +1,5 @@
 use crate::utils::{ArgParser, BotUtils};
-use client::quotes::{Quote, QuoteCreate};
+use client::quotes::QuoteCreate;
 use serenity::{
     client::Context,
     framework::standard::{
@@ -81,16 +81,3 @@ async fn delete(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 
     Ok(())
 }
-
-// #[command]
-// #[num_args(1)]
-// async fn delete(ctx: &Context, msg: &Message, mut args: Args) ->
-// CommandResult {     let (client, guild_id) = BotUtils::get_info(ctx,
-// msg).await?;     let name = args.single_quoted::<String>()?;
-//     client.key_words(guild_id).delete(&name).await?;
-
-//     msg.reply(ctx, format!("Deleted key_word: {}", name))
-//         .await?;
-
-//     Ok(())
-// }
