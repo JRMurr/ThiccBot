@@ -71,6 +71,11 @@ impl ThiccClient {
         Ok(self.client.delete(url))
     }
 
+    pub fn put<U: IntoUrl>(&self, url: U) -> ThiccResult<RequestBuilder> {
+        let url = self.join_with_base(url)?;
+        Ok(self.client.put(url))
+    }
+
     pub async fn delete_helper<U: IntoUrl>(&self, url: U) -> ThiccResult<()> {
         let _ = self.delete(url)?.send().await?.error_for_status();
         Ok(())
@@ -112,6 +117,26 @@ impl ThiccClient {
     ) -> ThiccResult<Res> {
         let res = self
             .post(url)?
+            .json(payload)
+            .send()
+            .await?
+            .error_for_status()?
+            .json()
+            .await?;
+        Ok(res)
+    }
+
+    pub async fn put_json<
+        Payload: Serialize + ?Sized,
+        Res: DeserializeOwned,
+        U: IntoUrl,
+    >(
+        &self,
+        url: U,
+        payload: &Payload,
+    ) -> ThiccResult<Res> {
+        let res = self
+            .put(url)?
             .json(payload)
             .send()
             .await?

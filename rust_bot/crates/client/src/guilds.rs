@@ -1,6 +1,7 @@
 use crate::{error::ThiccError, ThiccClient, ThiccResult};
 
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct DiscordGuild {
@@ -51,7 +52,22 @@ impl GuildManager<'_> {
     ) -> ThiccResult<Option<DiscordGuild>> {
         let res = self
             .client
-            .get_json::<DiscordGuild, _>(format!("{}/{}", self.route, guild_id))
+            .get_json(format!("{}/{}", self.route, guild_id))
+            .await;
+        ThiccClient::swallow_404(res)
+    }
+
+    pub async fn set_bot_admin(
+        &self,
+        guild_id: u64,
+        role_id: u64,
+    ) -> ThiccResult<Option<DiscordGuild>> {
+        let res = self
+            .client
+            .put_json(
+                format!("{}/{}", self.route, guild_id),
+                &json!({ "admin_role": role_id }),
+            )
             .await;
         ThiccClient::swallow_404(res)
     }

@@ -1,4 +1,4 @@
-use crate::utils::{ArgParser, BotUtils};
+use crate::utils::{checks::BOT_ADMIN_CHECK, ArgParser, BotUtils};
 use client::key_words::KeyWord;
 use serenity::{
     client::Context,
@@ -18,6 +18,7 @@ pub struct KeyWords; // TODO: add bot admin checks
 
 #[command]
 #[aliases("set", "make", "add", "save")]
+#[checks(BOT_ADMIN)]
 #[min_args(2)]
 async fn create(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     // TODO: this will only do one response, maybe allow multiple responses?

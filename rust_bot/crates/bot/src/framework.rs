@@ -19,8 +19,8 @@ use serenity::{
 
 use crate::{
     commands::{
-        alias::ALIASES_GROUP, key_words::KEYWORDS_GROUP, last_fm::LASTFM_GROUP,
-        misc::MISC_GROUP, quotes::QUOTES_GROUP,
+        admin::ADMIN_GROUP, alias::ALIASES_GROUP, key_words::KEYWORDS_GROUP,
+        last_fm::LASTFM_GROUP, misc::MISC_GROUP, quotes::QUOTES_GROUP,
     },
     utils::BotUtils,
 };
@@ -154,6 +154,7 @@ pub fn create_framework() -> ThiccFramework {
         .group(&ALIASES_GROUP)
         .group(&MISC_GROUP)
         .group(&LASTFM_GROUP)
-        .group(&QUOTES_GROUP);
+        .group(&QUOTES_GROUP)
+        .group(&ADMIN_GROUP);
     ThiccFramework { standard }
 }
