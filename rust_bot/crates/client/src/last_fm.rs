@@ -50,7 +50,6 @@ impl FromStr for Period {
 }
 
 impl LastFmManager<'_> {
-    // TODO: make period an enum
     pub async fn get_grid<'a>(
         &self,
         user: String,

@@ -129,7 +129,6 @@ async fn dispatch_error_hook(
     msg: &Message,
     error: DispatchError,
 ) {
-    // TODO: arg parse errors here
     error!("Dispatch Error for msg: {:?}, error: {:?}", msg, error);
 }
 
