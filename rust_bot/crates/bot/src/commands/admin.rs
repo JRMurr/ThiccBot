@@ -1,4 +1,4 @@
-use crate::utils::BotUtils;
+use crate::utils::{checks::SERVER_OWNER_CHECK, BotUtils};
 use serenity::{
     client::Context,
     framework::standard::{
@@ -16,8 +16,7 @@ use serenity::{
 pub struct Admin;
 
 #[command]
-// #[aliases("set", "make", "add", "save")]
-// #[checks(BOT_ADMIN)]
+#[checks(SERVER_OWNER)]
 #[num_args(1)]
 async fn set_bot_admin(
     ctx: &Context,

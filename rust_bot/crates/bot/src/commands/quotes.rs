@@ -1,4 +1,4 @@
-use crate::utils::{ArgParser, BotUtils};
+use crate::utils::{checks::BOT_ADMIN_CHECK, ArgParser, BotUtils};
 use client::quotes::QuoteCreate;
 use serenity::{
     client::Context,
@@ -19,6 +19,7 @@ pub struct Quotes; // TODO: add bot admin checks
 
 #[command]
 #[aliases("set", "make", "add", "save")]
+#[checks(BOT_ADMIN)]
 #[min_args(2)]
 async fn create(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let quote: QuoteCreate = ArgParser::key_value_pair(args)?.into();
@@ -70,6 +71,7 @@ async fn get(ctx: &Context, msg: &Message) -> CommandResult {
 }
 
 #[command]
+#[checks(BOT_ADMIN)]
 #[num_args(1)]
 async fn delete(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let (client, guild_id) = BotUtils::get_info(ctx, msg).await?;

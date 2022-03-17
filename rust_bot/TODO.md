@@ -3,6 +3,7 @@
 - add good help messages
 - maybe make a macro for parsing args
 - decide what errors should be shown
+- add update commands
 - add counter commands
 - add playlist stuff
 - add reaction roles stuff (actually probably not but see how hard)

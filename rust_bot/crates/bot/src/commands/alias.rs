@@ -1,3 +1,4 @@
+use crate::utils::{checks::BOT_ADMIN_CHECK, ArgParser, BotUtils};
 use client::alias::Alias;
 use serenity::{
     client::Context,
@@ -8,8 +9,6 @@ use serenity::{
     model::prelude::Message,
 };
 
-use crate::utils::{ArgParser, BotUtils};
-
 #[group]
 #[prefixes(alias)]
 #[commands(create, list, delete)]
@@ -19,6 +18,7 @@ pub struct Aliases; // TODO: add bot admin checks
 
 #[command]
 #[aliases("set", "make", "add", "save")]
+#[checks(BOT_ADMIN)]
 #[min_args(2)]
 async fn create(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let alias: Alias = ArgParser::key_value_pair(args)?.into();
@@ -47,6 +47,7 @@ async fn list(ctx: &Context, msg: &Message) -> CommandResult {
 }
 
 #[command]
+#[checks(BOT_ADMIN)]
 #[num_args(1)]
 async fn delete(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let (client, guild_id) = BotUtils::get_info(ctx, msg).await?;

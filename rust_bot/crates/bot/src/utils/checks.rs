@@ -7,7 +7,32 @@ use serenity::{
 
 use crate::{utils::BotUtils, OwnerHolder};
 
-// TODO: add simpler check for just is bot owner or server admin
+// TODO: remove all these expects and add http calls if cache not good
+
+#[check]
+pub async fn server_owner(
+    ctx: &Context,
+    msg: &Message,
+    _: &mut Args,
+    _: &CommandOptions,
+) -> Result<(), Reason> {
+    let data = ctx.data.read().await;
+
+    let bot_owner_id = data.get::<OwnerHolder>().unwrap();
+
+    if msg.author.id.0 == *bot_owner_id {
+        // I can do anything
+        return Ok(());
+    }
+
+    let guild = msg.guild(&ctx.cache).await.expect("guild not in cache");
+
+    if guild.owner_id == msg.author.id {
+        // server owner can do anything
+        return Ok(());
+    }
+    Err(Reason::Unknown)
+}
 
 #[check]
 pub async fn bot_admin(
@@ -25,7 +50,6 @@ pub async fn bot_admin(
         return Ok(());
     }
 
-    // TODO: remove all these expects and add http calls if cache not good
     let guild = msg.guild(&ctx.cache).await.expect("guild not in cache");
 
     if guild.owner_id == msg.author.id {

@@ -46,6 +46,7 @@ async fn list(ctx: &Context, msg: &Message) -> CommandResult {
 }
 
 #[command]
+#[checks(BOT_ADMIN)]
 #[num_args(1)]
 async fn delete(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let (client, guild_id) = BotUtils::get_info(ctx, msg).await?;
