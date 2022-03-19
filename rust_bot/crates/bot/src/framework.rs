@@ -14,7 +14,7 @@ use serenity::{
         },
         Framework,
     },
-    model::channel::Message,
+    model::{channel::Message, id::UserId},
 };
 
 use crate::{
@@ -123,6 +123,19 @@ async fn after(
     }
 }
 
+/// Get configured command prefix for the guild
+// async fn get_command_prefixes(
+//     ctx: &Context,
+//     msg: &Message,
+// ) -> anyhow::Result<Vec<String>> {
+//     let (client, guild_id) = BotUtils::get_info(ctx, msg).await?;
+//     let guild = client.guilds().get(guild_id).await?;
+//     Ok(match guild {
+//         Some(g) => g.command_prefixes.unwrap_or_else(|| Vec::new()),
+//         None => Vec::new(),
+//     })
+// }
+
 #[hook]
 async fn dispatch_error_hook(
     _context: &Context,
@@ -140,11 +153,21 @@ async fn dispatch_error_hook(
 //     // println!("Message is not a command '{}'", msg.content);
 // }
 
-pub fn create_framework() -> ThiccFramework {
-    // TODO: look into https://docs.rs/serenity/0.10.9/serenity/framework/standard/struct.Configuration.html#method.dynamic_prefix
-    // to be able to set the prefix per server
+pub fn create_framework(owner_id: u64) -> ThiccFramework {
+    let mut owner_set = HashSet::new();
+    owner_set.insert(UserId(owner_id));
     let standard = StandardFramework::new()
-        .configure(|c| c.prefix("?"))
+        .configure(|c| {
+            c.prefix("?").owners(owner_set)
+            // TODO: dynamic_prefix can only return a single prefix at a time
+            // .dynamic_prefix(|ctx, msg| {
+            //     Box::pin(async move {
+            //         get_command_prefixes(ctx, msg)
+            //             .await
+            //             .unwrap_or_else(|| Vec::new())
+            //     })
+            // })
+        })
         .after(after) // set the bot's prefix to "?"
         .help(&MY_HELP)
         .on_dispatch_error(dispatch_error_hook)

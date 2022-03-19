@@ -1,4 +1,5 @@
 use crate::utils::{checks::SERVER_OWNER_CHECK, BotUtils};
+use client::guilds::PrefixType;
 use serenity::{
     client::Context,
     framework::standard::{
@@ -10,7 +11,7 @@ use serenity::{
 
 #[group]
 #[prefixes(admin)]
-#[commands(set_bot_admin)]
+#[commands(set_bot_admin, add_prefix)]
 #[summary = "Commands for managing thicc bot in this server"]
 #[only_in(guilds)]
 pub struct Admin;
@@ -30,6 +31,31 @@ async fn set_bot_admin(
 
     msg.reply(ctx, format!("set admin role to: {}", args.message()))
         .await?;
+
+    Ok(())
+}
+#[command]
+#[num_args(2)]
+async fn add_prefix(
+    ctx: &Context,
+    msg: &Message,
+    mut args: Args,
+) -> CommandResult {
+    let (client, guild_id) = BotUtils::get_info(ctx, msg).await?;
+    let prefix_type = args.single_quoted::<PrefixType>()?;
+    let prefix = args.single_quoted::<String>()?;
+    client
+        .guilds()
+        .create_prefix(guild_id, &prefix_type, &prefix)
+        .await?;
+
+    msg.reply(
+        ctx,
+        format!(
+            "({prefix}) has been added to the list of possible {prefix_type}es"
+        ),
+    )
+    .await?;
 
     Ok(())
 }

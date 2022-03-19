@@ -5,7 +5,7 @@ use serenity::{
     model::{guild::Role, id::RoleId, prelude::Message, Permissions},
 };
 
-use crate::{utils::BotUtils, OwnerHolder};
+use crate::utils::BotUtils;
 
 // TODO: remove all these expects and add http calls if cache not good
 
@@ -16,15 +16,6 @@ pub async fn server_owner(
     _: &mut Args,
     _: &CommandOptions,
 ) -> Result<(), Reason> {
-    let data = ctx.data.read().await;
-
-    let bot_owner_id = data.get::<OwnerHolder>().unwrap();
-
-    if msg.author.id.0 == *bot_owner_id {
-        // I can do anything
-        return Ok(());
-    }
-
     let guild = msg.guild(&ctx.cache).await.expect("guild not in cache");
 
     if guild.owner_id == msg.author.id {
@@ -41,15 +32,6 @@ pub async fn bot_admin(
     _: &mut Args,
     _: &CommandOptions,
 ) -> Result<(), Reason> {
-    let data = ctx.data.read().await;
-
-    let bot_owner_id = data.get::<OwnerHolder>().unwrap();
-
-    if msg.author.id.0 == *bot_owner_id {
-        // I can do anything
-        return Ok(());
-    }
-
     let guild = msg.guild(&ctx.cache).await.expect("guild not in cache");
 
     if guild.owner_id == msg.author.id {

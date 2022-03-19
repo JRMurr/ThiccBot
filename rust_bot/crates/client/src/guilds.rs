@@ -1,3 +1,6 @@
+use std::str::FromStr;
+use strum::{Display, EnumVariantNames, VariantNames};
+
 use crate::{error::ThiccError, ThiccClient, ThiccResult};
 
 use serde::{Deserialize, Serialize};
@@ -17,8 +20,8 @@ pub struct DiscordGuild {
     /// has a role above this role they are still an admin
     pub admin_role: Option<u64>,
 
-    command_prefixes: Option<Vec<String>>,
-    message_prefixes: Option<Vec<String>>,
+    pub command_prefixes: Option<Vec<String>>,
+    pub message_prefixes: Option<Vec<String>>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -45,6 +48,29 @@ impl ThiccClient {
     }
 }
 
+#[derive(Debug, Display, EnumVariantNames, PartialEq)]
+pub enum PrefixType {
+    #[strum(to_string = "message prefix")]
+    Message,
+    #[strum(to_string = "command prefix")]
+    Command,
+}
+
+impl FromStr for PrefixType {
+    type Err = ThiccError;
+    fn from_str(s: &str) -> Result<PrefixType, ThiccError> {
+        match s.trim() {
+            "message" => Ok(PrefixType::Message),
+            "command" => Ok(PrefixType::Command),
+            _ => Err(ThiccError::ParseError {
+                allowed: PrefixType::VARIANTS,
+                got: s.to_string(),
+            }),
+        }
+    }
+}
+
+// TODO: add my guild stuff to the cache
 impl GuildManager<'_> {
     pub async fn get(
         &self,
@@ -92,5 +118,21 @@ impl GuildManager<'_> {
                 None
             }
         })
+    }
+
+    pub async fn create_prefix(
+        &self,
+        guild_id: u64,
+        prefix_type: &PrefixType,
+        prefix: &str,
+    ) -> ThiccResult<Option<DiscordGuild>> {
+        let res = self
+            .client
+            .put_json(
+                format!("{}/{}", self.route, guild_id),
+                &json!({ prefix_type.to_string(): prefix }),
+            )
+            .await;
+        ThiccClient::swallow_404(res)
     }
 }

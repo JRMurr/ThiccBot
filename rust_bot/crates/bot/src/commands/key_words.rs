@@ -14,7 +14,7 @@ use serenity::{
 #[commands(create, list, delete)]
 #[summary = "Commands for creating and managing key words"]
 #[only_in(guilds)]
-pub struct KeyWords; // TODO: add bot admin checks
+pub struct KeyWords;
 
 #[command]
 #[aliases("set", "make", "add", "save")]
