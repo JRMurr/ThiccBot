@@ -49,9 +49,12 @@ fn get_pages<'a, T: Display>(
         .collect()
 }
 
+// TODO: add trait or something to show id if available
+// maybe diff trait instead of display
+// maybe using specialization we can do an auto trait of some kind?
+// https://stackoverflow.com/questions/68701910/function-optional-trait-bound-in-rust
+
 impl BotUtils {
-    // TODO: add trait or something to show id if available
-    // maybe diff trait instead of display
     pub async fn run_paged_menu<T: Display>(
         ctx: &Context,
         msg: &Message,
