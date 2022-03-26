@@ -13,7 +13,7 @@ use serenity::{
 
 #[group]
 #[prefixes(alias)]
-#[commands(create, list, delete)]
+#[commands(create, list, delete, update)]
 #[summary = "Commands for creating and managing key words"]
 #[only_in(guilds)]
 pub struct Aliases; // TODO: add bot admin checks
@@ -36,6 +36,23 @@ async fn create(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let res = client.alias(guild_id).create(&alias).await?;
 
     msg.reply(ctx, format!("Created alias: {}", res.name))
+        .await?;
+
+    Ok(())
+}
+
+#[command]
+#[aliases("change")]
+#[checks(BOT_ADMIN)]
+#[min_args(2)]
+async fn update(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
+    let alias: Alias = ArgParser::key_value_pair(args)?.into();
+
+    let (client, guild_id) = BotUtils::get_info(ctx, msg).await?;
+
+    let res = client.alias(guild_id).update(&alias).await?;
+
+    msg.reply(ctx, format!("Updated alias: {}", res.name))
         .await?;
 
     Ok(())

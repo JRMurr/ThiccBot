@@ -54,6 +54,23 @@ impl AliasManager<'_> {
         })
     }
 
+    pub async fn update(&self, alias: &Alias) -> ThiccResult<Alias> {
+        let res = self.client.put_json(
+            format!("{}/{}", &self.guild_route, alias.name),
+            alias
+        ).await;
+        ThiccClient::handle_status(res, |status| {
+            if status == reqwest::StatusCode::NOT_FOUND {
+                Some(ThiccError::ResourceDoesNotExist {
+                    name: alias.name.clone(),
+                    resource_type: "Alias".to_string(),
+                })
+            } else {
+                None
+            }
+        })
+    }
+
     pub async fn delete(&self, alias_name: &str) -> ThiccResult<()> {
         self.client
             .delete_helper(format!("{}/{}", self.guild_route, alias_name))
