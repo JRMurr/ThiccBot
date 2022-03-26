@@ -1,6 +1,6 @@
 pub mod checks;
 mod client;
-mod paginate;
+pub mod paginate;
 mod parse;
 pub struct BotUtils;
 

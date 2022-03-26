@@ -5,7 +5,7 @@ use serenity::{
     model::prelude::{Message, Reaction, ReactionType},
 };
 use serenity_utils::menu::*;
-use std::{fmt::Display, sync::Arc};
+use std::sync::Arc;
 
 // A custom function to be used as a control function for the menu.
 async fn first_page<'a>(menu: &mut Menu<'a>, reaction: Reaction) {
@@ -25,17 +25,23 @@ async fn last_page<'a>(menu: &mut Menu<'a>, reaction: Reaction) {
     menu.options.page = menu.pages.len() - 1;
 }
 
-fn get_pages<'a, T: Display>(
+/// A trait for displaying in the paginated list
+pub trait PageDisplay {
+    fn page_display(&self) -> String;
+}
+
+fn get_pages<'a, T: PageDisplay>(
     entries: Vec<T>,
     page_size: usize,
 ) -> Vec<CreateMessage<'a>> {
-    // TODO: would be nice to add a number to show with each entry
     entries
         .chunks(page_size)
         .map(|chunk| {
-            chunk.iter().fold("".to_string(), |acc, entry| {
-                format!("{}\n{}", acc, entry)
-            })
+            itertools::intersperse(
+                chunk.iter().map(|e| e.page_display()),
+                "\n".to_string(),
+            )
+            .collect::<String>()
         })
         .map(|description| {
             let mut page = CreateMessage::default();
@@ -49,13 +55,8 @@ fn get_pages<'a, T: Display>(
         .collect()
 }
 
-// TODO: add trait or something to show id if available
-// maybe diff trait instead of display
-// maybe using specialization we can do an auto trait of some kind?
-// https://stackoverflow.com/questions/68701910/function-optional-trait-bound-in-rust
-
 impl BotUtils {
-    pub async fn run_paged_menu<T: Display>(
+    pub async fn run_paged_menu<T: PageDisplay>(
         ctx: &Context,
         msg: &Message,
         entries: Vec<T>,

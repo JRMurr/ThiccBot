@@ -1,5 +1,7 @@
-use crate::utils::{checks::BOT_ADMIN_CHECK, ArgParser, BotUtils};
-use client::quotes::QuoteCreate;
+use crate::utils::{
+    checks::BOT_ADMIN_CHECK, paginate::PageDisplay, ArgParser, BotUtils,
+};
+use client::quotes::{Quote, QuoteCreate};
 use serenity::{
     client::Context,
     framework::standard::{
@@ -11,11 +13,17 @@ use serenity::{
 
 #[group]
 #[prefixes(quotes, quote)]
-#[commands(create, list, get, search)]
-#[default_command(get)]
+#[commands(create, list, get, search, delete)]
+#[default_command(get)] // TODO: its a little weird, when u miss type a sub command it runs get
 #[summary = "Commands for creating and managing quotes"]
 #[only_in(guilds)]
 pub struct Quotes; // TODO: add bot admin checks
+
+impl PageDisplay for Quote {
+    fn page_display(&self) -> String {
+        format!("{}: {}", self.id, self)
+    }
+}
 
 #[command]
 #[aliases("set", "make", "add", "save")]

@@ -1,4 +1,6 @@
-use crate::utils::{checks::BOT_ADMIN_CHECK, ArgParser, BotUtils};
+use crate::utils::{
+    checks::BOT_ADMIN_CHECK, paginate::PageDisplay, ArgParser, BotUtils,
+};
 use client::alias::Alias;
 use serenity::{
     client::Context,
@@ -15,6 +17,12 @@ use serenity::{
 #[summary = "Commands for creating and managing key words"]
 #[only_in(guilds)]
 pub struct Aliases; // TODO: add bot admin checks
+
+impl PageDisplay for Alias {
+    fn page_display(&self) -> String {
+        self.to_string()
+    }
+}
 
 #[command]
 #[aliases("set", "make", "add", "save")]

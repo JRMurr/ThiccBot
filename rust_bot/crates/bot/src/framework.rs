@@ -150,7 +150,7 @@ async fn dispatch_error_hook(
 //     // TODO: probably only do this in dev
 //     // TODO: could also just do the manual call to dispatch here instead of
 //     // making my own framework
-//     // println!("Message is not a command '{}'", msg.content);
+//     println!("Message is not a command '{}'", msg.content);
 // }
 
 pub fn create_framework(owner_id: u64) -> ThiccFramework {
