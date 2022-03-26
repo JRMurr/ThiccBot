@@ -124,17 +124,17 @@ async fn after(
 }
 
 /// Get configured command prefix for the guild
-// async fn get_command_prefixes(
-//     ctx: &Context,
-//     msg: &Message,
-// ) -> anyhow::Result<Vec<String>> {
-//     let (client, guild_id) = BotUtils::get_info(ctx, msg).await?;
-//     let guild = client.guilds().get(guild_id).await?;
-//     Ok(match guild {
-//         Some(g) => g.command_prefixes.unwrap_or_else(|| Vec::new()),
-//         None => Vec::new(),
-//     })
-// }
+async fn get_command_prefixes(
+    ctx: &Context,
+    msg: &Message,
+) -> anyhow::Result<Vec<String>> {
+    let (client, guild_id) = BotUtils::get_info(ctx, msg).await?;
+    let guild = client.guilds().get(guild_id).await?;
+    Ok(match guild {
+        Some(g) => g.command_prefixes.unwrap_or_default(),
+        None => Vec::new(),
+    })
+}
 
 #[hook]
 async fn dispatch_error_hook(
@@ -153,20 +153,27 @@ async fn dispatch_error_hook(
 //     println!("Message is not a command '{}'", msg.content);
 // }
 
-pub fn create_framework(owner_id: u64) -> ThiccFramework {
+pub fn create_framework(
+    owner_id: UserId,
+    bot_user_id: Option<UserId>,
+) -> ThiccFramework {
     let mut owner_set = HashSet::new();
-    owner_set.insert(UserId(owner_id));
+    owner_set.insert(owner_id);
     let standard = StandardFramework::new()
         .configure(|c| {
-            c.prefix("?").owners(owner_set)
-            // TODO: dynamic_prefix can only return a single prefix at a time
-            // .dynamic_prefix(|ctx, msg| {
-            //     Box::pin(async move {
-            //         get_command_prefixes(ctx, msg)
-            //             .await
-            //             .unwrap_or_else(|| Vec::new())
-            //     })
-            // })
+            c.on_mention(bot_user_id)
+                .prefix("?")
+                .owners(owner_set)
+                .dynamic_prefix(|ctx, msg| {
+                    Box::pin(async move {
+                        let prefixes = get_command_prefixes(ctx, msg)
+                            .await
+                            .unwrap_or_default();
+                        // TODO: dynamic_prefix can only return a single prefix
+                        // at a time
+                        prefixes.get(0).cloned()
+                    })
+                })
         })
         .after(after) // set the bot's prefix to "?"
         .help(&MY_HELP)
