@@ -27,8 +27,8 @@ This is a discord bot written in [discord.py](https://github.com/Rapptz/discord.
 
 While this uses docker to run the bot and flask backend, you can make a conda environment so your IDE (vsCode) can have autocomplete for the packages.
 ```bash
-conda create -n thiccBot python=3.7 pip
-source activate thiccBot
+python -m venv .venv
+source .venv/bin/activate.fish
 cd bot
 pip install -r requirements.txt
 cd ..
@@ -40,6 +40,12 @@ pip install -r requirements.txt
 ```sh
 docker-compose up
 ```
+
+run just backend
+```sh
+docker-compose run --service-ports flask
+```
+
 if you want to run the web interface locally you can do
 ```sh
 docker-compose up

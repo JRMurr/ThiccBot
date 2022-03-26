@@ -19,8 +19,8 @@ pkgs.mkShell {
     pkgconfig
 
     #python
-    python39
-    python39Packages.virtualenv
+    python38
+    python38Packages.virtualenv
 
     # common
     watchexec
