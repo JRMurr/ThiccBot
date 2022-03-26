@@ -25,8 +25,11 @@ pub enum ClientErrors {
 /// Errors that we should show the user
 #[derive(Debug, Error)]
 pub enum ThiccError {
-    #[error("{resource_type} with name {name} already exists")]
+    #[error("{resource_type} with name \"{name}\" already exists")]
     ResourceAlreadyExist { resource_type: String, name: String },
+
+    #[error("{resource_type} with name \"{name}\" does not exists")]
+    ResourceDoesNotExist { resource_type: String, name: String },
 
     #[error("Parse error: got {got}, allowed values: {allowed:?}")]
     ParseError {

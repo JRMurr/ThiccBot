@@ -82,8 +82,8 @@ impl KeyWordManager<'_> {
             key_word
         ).await;
         ThiccClient::handle_status(res, |status| {
-            if status == reqwest::StatusCode::BAD_REQUEST {
-                Some(ThiccError::ResourceAlreadyExist {
+            if status == reqwest::StatusCode::NOT_FOUND {
+                Some(ThiccError::ResourceDoesNotExist {
                     name: key_word.name.clone(),
                     resource_type: "Key Word".to_string(),
                 })
