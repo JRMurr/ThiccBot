@@ -76,6 +76,23 @@ impl KeyWordManager<'_> {
         })
     }
 
+    pub async fn update(&self, key_word: &KeyWord) -> ThiccResult<KeyWord> {
+        let res = self.client.put_json(
+            format!("{}/{}", &self.guild_route, key_word.name),
+            key_word
+        ).await;
+        ThiccClient::handle_status(res, |status| {
+            if status == reqwest::StatusCode::NOT_FOUND {
+                Some(ThiccError::ResourceDoesNotExist {
+                    name: key_word.name.clone(),
+                    resource_type: "Key Word".to_string(),
+                })
+            } else {
+                None
+            }
+        })
+    }
+
     pub async fn delete(&self, key_word: &str) -> ThiccResult<()> {
         self.client
             .delete_helper(format!("{}/{}", self.guild_route, key_word))

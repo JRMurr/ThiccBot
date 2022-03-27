@@ -13,7 +13,7 @@ use serenity::{
 
 #[group]
 #[prefixes(keyWord, keyword, keyword, keyWords, key_word)]
-#[commands(create, list, delete)]
+#[commands(create, list, delete, update)]
 #[summary = "Commands for creating and managing key words"]
 #[only_in(guilds)]
 pub struct KeyWords;
@@ -37,6 +37,23 @@ async fn create(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let res = client.key_words(guild_id).create(&key_word).await?;
 
     msg.reply(ctx, format!("Created key word: {}", res.name))
+        .await?;
+
+    Ok(())
+}
+
+#[command]
+#[aliases("update", "change")]
+#[checks(BOT_ADMIN)]
+#[min_args(2)]
+async fn update(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
+    let key_word: KeyWord = ArgParser::key_value_pair(args)?.into();
+
+    let (client, guild_id) = BotUtils::get_info(ctx, msg).await?;
+
+    let res = client.key_words(guild_id).update(&key_word).await?;
+
+    msg.reply(ctx, format!("updated key word: {}", res.name))
         .await?;
 
     Ok(())
