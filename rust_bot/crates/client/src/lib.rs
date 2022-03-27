@@ -1,3 +1,6 @@
+#[cfg(test)]
+#[macro_use]
+extern crate assert_matches;
 use anyhow::Context;
 use bytes::Bytes;
 use error::{ClientErrors, ThiccError};
@@ -186,11 +189,14 @@ impl ThiccClient {
 mod tests {
     use super::*;
     use httptest::{
-        matchers::*, responders::*, Expectation, ExpectationBuilder,
-        ServerHandle, ServerPool,
+        matchers::*,
+        responders::{self, *},
+        Expectation, ExpectationBuilder, ServerHandle, ServerPool,
     };
 
     use rstest::*;
+    use serde::Deserialize;
+
     static SERVER_POOL: ServerPool = ServerPool::new(10);
     static API_KEY: &str = "apiKey";
 
@@ -283,6 +289,48 @@ mod tests {
         let resp = client.put("foo")?.send().await?;
 
         assert!(resp.status().is_success());
+
+        Ok(())
+    }
+
+    #[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
+    struct TestStruct {
+        pub key: usize,
+    }
+
+    #[rstest]
+    #[tokio::test]
+    async fn test_get_json(server: ServerHandle<'static>) -> ThiccResult<()> {
+        let client = get_client(&server);
+
+        let body = TestStruct { key: 10 };
+
+        server.expect(
+            get_expected_path("GET", "/foo")
+                .respond_with(responders::json_encoded(&body)),
+        );
+
+        let resp: TestStruct = client.get_json("foo").await?;
+
+        assert_eq!(resp, body);
+
+        Ok(())
+    }
+
+    #[rstest]
+    #[tokio::test]
+    async fn test_get_json_reqwest_error(
+        server: ServerHandle<'static>,
+    ) -> ThiccResult<()> {
+        let client = get_client(&server);
+
+        server.expect(
+            get_expected_path("GET", "/foo").respond_with(status_code(404)),
+        );
+
+        let resp: ThiccResult<usize> = client.get_json("foo").await;
+
+        assert_matches!(resp, Err(ClientErrors::Reqwest(_)));
 
         Ok(())
     }
