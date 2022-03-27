@@ -1,7 +1,6 @@
 use anyhow::Context;
 use bytes::Bytes;
 use error::{ClientErrors, ThiccError};
-use log::trace;
 use reqwest::{
     header::{HeaderMap, HeaderValue, AUTHORIZATION},
     Client, IntoUrl, RequestBuilder, Url,
@@ -63,9 +62,7 @@ impl ThiccClient {
     }
 
     pub fn get<U: IntoUrl>(&self, url: U) -> ThiccResult<RequestBuilder> {
-        trace!("ass fart");
         let url = self.join_with_base(url)?;
-        trace!("dddd: {url}");
         Ok(self.client.get(url))
     }
 
@@ -188,23 +185,102 @@ impl ThiccClient {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use httptest::{matchers::*, responders::*, Expectation, ServerPool};
-    static SERVER_POOL: ServerPool = ServerPool::new(10);
+    use httptest::{
+        matchers::*, responders::*, Expectation, ExpectationBuilder,
+        ServerHandle, ServerPool,
+    };
 
-    #[tokio::test]
-    async fn test_get_add_base() -> ThiccResult<()> {
+    use rstest::*;
+    static SERVER_POOL: ServerPool = ServerPool::new(10);
+    static API_KEY: &str = "apiKey";
+
+    #[fixture]
+    pub fn server() -> ServerHandle<'static> {
         let _ = pretty_env_logger::try_init();
-        let server = SERVER_POOL.get_server();
+        SERVER_POOL.get_server()
+    }
+
+    fn get_client(server: &ServerHandle<'static>) -> ThiccClient {
         let url = server.url("").to_string();
+        ThiccClient::new(url, API_KEY)
+    }
+
+    fn get_expected_path(
+        method: &'static str,
+        path: &'static str,
+    ) -> ExpectationBuilder {
+        Expectation::matching(all_of![
+            request::method_path(method, path),
+            request::headers(contains(("authorization", API_KEY)))
+        ])
+    }
+
+    #[rstest]
+    #[tokio::test]
+    async fn test_get_add_base(
+        server: ServerHandle<'static>,
+    ) -> ThiccResult<()> {
+        let client = get_client(&server);
 
         server.expect(
-            Expectation::matching(request::method_path("GET", "/fart"))
-                .respond_with(status_code(200)),
+            get_expected_path("GET", "/foo").respond_with(status_code(200)),
         );
 
-        let client = ThiccClient::new(url, "poop");
+        let resp = client.get("foo")?.send().await?;
 
-        let resp = client.get("fart")?.send().await?;
+        assert!(resp.status().is_success());
+
+        Ok(())
+    }
+
+    #[rstest]
+    #[tokio::test]
+    async fn test_post_add_base(
+        server: ServerHandle<'static>,
+    ) -> ThiccResult<()> {
+        let client = get_client(&server);
+
+        server.expect(
+            get_expected_path("POST", "/foo").respond_with(status_code(200)),
+        );
+
+        let resp = client.post("foo")?.send().await?;
+
+        assert!(resp.status().is_success());
+
+        Ok(())
+    }
+
+    #[rstest]
+    #[tokio::test]
+    async fn test_delete_add_base(
+        server: ServerHandle<'static>,
+    ) -> ThiccResult<()> {
+        let client = get_client(&server);
+
+        server.expect(
+            get_expected_path("DELETE", "/foo").respond_with(status_code(200)),
+        );
+
+        let resp = client.delete("foo")?.send().await?;
+
+        assert!(resp.status().is_success());
+
+        Ok(())
+    }
+
+    #[rstest]
+    #[tokio::test]
+    async fn test_put_add_base(
+        server: ServerHandle<'static>,
+    ) -> ThiccResult<()> {
+        let client = get_client(&server);
+
+        server.expect(
+            get_expected_path("PUT", "/foo").respond_with(status_code(200)),
+        );
+
+        let resp = client.put("foo")?.send().await?;
 
         assert!(resp.status().is_success());
 
