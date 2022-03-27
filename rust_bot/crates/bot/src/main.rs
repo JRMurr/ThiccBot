@@ -23,11 +23,16 @@ impl serenity::prelude::TypeMapKey for ThiccHolder {
 #[tokio::main]
 async fn main() {
     env_logger::init();
-    let owner_id: u64 = env::var("BOT_ADMIN")
+    let owner_id = env::var("BOT_ADMIN")
         .expect("BOT_ADMIN not set")
+        .trim()
         .parse()
         .expect("Bot admin var not an usize");
-    let framework = create_framework(owner_id);
+
+    let bot_user_id = env::var("BOT_USER_ID")
+        .map(|id| id.trim().parse().expect("BOT_USER_ID is not valid"))
+        .ok();
+    let framework = create_framework(owner_id, bot_user_id);
 
     let token = env::var("DISCORD_ID").expect("DISCORD_ID not set");
     let base_url = env::var("BACKEND_URL").expect("BACKEND_URL not set");

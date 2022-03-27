@@ -1,7 +1,7 @@
 # ThiccBot
 Python discord bot
 
-This is a discord bot written in [discord.py](https://github.com/Rapptz/discord.py/tree/rewrite). It has a flask backend so the bot can be configured through a web interface (coming soon™️)
+This is a discord bot written in [discord.py](https://github.com/Rapptz/discord.py/tree/rewrite). It has a flask backend so the bot can be configured through a web interface (coming soon™️ (not really))
 
 # Bot setup
 1. Set up your `.env` file, this stores all credentials/tokens that should not be checked into git. You can look at `example.env` for reference
@@ -44,14 +44,6 @@ docker-compose up
 run just backend
 ```sh
 docker-compose run --service-ports flask
-```
-
-if you want to run the web interface locally you can do
-```sh
-docker-compose up
-
-# in a different tab
-./runWeb.sh
 ```
 
 ## DB migrate
