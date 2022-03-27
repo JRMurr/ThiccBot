@@ -1,6 +1,7 @@
 use anyhow::Context;
 use bytes::Bytes;
 use error::{ClientErrors, ThiccError};
+use log::trace;
 use reqwest::{
     header::{HeaderMap, HeaderValue, AUTHORIZATION},
     Client, IntoUrl, RequestBuilder, Url,
@@ -62,7 +63,9 @@ impl ThiccClient {
     }
 
     pub fn get<U: IntoUrl>(&self, url: U) -> ThiccResult<RequestBuilder> {
+        trace!("ass fart");
         let url = self.join_with_base(url)?;
+        trace!("dddd: {url}");
         Ok(self.client.get(url))
     }
 
@@ -179,5 +182,32 @@ impl ThiccClient {
             },
             Err(e) => Err(e),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use httptest::{matchers::*, responders::*, Expectation, ServerPool};
+    static SERVER_POOL: ServerPool = ServerPool::new(10);
+
+    #[tokio::test]
+    async fn test_get_add_base() -> ThiccResult<()> {
+        let _ = pretty_env_logger::try_init();
+        let server = SERVER_POOL.get_server();
+        let url = server.url("").to_string();
+
+        server.expect(
+            Expectation::matching(request::method_path("GET", "/fart"))
+                .respond_with(status_code(200)),
+        );
+
+        let client = ThiccClient::new(url, "poop");
+
+        let resp = client.get("fart")?.send().await?;
+
+        assert!(resp.status().is_success());
+
+        Ok(())
     }
 }

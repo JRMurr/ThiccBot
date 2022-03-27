@@ -4,9 +4,8 @@
       "https://github.com/oxalica/rust-overlay/archive/master.tar.gz"))
   ];
 } }:
-
-pkgs.mkShell {
-  buildInputs = with pkgs; [
+let
+  basePackages = with pkgs; [
     # cargo-watch
     ((rust-bin.fromRustupToolchainFile ./rust-toolchain.toml).override {
       extensions = [ "rust-src" ];
@@ -24,5 +23,14 @@ pkgs.mkShell {
 
     # common
     watchexec
+
+    nixfmt
   ];
+  macInputs =
+    (with pkgs.darwin.apple_sdk.frameworks; [ CoreFoundation CoreServices ]);
+  inputs = basePackages
+    ++ pkgs.lib.lists.optionals pkgs.stdenv.isDarwin macInputs;
+in pkgs.mkShell {
+
+  buildInputs = inputs;
 }
