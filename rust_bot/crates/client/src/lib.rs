@@ -332,6 +332,125 @@ mod tests {
 
         assert_matches!(resp, Err(ClientErrors::Reqwest(_)));
 
+        assert_matches!(ThiccClient::swallow_404(resp), Ok(None));
+
+        Ok(())
+    }
+
+    #[rstest]
+    #[tokio::test]
+    async fn test_handle_status(
+        server: ServerHandle<'static>,
+    ) -> ThiccResult<()> {
+        let client = get_client(&server);
+
+        server.expect(
+            get_expected_path("GET", "/foo").respond_with(status_code(404)),
+        );
+
+        let resp: ThiccResult<usize> = client.get_json("foo").await;
+
+        assert_matches!(resp, Err(ClientErrors::Reqwest(_)));
+
+        let new_error = ThiccError::ResourceAlreadyExist {
+            name: "a name".to_string(),
+            resource_type: "a resource".to_string(),
+        };
+
+        let new_resp = ThiccClient::handle_status(resp, |status| {
+            if status == reqwest::StatusCode::NOT_FOUND {
+                Some(new_error)
+            } else {
+                None
+            }
+        });
+
+        assert_matches!(
+            new_resp,
+            Err(ClientErrors::Thicc(ThiccError::ResourceAlreadyExist {
+                resource_type: _,
+                name: _
+            }))
+        );
+
+        Ok(())
+    }
+
+    #[rstest]
+    #[tokio::test]
+    async fn test_post_json(server: ServerHandle<'static>) -> ThiccResult<()> {
+        let client = get_client(&server);
+
+        let body = TestStruct { key: 10 };
+
+        server.expect(
+            get_expected_path("POST", "/foo")
+                .respond_with(responders::json_encoded(&body)),
+        );
+
+        let resp: TestStruct = client.post_json("foo", &body).await?;
+
+        assert_eq!(resp, body);
+
+        Ok(())
+    }
+
+    #[rstest]
+    #[tokio::test]
+    async fn test_post_json_reqwest_error(
+        server: ServerHandle<'static>,
+    ) -> ThiccResult<()> {
+        let client = get_client(&server);
+
+        let body = TestStruct { key: 10 };
+
+        server.expect(
+            get_expected_path("POST", "/foo").respond_with(status_code(404)),
+        );
+
+        let resp: ThiccResult<usize> = client.post_json("foo", &body).await;
+
+        assert_matches!(resp, Err(ClientErrors::Reqwest(_)));
+
+        Ok(())
+    }
+
+    #[rstest]
+    #[tokio::test]
+    async fn test_put_json(server: ServerHandle<'static>) -> ThiccResult<()> {
+        let client = get_client(&server);
+
+        let body = TestStruct { key: 10 };
+
+        server.expect(
+            get_expected_path("PUT", "/foo")
+                .respond_with(responders::json_encoded(&body)),
+        );
+
+        let resp: TestStruct = client.put_json("foo", &body).await?;
+
+        assert_eq!(resp, body);
+
+        Ok(())
+    }
+
+    #[rstest]
+    #[tokio::test]
+    async fn test_put_json_reqwest_error(
+        server: ServerHandle<'static>,
+    ) -> ThiccResult<()> {
+        let client = get_client(&server);
+
+        let body = TestStruct { key: 10 };
+
+        server.expect(
+            get_expected_path("PUT", "/foo").respond_with(status_code(404)),
+        );
+
+        let resp: ThiccResult<usize> = client.put_json("foo", &body).await;
+
+        assert_matches!(resp, Err(ClientErrors::Reqwest(_)));
+
         Ok(())
     }
 }
