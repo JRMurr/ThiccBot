@@ -15,6 +15,7 @@ thiserror = "1.0"
 bytes = "1.1"
 strum = { version = "0.24", features = ["derive"] }
 log = "0.4.0"
+moka = { version = "0.8", features = ["future"] }
 
 
 [dev-dependencies]

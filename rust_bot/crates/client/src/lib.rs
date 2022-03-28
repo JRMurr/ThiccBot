@@ -1,9 +1,12 @@
 #[cfg(test)]
 #[macro_use]
 extern crate assert_matches;
+use std::{fmt, time::Duration};
+
 use anyhow::Context;
 use bytes::Bytes;
 use error::{ClientErrors, ThiccError};
+use moka::future::Cache;
 use reqwest::{
     header::{HeaderMap, HeaderValue, AUTHORIZATION},
     Client, IntoUrl, RequestBuilder, Url,
@@ -20,10 +23,23 @@ pub mod quotes;
 pub type ThiccResult<T> = std::result::Result<T, ClientErrors>;
 
 /// Wrapper around [`Client`] to support a `base_url`
-#[derive(Debug, Clone)]
+#[allow(dead_code)] // clone is used in client
+#[derive(Clone)]
 pub struct ThiccClient {
     client: Client,
     base_url: Url,
+    // TODO: maybe generalize this for all resources, could be useful for
+    // aliases and keywords
+    pub(crate) guild_cache: Cache<u64, guilds::DiscordGuild>,
+}
+
+impl fmt::Debug for ThiccClient {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.debug_struct("ThiccClient")
+            .field("client", &self.client)
+            .field("base_url", &self.base_url)
+            .finish_non_exhaustive()
+    }
 }
 
 impl ThiccClient {
@@ -43,7 +59,17 @@ impl ThiccClient {
             .build()
             .expect("Error building client");
 
-        ThiccClient { client, base_url }
+        let guild_cache = Cache::builder()
+            .max_capacity(100)
+            .time_to_live(Duration::from_secs(10)) // all the calls should update the cache as needed. If other bots
+            // frontends are added maybe lower this
+            .build();
+
+        ThiccClient {
+            client,
+            base_url,
+            guild_cache,
+        }
     }
 
     fn join_with_base<U: IntoUrl>(&self, url: U) -> ThiccResult<Url> {

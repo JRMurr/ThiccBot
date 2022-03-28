@@ -6,7 +6,7 @@ use crate::{error::ThiccError, ThiccClient, ThiccResult};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct DiscordGuild {
     /// the name of the server/guild
     pub name: String,
@@ -72,15 +72,34 @@ impl FromStr for PrefixType {
 
 // TODO: add my guild stuff to the cache
 impl GuildManager<'_> {
+    async fn swallow_and_cache(
+        &self,
+        guild_id: u64,
+        res: ThiccResult<DiscordGuild>,
+    ) -> ThiccResult<Option<DiscordGuild>> {
+        let res = ThiccClient::swallow_404(res);
+
+        if let Ok(Some(ref guild)) = res {
+            self.client
+                .guild_cache
+                .insert(guild_id, guild.clone())
+                .await;
+        }
+        res
+    }
+
     pub async fn get(
         &self,
         guild_id: u64,
     ) -> ThiccResult<Option<DiscordGuild>> {
-        let res = self
+        if let Some(guild) = self.client.guild_cache.get(&guild_id) {
+            return Ok(Some(guild));
+        }
+        let res: ThiccResult<DiscordGuild> = self
             .client
             .get_json(format!("{}/{}", self.route, guild_id))
             .await;
-        ThiccClient::swallow_404(res)
+        self.swallow_and_cache(guild_id, res).await
     }
 
     pub async fn set_bot_admin(
@@ -88,14 +107,14 @@ impl GuildManager<'_> {
         guild_id: u64,
         role_id: u64,
     ) -> ThiccResult<Option<DiscordGuild>> {
-        let res = self
+        let res: ThiccResult<DiscordGuild> = self
             .client
             .put_json(
                 format!("{}/{}", self.route, guild_id),
                 &json!({ "admin_role": role_id }),
             )
             .await;
-        ThiccClient::swallow_404(res)
+        self.swallow_and_cache(guild_id, res).await
     }
 
     pub async fn create(
@@ -107,8 +126,9 @@ impl GuildManager<'_> {
             id: guild_id,
             name: name.to_string(),
         };
-        let res = self.client.post_json(&self.route, &payload).await;
-        ThiccClient::handle_status(res, |status| {
+        let res: ThiccResult<DiscordGuild> =
+            self.client.post_json(&self.route, &payload).await;
+        let mapped_res = ThiccClient::handle_status(res, |status| {
             if status == reqwest::StatusCode::BAD_REQUEST {
                 Some(ThiccError::ResourceAlreadyExist {
                     name: payload.name.clone(),
@@ -117,7 +137,15 @@ impl GuildManager<'_> {
             } else {
                 None
             }
-        })
+        });
+
+        if let Ok(ref guild) = mapped_res {
+            self.client
+                .guild_cache
+                .insert(guild_id, guild.clone())
+                .await;
+        }
+        mapped_res
     }
 
     pub async fn create_prefix(
@@ -126,13 +154,13 @@ impl GuildManager<'_> {
         prefix_type: &PrefixType,
         prefix: &str,
     ) -> ThiccResult<Option<DiscordGuild>> {
-        let res = self
+        let res: ThiccResult<DiscordGuild> = self
             .client
             .put_json(
                 format!("{}/{}", self.route, guild_id),
                 &json!({ prefix_type.to_string(): prefix }),
             )
             .await;
-        ThiccClient::swallow_404(res)
+        self.swallow_and_cache(guild_id, res).await
     }
 }

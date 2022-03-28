@@ -7,4 +7,4 @@
 - add counter commands
 - add playlist stuff
 - add reaction roles stuff (actually probably not but see how hard)
-- look into how the cache works more and if I need to care about filling it
+- cache the backend guild lookups

@@ -37,10 +37,9 @@ impl ThiccFramework {
         // TODO: the parse struct is not public need to remake
         // https://github.com/serenity-rs/serenity/blob/current/src/framework/standard/parse/mod.rs#L218
 
-        // TODO: check all command prefixes for guild
-        let prefix = "?";
-        if msg.content.starts_with(prefix) {
-            if let Some(alias_name) = msg.content.strip_prefix(prefix) {
+        let prefixes = get_command_prefixes(&ctx, &msg).await?;
+        for prefix in prefixes {
+            if let Some(alias_name) = msg.content.strip_prefix(&prefix) {
                 // TODO: check alias_name not a built in command
                 if let Some(alias) =
                     client.alias(guild_id).get(alias_name).await?
@@ -54,6 +53,7 @@ impl ThiccFramework {
             }
         }
         self.standard.dispatch(ctx, msg).await;
+
         Ok(())
     }
 }
@@ -175,7 +175,7 @@ pub fn create_framework(
                     })
                 })
         })
-        .after(after) // set the bot's prefix to "?"
+        .after(after)
         .help(&MY_HELP)
         .on_dispatch_error(dispatch_error_hook)
         // .normal_message(normal_message)
