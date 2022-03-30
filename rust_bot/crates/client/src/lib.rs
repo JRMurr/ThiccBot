@@ -31,6 +31,8 @@ pub struct ThiccClient {
     // TODO: maybe generalize this for all resources, could be useful for
     // aliases and keywords
     pub(crate) guild_cache: Cache<u64, guilds::DiscordGuild>,
+
+    general_cache: Cache<String, Bytes>,
 }
 
 impl fmt::Debug for ThiccClient {
@@ -65,14 +67,42 @@ impl ThiccClient {
             // frontends are added maybe lower this
             .build();
 
+        let general_cache = Cache::builder()
+            .max_capacity(10_000)
+            .time_to_live(Duration::from_secs(10))
+            .build();
+
         ThiccClient {
             client,
             base_url,
             guild_cache,
+            general_cache,
         }
     }
 
-    fn join_with_base<U: IntoUrl>(&self, url: U) -> ThiccResult<Url> {
+    fn get_from_cache<U: IntoUrl, T: DeserializeOwned>(
+        &self,
+        url: &U,
+    ) -> Option<T> {
+        let key = url.as_str().to_string();
+        if let Some(bytes) = self.general_cache.get(&key) {
+            serde_json::from_slice(&bytes).ok()
+        } else {
+            None
+        }
+    }
+
+    async fn cache_bytes<U: IntoUrl, Res: DeserializeOwned>(
+        &self,
+        url: &U,
+        bytes: &Bytes,
+    ) -> ThiccResult<Res> {
+        let key = url.as_str().to_string();
+        self.general_cache.insert(key, bytes.clone()).await;
+        Ok(serde_json::from_slice(bytes)?)
+    }
+
+    fn join_with_base<U: IntoUrl>(&self, url: &U) -> ThiccResult<Url> {
         let url = url.as_str();
         if url.starts_with('/') {
             return Err(ClientErrors::InvalidRelativeUrl(url.to_string()));
@@ -85,48 +115,53 @@ impl ThiccClient {
         Ok(url)
     }
 
-    pub fn post<U: IntoUrl>(&self, url: U) -> ThiccResult<RequestBuilder> {
+    pub fn post<U: IntoUrl>(&self, url: &U) -> ThiccResult<RequestBuilder> {
         let url = self.join_with_base(url)?;
         Ok(self.client.post(url))
     }
 
-    pub fn get<U: IntoUrl>(&self, url: U) -> ThiccResult<RequestBuilder> {
+    pub fn get<U: IntoUrl>(&self, url: &U) -> ThiccResult<RequestBuilder> {
         let url = self.join_with_base(url)?;
         Ok(self.client.get(url))
     }
 
-    pub fn delete<U: IntoUrl>(&self, url: U) -> ThiccResult<RequestBuilder> {
+    pub fn delete<U: IntoUrl>(&self, url: &U) -> ThiccResult<RequestBuilder> {
         let url = self.join_with_base(url)?;
         Ok(self.client.delete(url))
     }
 
-    pub fn put<U: IntoUrl>(&self, url: U) -> ThiccResult<RequestBuilder> {
+    pub fn put<U: IntoUrl>(&self, url: &U) -> ThiccResult<RequestBuilder> {
         let url = self.join_with_base(url)?;
         Ok(self.client.put(url))
     }
 
     pub async fn delete_helper<U: IntoUrl>(&self, url: U) -> ThiccResult<()> {
-        let _ = self.delete(url)?.send().await?.error_for_status();
+        let _ = self.delete(&url)?.send().await?.error_for_status();
         Ok(())
     }
 
+    /// Gets a resource as the url, will lookup in cache. If not found will
+    /// cache the result
     pub async fn get_json<T: DeserializeOwned, U: IntoUrl>(
         &self,
         url: U,
     ) -> ThiccResult<T> {
+        if let Some(res) = self.get_from_cache(&url) {
+            return Ok(res);
+        }
         let res = self
-            .get(url)?
+            .get(&url)?
             .send()
             .await?
             .error_for_status()?
-            .json::<T>()
+            .bytes()
             .await?;
-        Ok(res)
+        self.cache_bytes(&url, &res).await
     }
 
     pub async fn get_bytes<U: IntoUrl>(&self, url: U) -> ThiccResult<Bytes> {
         let res = self
-            .get(url)?
+            .get(&url)?
             .send()
             .await?
             .error_for_status()?
@@ -135,6 +170,7 @@ impl ThiccClient {
         Ok(res)
     }
 
+    /// Gets a resource as the url, will cache the result
     pub async fn post_json<
         Payload: Serialize + ?Sized,
         Res: DeserializeOwned,
@@ -145,16 +181,17 @@ impl ThiccClient {
         payload: &Payload,
     ) -> ThiccResult<Res> {
         let res = self
-            .post(url)?
+            .post(&url)?
             .json(payload)
             .send()
             .await?
             .error_for_status()?
-            .json()
+            .bytes()
             .await?;
-        Ok(res)
+        self.cache_bytes(&url, &res).await
     }
 
+    /// Gets a resource as the url, will cache the result
     pub async fn put_json<
         Payload: Serialize + ?Sized,
         Res: DeserializeOwned,
@@ -165,14 +202,14 @@ impl ThiccClient {
         payload: &Payload,
     ) -> ThiccResult<Res> {
         let res = self
-            .put(url)?
+            .put(&url)?
             .json(payload)
             .send()
             .await?
             .error_for_status()?
-            .json()
+            .bytes()
             .await?;
-        Ok(res)
+        self.cache_bytes(&url, &res).await
     }
 
     /// given an [`ThiccResult`], if its a 404 error from [`reqwest::Error`]
@@ -258,7 +295,7 @@ mod tests {
             get_expected_path("GET", "/foo").respond_with(status_code(200)),
         );
 
-        let resp = client.get("foo")?.send().await?;
+        let resp = client.get(&"foo")?.send().await?;
 
         assert!(resp.status().is_success());
 
@@ -276,7 +313,7 @@ mod tests {
             get_expected_path("POST", "/foo").respond_with(status_code(200)),
         );
 
-        let resp = client.post("foo")?.send().await?;
+        let resp = client.post(&"foo")?.send().await?;
 
         assert!(resp.status().is_success());
 
@@ -294,7 +331,7 @@ mod tests {
             get_expected_path("DELETE", "/foo").respond_with(status_code(200)),
         );
 
-        let resp = client.delete("foo")?.send().await?;
+        let resp = client.delete(&"foo")?.send().await?;
 
         assert!(resp.status().is_success());
 
@@ -312,7 +349,7 @@ mod tests {
             get_expected_path("PUT", "/foo").respond_with(status_code(200)),
         );
 
-        let resp = client.put("foo")?.send().await?;
+        let resp = client.put(&"foo")?.send().await?;
 
         assert!(resp.status().is_success());
 

@@ -20,6 +20,9 @@ pub enum ClientErrors {
 
     #[error("Error parsing: {0}")]
     StrumParseError(#[from] strum::ParseError),
+
+    #[error(transparent)]
+    SerdeError(#[from] serde_json::Error),
 }
 
 /// Errors that we should show the user

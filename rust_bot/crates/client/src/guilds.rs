@@ -70,7 +70,6 @@ impl FromStr for PrefixType {
     }
 }
 
-// TODO: add my guild stuff to the cache
 impl GuildManager<'_> {
     async fn swallow_and_cache(
         &self,
