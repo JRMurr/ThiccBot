@@ -144,7 +144,6 @@ dependencies = [
  "anyhow",
  "client",
  "emojis",
- "env_logger 0.8.4",
  "futures",
  "itertools",
  "log",
@@ -1926,6 +1925,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2dfed899f0eb03f32ee8c6a0aabdb8a7949659e3466561fc0adf54e26d88c5f4"
 dependencies = [
  "winapi-util",
+]
+
+[[package]]
+name = "thicc_bot"
+version = "0.1.0"
+dependencies = [
+ "bot",
+ "env_logger 0.8.4",
+ "log",
+ "tokio",
 ]
 
 [[package]]

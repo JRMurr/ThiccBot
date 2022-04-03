@@ -7,6 +7,7 @@
 - [ ] add counter commands
 - [ ] add playlist stuff
 - [ ] add reaction roles stuff (actually probably not but see how hard)
+- [ ] add do_multiple
 - [X] cache the backend guild lookups
 - [ ] add prefix deleting
 - [ ] add better caching for all resources. `caching-attempts` branch is a start but need to figure out how to update the cache on update/delete since the URLs are not the same as get
