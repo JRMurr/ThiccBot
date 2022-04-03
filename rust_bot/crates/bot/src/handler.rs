@@ -1,9 +1,8 @@
 use anyhow::Result;
-use rand::seq::SliceRandom;
 use serenity::{
     async_trait,
     client::{Context, EventHandler},
-    model::{channel::Message, guild::Guild},
+    model::guild::Guild,
 };
 
 use crate::utils::BotUtils;
@@ -11,41 +10,6 @@ use crate::utils::BotUtils;
 pub struct Handler;
 
 impl Handler {
-    async fn handle_key_words(
-        &self,
-        ctx: &Context,
-        msg: &Message,
-    ) -> Result<()> {
-        let bot_user = ctx.cache.current_user_id().await;
-        if msg.author.id == bot_user {
-            return Ok(());
-        }
-        match msg.guild_id {
-            Some(id) => {
-                // TODO: maybe move this to on normal message
-                let client = BotUtils::get_thicc_client(ctx).await?;
-                let key_word = client.key_words(id.0).get(&msg.content).await?;
-                match key_word {
-                    Some(key_word) => {
-                        let rand_response =
-                            key_word.responses.choose(&mut rand::thread_rng());
-                        match rand_response {
-                            Some(response) => {
-                                msg.channel_id.say(&ctx.http, response).await?;
-                                Ok(())
-                            }
-                            None => anyhow::bail!(
-                                "Key word does not have any responses"
-                            ),
-                        }
-                    }
-                    None => Ok(()),
-                }
-            }
-            None => Ok(()),
-        }
-    }
-
     async fn handle_guild_create(
         &self,
         ctx: &Context,
@@ -63,13 +27,6 @@ impl Handler {
 
 #[async_trait]
 impl EventHandler for Handler {
-    // TODO: might be able to do this in a .normal_message(normal_message)
-    async fn message(&self, context: Context, msg: Message) {
-        if let Err(why) = self.handle_key_words(&context, &msg).await {
-            error!("error handling key_words: {:?}", why);
-        }
-    }
-
     async fn guild_create(&self, ctx: Context, guild: Guild, _is_new: bool) {
         if let Err(why) = self.handle_guild_create(&ctx, &guild).await {
             error!("error handling guild_create: {:?}", why);
