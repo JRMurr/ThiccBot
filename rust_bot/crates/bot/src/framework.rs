@@ -137,6 +137,19 @@ async fn get_command_prefixes(
     })
 }
 
+/// Get configured message prefix for the guild
+async fn get_message_prefixes(
+    ctx: &Context,
+    msg: &Message,
+) -> anyhow::Result<Vec<String>> {
+    let (client, guild_id) = BotUtils::get_info(ctx, msg).await?;
+    let guild = client.guilds().get(guild_id).await?;
+    Ok(match guild {
+        Some(g) => g.message_prefixes.unwrap_or_default(),
+        None => Vec::new(),
+    })
+}
+
 #[hook]
 async fn dispatch_error_hook(
     _context: &Context,
@@ -153,7 +166,14 @@ async fn get_keyword_response(
     match msg.guild_id {
         Some(id) => {
             let client = BotUtils::get_thicc_client(ctx).await?;
-            let key_word = client.key_words(id.0).get(&msg.content).await?;
+            let prefixes = get_message_prefixes(ctx, msg).await?;
+            trace!("{:?}", prefixes);
+            let content = prefixes
+                .iter()
+                .find_map(|prefix| msg.content.strip_prefix(prefix))
+                .unwrap_or(&msg.content);
+
+            let key_word = client.key_words(id.0).get(content).await?;
             match key_word {
                 Some(key_word) => {
                     let rand_response =

@@ -50,9 +50,9 @@ impl ThiccClient {
 
 #[derive(Debug, Display, EnumVariantNames, PartialEq)]
 pub enum PrefixType {
-    #[strum(to_string = "message prefix")]
+    #[strum(to_string = "message_prefix")]
     Message,
-    #[strum(to_string = "command prefix")]
+    #[strum(to_string = "command_prefix")]
     Command,
 }
 
