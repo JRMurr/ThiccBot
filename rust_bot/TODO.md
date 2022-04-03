@@ -8,3 +8,4 @@
 - [ ] add playlist stuff
 - [ ] add reaction roles stuff (actually probably not but see how hard)
 - [X] cache the backend guild lookups
+- [ ] add prefix deleting
