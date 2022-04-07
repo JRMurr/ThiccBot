@@ -13,12 +13,10 @@ use reqwest::{
 };
 use serde::{de::DeserializeOwned, Serialize};
 
-pub mod alias;
 pub mod error;
-pub mod guilds;
-pub mod key_words;
-pub mod last_fm;
-pub mod quotes;
+pub mod managers;
+
+pub use managers::*;
 
 pub type ThiccResult<T> = std::result::Result<T, ClientErrors>;
 
