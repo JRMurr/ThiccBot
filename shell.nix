@@ -13,7 +13,7 @@ let
     cargo-expand
     gcc
     cmake
-    openssl
+    # openssl
     zlib
     pkgconfig
 

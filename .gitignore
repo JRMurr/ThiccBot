@@ -1,4 +1,6 @@
 .direnv
+# nix build res
+result
 # Thicc bot
 
 swagger.json
