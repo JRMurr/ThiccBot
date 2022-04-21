@@ -20,9 +20,7 @@ impl serenity::prelude::TypeMapKey for ThiccHolder {
     type Value = ThiccClient;
 }
 
-#[tokio::main]
-async fn main() {
-    env_logger::init();
+pub async fn build_bot() -> Client {
     let owner_id = env::var("BOT_ADMIN")
         .expect("BOT_ADMIN not set")
         .trim()
@@ -38,16 +36,10 @@ async fn main() {
     let base_url = env::var("BACKEND_URL").expect("BACKEND_URL not set");
     let api_key = env::var("BOT_API_TOKEN").expect("BOT_API_TOKEN not set");
 
-    let mut client = Client::builder(token.trim())
+    Client::builder(token.trim())
         .event_handler(Handler)
         .framework(framework)
         .type_map_insert::<ThiccHolder>(ThiccClient::new(base_url, &api_key))
         .await
-        .expect("Error creating client");
-
-    info!("Starting Bot");
-    // start listening for events by starting a single shard
-    if let Err(why) = client.start().await {
-        error!("An error occurred while running the client: {:?}", why);
-    }
+        .expect("Error creating client")
 }
