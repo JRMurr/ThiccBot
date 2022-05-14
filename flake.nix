@@ -37,8 +37,7 @@
           ];
 
           shellHook = ''
-            alias ls=exa
-            alias find=fd
+            touch .env
           '';
         };
       });

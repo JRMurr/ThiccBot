@@ -1,6 +1,7 @@
 # local package
 -e .
 
+werkzeug== 2.0.3 
 psycopg2==2.8.2
 Flask==2.0.3
 Flask-SQLAlchemy==2.4.0
