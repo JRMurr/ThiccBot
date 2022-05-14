@@ -12,12 +12,34 @@
       let
         overlays = [ (import rust-overlay) ];
         pkgs = import nixpkgs { inherit system overlays; };
-        rustVersion = ((pkgs.rust-bin.fromRustupToolchainFile
-          ./rust-toolchain.toml).override { extensions = [ "rust-src" ]; });
+        rustVersion =
+          (pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml);
       in with pkgs; {
+        packages = {
+          thiccBotDocker = let
+            platform = pkgs.makeRustPlatform {
+              cargo = rustVersion;
+              rustc = rustVersion;
+            };
+            thicc_bot = platform.buildRustPackage {
+              pname = "thicc_bot";
+              version = "0.1.0";
+              src = ./rust_bot/.;
+              cargoSha256 =
+                "15kiwpji3fg0mvzyj3d1hv1vcyzz8dfzl20752dhsjl4gzcm97a0";
+
+              # use this when building new code, need a fake sha. Copy the real one from the error output
+              # cargoSha256 = pkgs.lib.fakeSha256;
+            };
+          in pkgs.dockerTools.buildImage {
+            name = "thicc-bot";
+            config = { Cmd = [ "${thicc_bot}/bin/thicc_bot" ]; };
+          };
+        };
+
         devShell = mkShell {
           buildInputs = [
-            rustVersion
+            (rustVersion.override { extensions = [ "rust-src" ]; })
 
             cargo-expand
             gcc
