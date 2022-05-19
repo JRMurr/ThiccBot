@@ -14,6 +14,7 @@
         pkgs = import nixpkgs { inherit system overlays; };
         rustVersion =
           (pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml);
+        # pythonBackend = mach-nix.buildPythonPackage ./backend;
       in with pkgs; {
         packages = {
           thiccBotDocker = let
@@ -25,11 +26,7 @@
               pname = "thicc_bot";
               version = "0.1.0";
               src = ./rust_bot/.;
-              cargoSha256 =
-                "15kiwpji3fg0mvzyj3d1hv1vcyzz8dfzl20752dhsjl4gzcm97a0";
-
-              # use this when building new code, need a fake sha. Copy the real one from the error output
-              # cargoSha256 = pkgs.lib.fakeSha256;
+              cargoLock.lockFile = ./rust_bot/Cargo.lock;
             };
           in pkgs.dockerTools.buildImage {
             name = "thicc-bot";
@@ -51,6 +48,7 @@
             #python
             python38
             python38Packages.virtualenv
+            # pythonBackend
 
             # common
             watchexec
